@@ -1,0 +1,25 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  background: #f8f0e0;
+}
+
+.sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(to bottom, #ede3cc, #e8dcc0);
+  border-right: 2px solid #d4b896;
+  overflow-y: auto;
+  padding-top: 1rem;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
