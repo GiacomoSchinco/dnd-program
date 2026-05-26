@@ -1,42 +1,37 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import { useNavigate } from "react-router-dom";
+
+type LocalUser = {
+  email?: string;
+  name?: string;
+};
 
 export default function AuthButton() {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<LocalUser | null>(null);
     const [loading, setLoading] = useState(true);
-    const router = useRouter();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        // Legge la sessione dalla cache locale (sincrono, nessun flash)
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null);
+        // Fallback locale: evita dipendenze esterne se auth non e' configurata.
+        try {
+            const raw = localStorage.getItem('dnd-user');
+            setUser(raw ? (JSON.parse(raw) as LocalUser) : null);
+        } catch {
+            setUser(null);
+        } finally {
             setLoading(false);
-        });
-
-        // Ascolta cambiamenti di autenticazione
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-            setLoading(false);
-        });
-
-        return () => subscription.unsubscribe();
+        }
     }, []);
 
     const handleLogin = () => {
-        router.push('/login');
+        navigate('/');
     };
     
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        router.push('/');
-        router.refresh();
-    };
-
-    const handleDashboard = () => {
-        router.push('/dashboard');
+        localStorage.removeItem('dnd-user');
+        setUser(null);
+        navigate('/');
     };
 
     // Stato di caricamento
@@ -71,11 +66,9 @@ export default function AuthButton() {
         );
     }
 
-    // Utente LOGGATO → mostra nome cliccabile che porta a dashboard
+    // Utente loggato: bottone logout.
     return (
         <div className="flex items-center gap-2">
-            {/* Pulsante Logout (opzionale, se vuoi tenerlo) */}
-            
             <button
                 onClick={handleLogout}
                 className="relative px-3 py-2 text-amber-100 hover:text-amber-50 transition-all duration-300 group"

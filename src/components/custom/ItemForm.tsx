@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, type ComponentType } from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCreateItem, useUpdateItem, useDeleteItem } from '@/hooks/mutations/useItemMutations';
 import { Button } from '@/components/ui/button';
@@ -154,7 +154,7 @@ export default function ItemForm({
   title = mode === 'edit' ? 'Modifica Oggetto' : 'Nuovo Oggetto',
   subtitle = mode === 'edit' ? 'Modifica i dettagli dell\'oggetto' : 'Crea o modifica un oggetto per il gioco',
 }: ItemFormProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const createItem = useCreateItem();
   const updateItem = useUpdateItem();
   const deleteItem = useDeleteItem();
@@ -224,7 +224,7 @@ export default function ItemForm({
         {
           onSuccess: () => {
             toast.success('Oggetto aggiornato!');
-            router.push('/admin/items');
+            navigate('/admin/items');
           },
           onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore aggiornamento'),
         }
@@ -233,7 +233,7 @@ export default function ItemForm({
       createItem.mutate(formData, {
         onSuccess: () => {
           toast.success('Oggetto creato!');
-          router.push('/admin/items');
+          navigate('/admin/items');
         },
         onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore creazione'),
       });
@@ -249,7 +249,7 @@ export default function ItemForm({
       deleteItem.mutate(itemId, {
         onSuccess: () => {
           toast.success('Oggetto eliminato!');
-          router.push('/admin/items');
+          navigate('/admin/items');
         },
         onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore eliminazione'),
       });

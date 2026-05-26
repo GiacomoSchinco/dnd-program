@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
 import { EffectCards } from 'swiper/modules';
@@ -122,13 +121,11 @@ export default function CardSwiper({
                 }}
               >
                 {item.imageSrc && (
-                  <Image
+                  <img
                     src={item.imageSrc}
                     alt={item.label ?? String(item.id)}
-                    fill
-                    className="object-fill"
+                    className="w-full h-full object-fill"
                     loading="eager"
-                    sizes="320px"
                     draggable={false}
                   />
                 )}

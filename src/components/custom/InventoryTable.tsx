@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams } from 'react-router-dom';
 import DataTable from './DataTable';
 import type { InventoryItem } from '@/types/inventory';
 import { useInventoryMutations } from '@/hooks/mutations/useInventoryMutations';

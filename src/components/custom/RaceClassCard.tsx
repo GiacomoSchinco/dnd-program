@@ -1,7 +1,6 @@
 // components/character/creation-wizard/RaceClassCard.tsx
 'use client';
 
-import Image from 'next/image';
 import AncientCardContainer from '@/components/custom/AncientCardContainer';
 import { cn } from '@/lib/utils';
 import { CARD_SIZES } from '@/lib/utils/cardSizes';
@@ -38,13 +37,11 @@ export function RaceClassCard({
     <AncientCardContainer className="w-full h-full overflow-hidden p-0 relative group">
       {/* Immagine di sfondo della carta */}
       <div className="absolute inset-0">
-        <Image
+        <img
           src={`/images/${folder}/card_${name}.png`}
           alt={name}
-          fill
-          className="object-fill"
+          className="w-full h-full object-fill"
           loading="eager"
-          sizes="(max-width: 768px) 100vw, 320px"
         />
       </div>
 

@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom'
 
 const links = [
-  { to: '/', icon: '⚔️', label: 'Combattimento' },
+  { to: '/', icon: '🏰', label: 'Home' },
+  { to: '/combat', icon: '⚔️', label: 'Combattimento' },
   { to: '/party', icon: '👥', label: 'Gruppo' },
   { to: '/monsters', icon: '🐉', label: 'Mostri' },
   { to: '/spells', icon: '✨', label: 'Magie' },

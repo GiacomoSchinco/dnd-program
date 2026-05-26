@@ -2,13 +2,12 @@
 "use client"
 
 import React from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import AncientCardContainer from './AncientCardContainer';
 import HpBar from './HpBar';
 import CardBack from './CardBack';
 import { cn } from '@/lib/utils';
-import { CardSize, CARD_SIZES } from '@/lib/utils/cardSizes';
+import { type CardSize, CARD_SIZES } from '@/lib/utils/cardSizes';
 import { getItalianClass, getItalianRace } from '@/lib/utils/nameMappers';
 import { CharacterLevelBadge } from './CharacterLevelBadge';
 
@@ -80,12 +79,11 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
         {/* Immagine personaggio */}
         <div className="flex-1 flex items-center justify-center my-2">
           <div className="relative w-28 h-28 rounded-full border-2 border-amber-700/50 overflow-hidden bg-parchment-200/50 shadow-lg group">
-            <Image
+            <img
               src={`/images/classes/token_${characterClass.toLowerCase()}.png`}
               alt={getItalianClass(characterClass)}
-              fill
-              sizes="112px"
-              className="object-cover"
+              className="w-full h-full object-cover"
+              loading="eager"
             />
             {/* Nome classe sovrapposto */}
             <div className="absolute inset-x-0 top-0 text-center py-1 bg-gradient-to-b from-black/80 to-transparent rounded-t-full">
@@ -104,8 +102,9 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
 
         {/* Pulsante Dettagli */}
         <div className="flex justify-center mt-3">
-          <Link href={`/characters/${id}`}>
-            <button className={cn(
+          <Link
+            to={`/characters/${id}`}
+            className={cn(
               "relative px-6 py-1.5",
               "bg-amber-700 text-amber-100 text-sm font-serif tracking-wide",
               "rounded-sm border-2 border-amber-900",
@@ -115,13 +114,13 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
               "before:content-[''] before:absolute before:inset-0",
               "before:border before:border-amber-500/30 before:rounded-sm before:pointer-events-none",
               "overflow-hidden"
-            )}>
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                <span className="text-amber-300 text-xs">⚔️</span>
-                Dettagli
-                <span className="text-amber-300 text-xs">🛡️</span>
-              </span>
-            </button>
+            )}
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              <span className="text-amber-300 text-xs">⚔️</span>
+              Dettagli
+              <span className="text-amber-300 text-xs">🛡️</span>
+            </span>
           </Link>
         </div>
       </div>
@@ -143,7 +142,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
         <CardBack />
       </div>
 
-      <style jsx>{`
+      <style>{`
         .preserve-3d {
           transform-style: preserve-3d;
         }
