@@ -1,14 +1,13 @@
 // components/custom/CharacterCard.tsx
-"use client"
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import AncientCardContainer from './AncientCardContainer';
+import { AntiqueButton } from './AntiqueButton';
 import HpBar from './HpBar';
 import CardBack from './CardBack';
 import { cn } from '@/lib/utils';
 import { type CardSize, CARD_SIZES } from '@/lib/utils/cardSizes';
-import { getItalianClass, getItalianRace } from '@/lib/utils/nameMappers';
+import { getEnglishClass, getItalianClass, getItalianRace } from '@/lib/utils/nameMappers';
 import { CharacterLevelBadge } from './CharacterLevelBadge';
 
 interface CharacterCardProps {
@@ -17,13 +16,18 @@ interface CharacterCardProps {
   race: string;
   characterClass: string;
   level: number;
-  background: string;
-  alignment: string;
+  background?: string;
+  alignment?: string;
   currentHp?: number;
   maxHp?: number;
   tempHp?: number;
   isFlippable?: boolean;
   size?: CardSize;
+  showDetailsButton?: boolean;
+  showManagementActions?: boolean;
+  onAddToCombat?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 const CharacterCard: React.FC<CharacterCardProps> = ({
@@ -38,9 +42,15 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
   maxHp,
   tempHp,
   isFlippable = false,
-  size = 'md' 
+  size = 'md',
+  showDetailsButton = true,
+  showManagementActions = false,
+  onAddToCombat,
+  onEdit,
+  onDelete,
 }) => {
   const [isFlipped, setIsFlipped] = React.useState(false);
+  const tokenClass = getEnglishClass(characterClass).toLowerCase();
   
   const renderFront = () => (
     <AncientCardContainer className="w-full h-full" padded={false}>
@@ -55,7 +65,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
           <CharacterLevelBadge level={level} size="sm" showLabel={false} />
         </div>
 
-        {/* Razza e Allineamento */}
+        {/* Razza e Allineamento (opzionale) */}
         <div className="flex items-center justify-between gap-2 mt-1 mb-1">
           <div className="flex items-center gap-1">
             <span className="text-xs text-amber-600">🧝</span>
@@ -63,12 +73,14 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
               {getItalianRace(race)}
             </span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-amber-600">⚖️</span>
-            <span className="text-sm font-serif text-amber-700">
-              {alignment}
-            </span>
-          </div>
+          {alignment && (
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-amber-600">⚖️</span>
+              <span className="text-sm font-serif text-amber-700">
+                {alignment}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Barra HP */}
@@ -80,7 +92,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
         <div className="flex-1 flex items-center justify-center my-2">
           <div className="relative w-28 h-28 rounded-full border-2 border-amber-700/50 overflow-hidden bg-parchment-200/50 shadow-lg group">
             <img
-              src={`/images/classes/token_${characterClass.toLowerCase()}.png`}
+              src={`/images/classes/token_${tokenClass}.png`}
               alt={getItalianClass(characterClass)}
               className="w-full h-full object-cover"
               loading="eager"
@@ -94,35 +106,88 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
           </div>
         </div>
 
-        {/* Background */}
-        <div className="text-center mt-1">
-          <span className="text-xs text-amber-600">📜</span>
-          <span className="text-xs font-serif text-amber-700 ml-1">{background}</span>
-        </div>
+        {/* Background (opzionale) */}
+        {background && (
+          <div className="text-center mt-1">
+            <span className="text-xs text-amber-600">📜</span>
+            <span className="text-xs font-serif text-amber-700 ml-1">{background}</span>
+          </div>
+        )}
 
         {/* Pulsante Dettagli */}
-        <div className="flex justify-center mt-3">
-          <Link
-            to={`/characters/${id}`}
-            className={cn(
-              "relative px-6 py-1.5",
-              "bg-amber-700 text-amber-100 text-sm font-serif tracking-wide",
-              "rounded-sm border-2 border-amber-900",
-              "shadow-md hover:shadow-lg",
-              "hover:bg-amber-800 hover:border-amber-950 hover:text-amber-50",
-              "active:translate-y-0.5 transition-all duration-200",
-              "before:content-[''] before:absolute before:inset-0",
-              "before:border before:border-amber-500/30 before:rounded-sm before:pointer-events-none",
-              "overflow-hidden"
-            )}
-          >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              <span className="text-amber-300 text-xs">⚔️</span>
-              Dettagli
-              <span className="text-amber-300 text-xs">🛡️</span>
-            </span>
-          </Link>
-        </div>
+        {showDetailsButton && (
+          <div className="flex justify-center mt-3">
+            <Link
+              to={`/characters/${id}`}
+              className={cn(
+                "relative px-6 py-1.5",
+                "bg-amber-700 text-amber-100 text-sm font-serif tracking-wide",
+                "rounded-sm border-2 border-amber-900",
+                "shadow-md hover:shadow-lg",
+                "hover:bg-amber-800 hover:border-amber-950 hover:text-amber-50",
+                "active:translate-y-0.5 transition-all duration-200",
+                "before:content-[''] before:absolute before:inset-0",
+                "before:border before:border-amber-500/30 before:rounded-sm before:pointer-events-none",
+                "overflow-hidden"
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                <span className="text-amber-300 text-xs">⚔️</span>
+                Dettagli
+                <span className="text-amber-300 text-xs">🛡️</span>
+              </span>
+            </Link>
+          </div>
+        )}
+
+        {/* Azioni gestione (opzionali) */}
+        {showManagementActions && (
+          <div className="mt-3 rounded-lg border border-amber-700/25 bg-amber-100/35 p-2 space-y-2">
+            <AntiqueButton
+              variant="leather"
+              size="sm"
+              rounded="lg"
+              shine
+              className="w-full font-semibold tracking-wide"
+              onClick={(e) => {
+                e.stopPropagation()
+                onAddToCombat?.()
+              }}
+            >
+              ⚔️ Aggiungi al Combattimento
+            </AntiqueButton>
+
+            <div className="grid grid-cols-2 gap-2">
+              <AntiqueButton
+                size="sm"
+                variant="parchment"
+                rounded="lg"
+                className="font-medium"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEdit?.()
+                }}
+                title="Modifica"
+              >
+                ✏️ Modifica
+              </AntiqueButton>
+              <AntiqueButton
+                size="sm"
+                variant="danger"
+                rounded="lg"
+                className="font-medium"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete?.()
+                }}
+                title="Elimina"
+              >
+                🗑 Elimina
+              </AntiqueButton>
+            </div>
+          </div>
+        )}
       </div>
     </AncientCardContainer>
   );

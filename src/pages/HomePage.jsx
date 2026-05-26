@@ -9,9 +9,9 @@ const sections = [
   },
   {
     to: '/party',
-    emoji: '👥',
-    title: 'Gruppo',
-    description: 'Crea i personaggi e tieni d\'occhio statistiche e inventario.',
+    emoji: '📚',
+    title: 'Campagne',
+    description: 'Gestisci campagne e personaggi con statistiche e inventario.',
   },
   {
     to: '/monsters',

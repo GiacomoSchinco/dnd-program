@@ -4,6 +4,7 @@ import { useCombatDB } from '../hooks/useCombatDB'
 import { Toast } from '../components/Toast/Toast'
 import { AntiqueButton } from '../components/custom/AntiqueButton'
 import AncientContainer from '../components/custom/AncientContainer'
+import CharacterCard from '../components/custom/CharacterCard'
 
 const CLASSES = [
   'Barbaro', 'Bardo', 'Chierico', 'Druido', 'Guerriero',
@@ -101,10 +102,15 @@ export function PartyPage() {
   }
 
   const handleAddToCombat = async (char) => {
+    const maxHp = Number(char.maxHp) || 1
+    const currentHp = char.currentHp ?? maxHp
+
     await addParticipant({
       name: char.name,
-      maxHp: char.maxHp,
-      currentHp: char.maxHp,
+      characterId: char.id,
+      campaignId: char.campaignId,
+      maxHp,
+      currentHp: Math.max(0, Math.min(maxHp, Number(currentHp))),
       ac: char.ac,
       initiative: 0,
       type: 'pc',
@@ -112,10 +118,35 @@ export function PartyPage() {
     showToast(`${char.name} aggiunto al combattimento`)
   }
 
+  const handleAddAllToCombat = async () => {
+    if (!campaignChars.length) {
+      showToast('Nessun personaggio da aggiungere')
+      return
+    }
+
+    for (const char of campaignChars) {
+      const maxHp = Number(char.maxHp) || 1
+      const currentHp = char.currentHp ?? maxHp
+
+      await addParticipant({
+        name: char.name,
+        characterId: char.id,
+        campaignId: char.campaignId,
+        maxHp,
+        currentHp: Math.max(0, Math.min(maxHp, Number(currentHp))),
+        ac: char.ac,
+        initiative: 0,
+        type: 'pc',
+      })
+    }
+
+    showToast(`Aggiunti ${campaignChars.length} personaggi al combattimento`)
+  }
+
   return (
     <div className="page-layout">
       <header className="page-header">
-        <h1 className="page-title">👥 Gruppo</h1>
+        <h1 className="page-title">📚 Campagne</h1>
       </header>
 
       <div className="page-body">
@@ -195,7 +226,17 @@ export function PartyPage() {
                 <h2 className="section-title">
                   {(campaigns ?? []).find((c) => c.id === selectedCampaign)?.name}
                 </h2>
-                <AntiqueButton onClick={openAddChar} size="sm">+ Nuovo PG</AntiqueButton>
+                <div className="flex items-center gap-2">
+                  <AntiqueButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleAddAllToCombat}
+                    disabled={!campaignChars.length}
+                  >
+                    ⚔️ Aggiungi tutto il party
+                  </AntiqueButton>
+                  <AntiqueButton onClick={openAddChar} size="sm">+ Nuovo PG</AntiqueButton>
+                </div>
               </div>
 
               {showCharForm && (
@@ -273,28 +314,26 @@ export function PartyPage() {
                 </AncientContainer>
               )}
 
-              <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+              <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
                 {campaignChars.map((char) => (
-                  <div key={char.id} className="char-card">
-                    <div className="flex items-center justify-between">
-                      <div className="char-name">{char.name}</div>
-                      <div className="char-badge">Lv {char.level}</div>
-                    </div>
-                    <div className="char-sub">{char.class} · {char.race}</div>
-                    <div className="char-stats">
-                      <span>❤️ {char.maxHp} HP</span>
-                      <span>🛡 {char.ac} CA</span>
-                    </div>
-                    <div className="flex gap-2 mt-1">
-                      <AntiqueButton
-                        variant="primary" size="xs" className="flex-1"
-                        onClick={() => handleAddToCombat(char)}
-                      >
-                        ⚔️ Combattimento
-                      </AntiqueButton>
-                      <AntiqueButton size="xs" variant="ghost" onClick={() => openEditChar(char)} title="Modifica">✏️</AntiqueButton>
-                      <AntiqueButton size="xs" variant="danger" onClick={() => handleDeleteChar(char)} title="Elimina">🗑</AntiqueButton>
-                    </div>
+                  <div key={char.id} className="flex flex-col gap-2 items-center">
+                    <CharacterCard
+                      id={char.id}
+                      name={char.name}
+                      race={char.race}
+                      characterClass={char.class}
+                      level={Number(char.level) || 1}
+                      background={char.background}
+                      alignment={char.alignment}
+                      currentHp={char.currentHp ?? (Number(char.maxHp) || 1)}
+                      maxHp={Number(char.maxHp) || 1}
+                      size="md"
+                      showDetailsButton={false}
+                      showManagementActions
+                      onAddToCombat={() => handleAddToCombat(char)}
+                      onEdit={() => openEditChar(char)}
+                      onDelete={() => handleDeleteChar(char)}
+                    />
                   </div>
                 ))}
                 {campaignChars.length === 0 && !showCharForm && (

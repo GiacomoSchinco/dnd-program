@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { AncientScroll } from '../custom/AncientScroll'
 
 export function ParticipantCard({
   participant,
@@ -63,8 +64,8 @@ export function ParticipantCard({
     .filter(Boolean)
     .join(' ')
 
-  return (
-    <div className={cardClass}>
+  const cardContent = (
+    <>
       {/* ── Header ── */}
       <div className="card-header">
         <div className="card-name-group">
@@ -160,6 +161,17 @@ export function ParticipantCard({
           </button>
         </div>
       </div>
-    </div>
+    </>
+  )
+
+  return (
+    <AncientScroll
+      className={cardClass}
+      variant="rolled"
+      texture={false}
+      watermark={false}
+    >
+      {cardContent}
+    </AncientScroll>
   )
 }
