@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "electron:preview": "vite build && electron .",
-    "electron:build": "vite build && electron-packager . \"D&D Combat Tracker\" --platform=win32 --arch=x64 --out=release --overwrite --ignore=^\\/src --ignore=^\\/node_modules --ignore=^\\/\\.git --ignore=^\\/release"
+    "electron:package": "vite build && electron-packager . \"D&D Combat Tracker\" --platform=win32 --arch=x64 --out=release --overwrite --ignore=^\\/src --ignore=^\\/node_modules --ignore=^\\/\\.git --ignore=^\\/release",
+    "electron:build": "vite build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win nsis"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -34,6 +35,37 @@
     "@electron/packager": "^20.0.0",
     "@vitejs/plugin-react": "^4.2.1",
     "electron": "^31.7.7",
+    "electron-builder": "^24.13.3",
     "vite": "^5.0.8"
+  },
+  "build": {
+    "appId": "com.giaco.dndcombattracker",
+    "productName": "D&D Combat Tracker",
+    "directories": {
+      "output": "release/installer"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }

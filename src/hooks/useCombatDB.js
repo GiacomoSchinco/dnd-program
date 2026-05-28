@@ -3,6 +3,43 @@ import { useEffect, useCallback } from 'react'
 import { db } from '../db/database'
 import { seedMonsters } from '../db/seedData'
 
+function normalizeCombatStatus(status) {
+  if (status === 'completed') return 'terminated'
+  if (status === 'in_progress' || status === 'terminated' || status === 'prepared') {
+    return status
+  }
+  return 'prepared'
+}
+
+function normalizeCombatRecord(combat) {
+  if (!combat) return combat
+  return {
+    ...combat,
+    status: normalizeCombatStatus(combat.status),
+  }
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function getNextMonsterName(baseName, participants = []) {
+  const normalizedBase = (baseName || 'Mostro').trim() || 'Mostro'
+  const matcher = new RegExp(`^${escapeRegExp(normalizedBase)}(?:\\s+(\\d+))?$`, 'i')
+
+  const usedNumbers = participants
+    .filter((p) => p?.type === 'monster' && typeof p?.name === 'string')
+    .map((p) => {
+      const match = p.name.trim().match(matcher)
+      if (!match) return null
+      return Number(match[1] ?? 1)
+    })
+    .filter((n) => Number.isInteger(n) && n > 0)
+
+  const nextNumber = usedNumbers.length ? Math.max(...usedNumbers) + 1 : 1
+  return `${normalizedBase} ${nextNumber}`
+}
+
 async function initializeDB() {
   const count = await db.monsters.count()
   if (count === 0) {
@@ -12,17 +49,26 @@ async function initializeDB() {
 
 export function useCombatDB() {
   // ── Reactive live queries ──────────────────────────────────────────────────
-  const activeCombat = useLiveQuery(() => db.activeCombat.get('current'))
+  const activeCombat = useLiveQuery(async () => {
+    const current = await db.activeCombat.get('current')
+    return normalizeCombatRecord(current)
+  })
   const campaigns = useLiveQuery(() => db.campaigns.toArray(), [], [])
   const characters = useLiveQuery(() => db.characters.toArray(), [], [])
   const combats = useLiveQuery(
-    () => db.combats.orderBy('date').reverse().toArray(),
+    async () => {
+      const records = await db.combats.orderBy('date').reverse().toArray()
+      return records.map(normalizeCombatRecord)
+    },
     [],
     [],
   )
 
   const combatHistory = useLiveQuery(
-    () => db.combats.orderBy('date').reverse().toArray(),
+    async () => {
+      const records = await db.combats.orderBy('date').reverse().toArray()
+      return records.map(normalizeCombatRecord)
+    },
     [],
     [],
   )
@@ -48,7 +94,7 @@ export function useCombatDB() {
     await db.combats.update(combatState.combatId, {
       name: combatState.name || 'Battaglia',
       date: new Date().toISOString(),
-      status: combatState.status ?? 'prepared',
+      status: normalizeCombatStatus(combatState.status),
       participants: combatState.participants ?? [],
       currentTurnIndex: combatState.currentTurnIndex ?? 0,
       round: combatState.round ?? 1,
@@ -174,8 +220,19 @@ export function useCombatDB() {
   }, [persistLinkedCombat])
 
   const addParticipant = useCallback(async (participant) => {
-    const newParticipant = { id: crypto.randomUUID(), ...participant }
     const current = await db.activeCombat.get('current')
+    const currentParticipants = current?.participants ?? []
+
+    const participantWithName =
+      participant?.type === 'monster'
+        ? {
+            ...participant,
+            name: getNextMonsterName(participant?.name, currentParticipants),
+          }
+        : participant
+
+    const newParticipant = { id: crypto.randomUUID(), ...participantWithName }
+
     if (!current) {
       const nextState = {
         id: 'current',
@@ -250,7 +307,7 @@ export function useCombatDB() {
       await db.combats.update(current.combatId, {
         name: name || current.name || 'Combattimento',
         date: new Date().toISOString(),
-        status: current.status ?? 'prepared',
+        status: normalizeCombatStatus(current.status),
         participants: current.participants,
         currentTurnIndex: current.currentTurnIndex,
         round: current.round ?? 1,
@@ -262,7 +319,7 @@ export function useCombatDB() {
     await db.combats.add({
       name: name || current.name || 'Combattimento',
       date: new Date().toISOString(),
-      status: current.status ?? 'prepared',
+      status: normalizeCombatStatus(current.status),
       participants: current.participants,
       currentTurnIndex: current.currentTurnIndex,
       round: current.round ?? 1,
@@ -278,7 +335,7 @@ export function useCombatDB() {
       combatId: combat.id,
       campaignId: combat.campaignId ?? null,
       name: combat.name,
-      status: combat.status ?? 'prepared',
+      status: normalizeCombatStatus(combat.status),
       participants: combat.participants,
       currentTurnIndex: 0,
       round: combat.round ?? 1,
@@ -312,15 +369,12 @@ export function useCombatDB() {
     await loadFromHistory(combatId)
   }, [loadFromHistory])
 
-  const deleteFromHistory = useCallback(async (combatId) => {
-    await db.combats.delete(combatId)
-  }, [])
-
-  const completeCombat = useCallback(async (combatId) => {
+  const setCombatStatus = useCallback(async (combatId, status) => {
     if (combatId == null) return
+    const normalized = normalizeCombatStatus(status)
 
     await db.combats.update(combatId, {
-      status: 'completed',
+      status: normalized,
       date: new Date().toISOString(),
     })
 
@@ -328,10 +382,22 @@ export function useCombatDB() {
     if (current?.combatId === combatId) {
       await db.activeCombat.put({
         ...current,
-        status: 'completed',
+        status: normalized,
       })
     }
   }, [])
+
+  const deleteFromHistory = useCallback(async (combatId) => {
+    await db.combats.delete(combatId)
+  }, [])
+
+  const completeCombat = useCallback(async (combatId) => {
+    await setCombatStatus(combatId, 'terminated')
+  }, [setCombatStatus])
+
+  const terminateCombat = useCallback(async (combatId) => {
+    await setCombatStatus(combatId, 'terminated')
+  }, [setCombatStatus])
 
   const newCombat = useCallback(async () => {
     const current = await db.activeCombat.get('current')
@@ -383,8 +449,10 @@ export function useCombatDB() {
     saveToHistory,
     loadFromHistory,
     loadCombat,
+    setCombatStatus,
     createCombatForCampaign,
     completeCombat,
+    terminateCombat,
     deleteFromHistory,
     newCombat,
     // Monster actions

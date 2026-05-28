@@ -51,26 +51,34 @@ npm run build
 Output in:
 - `dist\`
 
-## 6) Crea release desktop Windows (Electron)
+## 6) Crea installer desktop Windows (Electron)
 
 ```powershell
 npm run electron:build
 ```
 
 Output in:
-- `release\D&D Combat Tracker-win32-x64\`
+- `release\installer\D&D Combat Tracker Setup 0.1.0.exe`
 
-Dentro questa cartella trovi il file eseguibile dell app.
+Dentro `release\installer\` trovi il file installabile `.exe`.
+
+Se ti serve anche la versione portable non installabile, puoi usare:
+
+```powershell
+npm run electron:package
+```
+
+Output portable in:
+- `release\D&D Combat Tracker-win32-x64\`
 
 ## 7) Come condividere con un amico
 
 Metodo semplice:
-- comprimi tutta la cartella `release\D&D Combat Tracker-win32-x64\` in `.zip`
-- invia lo zip
-- il tuo amico estrae e avvia il file `.exe`
+- invia il file `release\installer\D&D Combat Tracker Setup 0.1.0.exe`
+- il tuo amico lo avvia e completa l installazione guidata
 
 Nota:
-- non serve installare Node.js sul PC del tuo amico per eseguire l app pacchettizzata
+- non serve installare Node.js sul PC del tuo amico per usare l installer o l app installata
 
 ## 8) Build pulita (se serve)
 

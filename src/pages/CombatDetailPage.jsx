@@ -42,9 +42,18 @@ export function CombatDetailPage() {
   )
 
   const statusLabel =
-    activeCombat?.status === 'completed' || combatRecord?.status === 'completed'
-      ? 'Svolta'
-      : 'Preparata'
+    activeCombat?.status === 'terminated' || combatRecord?.status === 'terminated'
+      ? 'Terminata'
+      : activeCombat?.status === 'in_progress' || combatRecord?.status === 'in_progress'
+        ? 'In corso'
+        : 'Preparata'
+
+  const statusClass =
+    statusLabel === 'Terminata'
+      ? 'terminated'
+      : statusLabel === 'In corso'
+        ? 'in-progress'
+        : 'prepared'
 
   return (
     <div className="page-layout">
@@ -67,7 +76,7 @@ export function CombatDetailPage() {
             {showMonsterLibrary ? '🙈 Nascondi Mostri' : '👹 Mostri'}
           </AntiqueButton>
           <span
-            className={`combat-status-badge ${statusLabel === 'Svolta' ? 'completed' : 'prepared'}`}
+            className={`combat-status-badge ${statusClass}`}
           >
             {statusLabel}
           </span>
@@ -104,7 +113,7 @@ export function CombatDetailPage() {
                 removeParticipant={combatDB.removeParticipant}
                 updateParticipantInitiative={combatDB.updateParticipantInitiative}
                 saveToHistory={combatDB.saveToHistory}
-                completeCombat={combatDB.completeCombat}
+                setCombatStatus={combatDB.setCombatStatus}
                 newCombat={combatDB.newCombat}
                 showToast={showToast}
               />

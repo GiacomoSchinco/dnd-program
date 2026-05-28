@@ -16,7 +16,7 @@ function App() {
 
   return (
     <HashRouter>
-      <div className={styles.app}>
+      <div className={styles.app} style={{ '--sidebar-width': `${sidebarWidth}px` }}>
         <aside
           className={`${styles.sidebar} ${sidebarCollapsed ? styles.sidebarCollapsed : ''}`}
           style={{

@@ -42,7 +42,12 @@ export function CombatPage() {
       return {
         ...combat,
         participantsCount: combat.participants?.length ?? 0,
-        displayStatus: baseStatus === 'completed' ? 'Svolta' : 'Preparata',
+        displayStatus:
+          baseStatus === 'terminated'
+            ? 'Terminata'
+            : baseStatus === 'in_progress'
+              ? 'In corso'
+              : 'Preparata',
       }
     }),
     [campaignCombats],
@@ -133,10 +138,10 @@ export function CombatPage() {
               label: 'Stato',
               render: (value) => {
                 const statusClass =
-                  value === 'Attiva'
-                    ? 'active'
-                    : value === 'Svolta'
-                      ? 'completed'
+                  value === 'In corso'
+                    ? 'in-progress'
+                    : value === 'Terminata'
+                      ? 'terminated'
                       : 'prepared'
                 return (
                   <span className={`combat-status-badge ${statusClass}`}>
@@ -162,7 +167,7 @@ export function CombatPage() {
             },
           ]}
           onRowClick={(combatId) => handleSelectCombat(combatId)}
-          emptyMessage="Nessuna battaglia preparata o svolta per questa campagna"
+          emptyMessage="Nessuna battaglia preparata, in corso o terminata per questa campagna"
           className="combat-table"
         />
       </section>

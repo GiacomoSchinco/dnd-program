@@ -1,5 +1,4 @@
-// components/ui/custom/AncientScroll.tsx
-'use client';
+
 
 import { cn } from '@/lib/utils';
 import { forwardRef, HTMLAttributes } from 'react';

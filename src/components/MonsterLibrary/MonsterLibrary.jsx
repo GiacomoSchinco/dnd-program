@@ -115,6 +115,15 @@ export function MonsterLibrary({
 
       {/* ── Monster Grid ── */}
       <div className="monster-library-list">
+        {!monsterLibrary?.length && (
+          <div className="monster-library-empty">
+            <p className="monster-library-empty-title">Nessun mostro in libreria</p>
+            <p className="monster-library-empty-text">
+              Crea il primo mostro con il pulsante in alto.
+            </p>
+          </div>
+        )}
+
         {monsterLibrary?.map((monster) =>
           editingId === monster.id ? (
             /* ── Edit Card ── */
@@ -133,46 +142,56 @@ export function MonsterLibrary({
           ) : (
             /* ── Monster Card ── */
             <div key={monster.id} className="monster-card">
-              <div className="monster-info">
-                <span className="monster-name">{monster.name}</span>
+              <div className="monster-card-head">
+                <div className="monster-info">
+                  <span className="monster-name">{monster.name}</span>
+                  <span className="monster-subtitle">Creatura pronta al combattimento</span>
+                </div>
+
+                <div className="monster-quick-actions">
+                  <button
+                    className="monster-btn-icon"
+                    onClick={() => startEdit(monster)}
+                    title="Modifica"
+                  >
+                    ✏
+                  </button>
+                  <button
+                    className="monster-btn-icon-danger"
+                    onClick={() => handleDelete(monster)}
+                    title="Elimina"
+                  >
+                    🗑
+                  </button>
+                </div>
+              </div>
+
+              <div className="monster-card-body">
                 <div className="stat-pills">
                   <span className="pill">❤ {monster.hp}</span>
                   <span className="pill">🛡 {monster.ac}</span>
                   <span className="pill">⚔ {monster.damage}</span>
                 </div>
-              </div>
 
-              <div className="monster-card-actions">
-                <div className="init-row">
-                  <label>Init:</label>
-                  <input
-                    type="number"
-                    className="init-input"
-                    value={initiatives[monster.id] ?? 10}
-                    onChange={(e) => setInit(monster.id, e.target.value)}
-                  />
+                <div className="monster-card-actions">
+                  <div className="init-row">
+                    <label>Iniziativa</label>
+                    <input
+                      type="number"
+                      className="init-input"
+                      value={initiatives[monster.id] ?? 10}
+                      onChange={(e) => setInit(monster.id, e.target.value)}
+                    />
+                  </div>
+
+                  <AntiqueButton
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleAddToCombat(monster)}
+                  >
+                    + Combattimento
+                  </AntiqueButton>
                 </div>
-                <AntiqueButton
-                  variant="primary"
-                  size="sm"
-                  onClick={() => handleAddToCombat(monster)}
-                >
-                  + Combattimento
-                </AntiqueButton>
-                <button
-                  className="monster-btn-icon"
-                  onClick={() => startEdit(monster)}
-                  title="Modifica"
-                >
-                  ✏
-                </button>
-                <button
-                  className="monster-btn-icon-danger"
-                  onClick={() => handleDelete(monster)}
-                  title="Elimina"
-                >
-                  🗑
-                </button>
               </div>
             </div>
           ),

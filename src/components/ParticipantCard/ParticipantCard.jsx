@@ -56,9 +56,29 @@ export function ParticipantCard({
     await updateParticipantInitiative(id, initiativeVal)
   }
 
+  // Determina il testo del tag
+  const getEntityTypeLabel = () => {
+    switch(type) {
+      case 'pc': return 'Personaggio'
+      case 'npc': return 'PNG'
+      case 'monster': return 'Mostro'
+      default: return 'Entità'
+    }
+  }
+
+  // Applica la classe di colore SOLO al tag in alto
+  const getEntityBannerClass = () => {
+    switch(type) {
+      case 'pc': return 'pc-banner'
+      case 'npc': return 'npc-banner'
+      case 'monster': return 'monster-banner'
+      default: return 'default-banner'
+    }
+  }
+
+  // La carta rimane pulita, gestisce solo il turno attivo
   const cardClass = [
     'participant-card',
-    type === 'pc' ? 'pc-card' : 'monster-card',
     isCurrentTurn ? 'active-turn' : '',
   ]
     .filter(Boolean)
@@ -66,17 +86,16 @@ export function ParticipantCard({
 
   const cardContent = (
     <>
+      {/* Ora il colore viene applicato solo qui dentro */}
+      <div className={`combat-entity-banner ${getEntityBannerClass()}`}>
+        {getEntityTypeLabel()}
+      </div>
+
       {/* ── Header ── */}
       <div className="card-header">
         <div className="card-name-group">
-          <span
-            className={`type-badge ${
-              type === 'pc' ? 'pc-badge' : 'monster-badge'
-            }`}
-          >
-            {type === 'pc' ? 'PG' : 'M'}
-          </span>
           <span className="card-name">{name}</span>
+          {type === 'npc' && <span className="npc-tag">(PNG)</span>}
           {isCurrentTurn && (
             <span className="turn-tag">◄ TURNO</span>
           )}
@@ -168,8 +187,8 @@ export function ParticipantCard({
     <AncientScroll
       className={cardClass}
       variant="rolled"
-      texture={false}
-      watermark={false}
+      texture={type === 'monster'} 
+      watermark={type === 'monster'}
     >
       {cardContent}
     </AncientScroll>

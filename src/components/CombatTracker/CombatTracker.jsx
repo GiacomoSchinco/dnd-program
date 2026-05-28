@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ParticipantList } from '../ParticipantList/ParticipantList'
 import { AntiqueButton } from '../custom/AntiqueButton'
 import AncientContainer from '../custom/AncientContainer'
@@ -17,7 +17,7 @@ export function CombatTracker({
   removeParticipant,
   updateParticipantInitiative,
   saveToHistory,
-  completeCombat,
+  setCombatStatus,
   newCombat,
   showToast,
 }) {
@@ -31,11 +31,21 @@ export function CombatTracker({
   const participants    = activeCombat?.participants    ?? []
   const currentTurnIndex = activeCombat?.currentTurnIndex ?? 0
   const round           = activeCombat?.round           ?? 1
+  const combatStatus    = activeCombat?.status ?? 'prepared'
+
+  useEffect(() => {
+    setSaveName(activeCombat?.name ?? '')
+  }, [activeCombat?.name])
 
   const updateNpcField = (field) => (e) =>
     setNpcForm((f) => ({ ...f, [field]: e.target.value }))
 
   const handleAddPGFromCampaign = async () => {
+    if (isTerminated) {
+      showToast('Battaglia terminata: imposta In corso per modificare')
+      return
+    }
+
     if (selectedCampaignId == null) {
       showToast('Seleziona prima una campagna')
       return
@@ -72,6 +82,11 @@ export function CombatTracker({
   }
 
   const handleAddNPC = async () => {
+    if (isTerminated) {
+      showToast('Battaglia terminata: imposta In corso per modificare')
+      return
+    }
+
     if (!npcForm.name.trim() || !npcForm.maxHp || !npcForm.ac) {
       showToast('Compila nome, HP massimi e CA')
       return
@@ -90,30 +105,76 @@ export function CombatTracker({
   }
 
   const handleSave = async () => {
-    if (!participants.length) {
-      showToast('Nessun partecipante da salvare')
-      return
-    }
     await saveToHistory(saveName.trim() || activeCombat?.name || 'Combattimento')
-    showToast('Combattimento salvato nello storico')
-    setSaveName('')
+    showToast('Nome battaglia salvato')
   }
 
   const handleNew = async () => {
     await newCombat()
     showToast('Nuovo combattimento iniziato')
-    setSaveName('')
   }
 
-  const handleComplete = async () => {
+  const handleSetInProgress = async () => {
     if (!activeCombat?.combatId) {
-      showToast('Apri prima una battaglia da completare')
+      showToast('Apri prima una battaglia')
+      return
+    }
+    await setCombatStatus(activeCombat.combatId, 'in_progress')
+    showToast('Battaglia impostata in corso')
+  }
+
+  const handleTerminate = async () => {
+    if (!activeCombat?.combatId) {
+      showToast('Apri prima una battaglia da terminare')
       return
     }
 
-    await completeCombat(activeCombat.combatId)
-    showToast('Battaglia segnata come svolta')
-    setSaveName('')
+    await setCombatStatus(activeCombat.combatId, 'terminated')
+    showToast('Battaglia terminata')
+  }
+
+  const statusLabel =
+    combatStatus === 'terminated'
+      ? 'Terminata'
+      : combatStatus === 'in_progress'
+        ? 'In corso'
+        : 'Preparata'
+
+  const statusClass =
+    combatStatus === 'terminated'
+      ? 'terminated'
+      : combatStatus === 'in_progress'
+        ? 'in-progress'
+        : 'prepared'
+
+  const canMutateStatus = !!activeCombat?.combatId
+  const isTerminated = combatStatus === 'terminated'
+
+  const headerTitle =
+    combatStatus === 'terminated'
+      ? '⚔️ Battaglia Terminata'
+      : '⚔️ Combattimento Attivo'
+
+  const actionBlocked = !participants.length || isTerminated
+
+  const mutationDisabledMessage = isTerminated
+    ? 'Battaglia terminata'
+    : undefined
+
+  const handleNextTurn = () => {
+    if (isTerminated) {
+      showToast('Questa battaglia e terminata: riaprila come In corso per continuare')
+      return
+    }
+    nextTurn()
+  }
+
+  const handleSort = () => {
+    if (isTerminated) {
+      showToast('Questa battaglia e terminata: riaprila come In corso per continuare')
+      return
+    }
+    sortByInitiative()
   }
 
   return (
@@ -121,34 +182,76 @@ export function CombatTracker({
       {/* ── Header ── */}
       <div className="combat-tracker-header">
         <div className="combat-tracker-title-row">
-          <h2>⚔️ Combattimento Attivo</h2>
+          <h2>{headerTitle}</h2>
           <span className="round-badge">Round {round}</span>
+        </div>
+        <div className="combat-tracker-management">
+          <div className="combat-tracker-save-row">
+            <input
+              className="combat-tracker-save-input"
+              placeholder="Nome combattimento..."
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+            />
+            <AntiqueButton variant="secondary" onClick={handleSave}>
+              💾 Salva Nome
+            </AntiqueButton>
+          </div>
+          <div className="combat-tracker-status-row">
+            <span className={`combat-status-badge ${statusClass}`}>
+              {statusLabel}
+            </span>
+            <AntiqueButton
+              variant="primary"
+              onClick={handleSetInProgress}
+              disabled={!canMutateStatus || combatStatus === 'in_progress'}
+            >
+              ▶ In corso
+            </AntiqueButton>
+            <AntiqueButton
+              variant="danger"
+              onClick={handleTerminate}
+              disabled={!canMutateStatus || isTerminated}
+            >
+              ✓ Terminata
+            </AntiqueButton>
+          </div>
         </div>
         <div className="combat-tracker-controls">
           <AntiqueButton
-            onClick={nextTurn}
-            disabled={!participants.length}
+            onClick={handleNextTurn}
+            disabled={actionBlocked}
+            title={mutationDisabledMessage}
           >
             ▶ Turno Successivo
           </AntiqueButton>
           <AntiqueButton
             variant="secondary"
-            onClick={sortByInitiative}
-            disabled={!participants.length}
+            onClick={handleSort}
+            disabled={actionBlocked}
+            title={mutationDisabledMessage}
           >
             ↕ Ordina
           </AntiqueButton>
           <AntiqueButton
             variant="heal"
             onClick={() => setShowAddPG((s) => !s)}
+            disabled={isTerminated}
+            title={mutationDisabledMessage}
           >
             {showAddPG ? '✕ Chiudi PG' : '+ PG'}
           </AntiqueButton>
           <AntiqueButton
             variant="secondary"
             onClick={() => setShowAddNPC((s) => !s)}
+            disabled={isTerminated}
+            title={mutationDisabledMessage}
           >
             {showAddNPC ? '✕ Chiudi NPC' : '+ NPC'}
+          </AntiqueButton>
+          <AntiqueButton variant="danger" onClick={handleNew}>
+            🗑 Nuovo
           </AntiqueButton>
         </div>
       </div>
@@ -237,7 +340,7 @@ export function CombatTracker({
           </div>
 
           <div className="ui-form-actions">
-            <AntiqueButton variant="heal" onClick={handleAddNPC}>
+            <AntiqueButton variant="heal" onClick={handleAddNPC} disabled={isTerminated}>
               Aggiungi NPC
             </AntiqueButton>
             <AntiqueButton
@@ -261,30 +364,6 @@ export function CombatTracker({
           updateParticipantInitiative={updateParticipantInitiative}
           showToast={showToast}
         />
-      </div>
-
-      {/* ── Footer ── */}
-      <div className="combat-tracker-footer">
-        <input
-          className="combat-tracker-save-input"
-          placeholder="Nome combattimento..."
-          value={saveName}
-          onChange={(e) => setSaveName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-        />
-        <AntiqueButton variant="secondary" onClick={handleSave}>
-          💾 Salva
-        </AntiqueButton>
-        <AntiqueButton
-          variant="primary"
-          onClick={handleComplete}
-          disabled={!activeCombat?.combatId || activeCombat?.status === 'completed'}
-        >
-          ✓ Svolta
-        </AntiqueButton>
-        <AntiqueButton variant="danger" onClick={handleNew}>
-          🗑 Nuovo
-        </AntiqueButton>
       </div>
     </div>
   )
