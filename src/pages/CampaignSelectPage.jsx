@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePartyDB } from '../hooks/usePartyDB';
 import { useCombatDB } from '../hooks/useCombatDB';
 import { useCampaignContext } from '../context/CampaignContext';
+import { useConfirm } from '../hooks/useConfirm';
 import DataTable from '../components/custom/DataTable';
 import { toast } from 'sonner';
 import { ConfirmModal } from '../components/custom/ConfirmModal';
@@ -10,8 +11,7 @@ import { Swords, Plus, Trash2 } from 'lucide-react';
 
 export function CampaignSelectPage() {
   const navigate = useNavigate();
-  const [confirmState, setConfirmState] = useState({ isOpen: false });
-  const closeConfirm = () => setConfirmState({ isOpen: false });
+  const { confirmState, confirm, closeConfirm } = useConfirm();
   const { campaigns, addCampaign } = usePartyDB();
   const { combats, createCombatForCampaign, loadCombat, deleteFromHistory } = useCombatDB();
   const { selectedCampaignId, setSelectedCampaignId } = useCampaignContext();
@@ -38,11 +38,9 @@ export function CampaignSelectPage() {
 
   const handleDeleteBattle = (combatId, e) => {
     e.stopPropagation();
-    setConfirmState({
-      isOpen: true,
+    confirm({
       title: 'Elimina Battaglia',
       message: 'Sei sicuro di voler eliminare questa battaglia?',
-      icon: '🗑️',
       onConfirm: async () => {
         await deleteFromHistory(combatId);
         toast.success('Battaglia eliminata');

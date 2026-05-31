@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCombatDB } from '../hooks/useCombatDB';
 import { usePartyDB } from '../hooks/usePartyDB';
+import { useConfirm } from '../hooks/useConfirm';
 import DataTable from '../components/custom/DataTable';
 import { useCampaignContext } from '../context/CampaignContext';
 import { toast } from 'sonner';
@@ -12,8 +13,7 @@ import { FormModal, Field } from '../components/custom/FormModal';
 
 export function BattleSelectPage() {
   const { campaignId } = useParams();
-  const [confirmState, setConfirmState] = useState({ isOpen: false });
-  const closeConfirm = () => setConfirmState({ isOpen: false });
+  const { confirmState, confirm, closeConfirm } = useConfirm();
   const [newBattleModal, setNewBattleModal] = useState(false);
   const [newBattleName, setNewBattleName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -52,11 +52,9 @@ export function BattleSelectPage() {
 
   const handleDeleteBattle = (combatId, e) => {
     e.stopPropagation();
-    setConfirmState({
-      isOpen: true,
+    confirm({
       title: 'Elimina Battaglia',
       message: 'Sei sicuro di voler eliminare questa battaglia?',
-      icon: '🗑️',
       onConfirm: async () => {
         await deleteFromHistory(combatId);
         toast.success('Battaglia eliminata');

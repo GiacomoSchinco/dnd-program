@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { usePartyDB } from '../hooks/usePartyDB';
 import { useCampaignContext } from '../context/CampaignContext';
+import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
 import { ConfirmModal } from '../components/custom/ConfirmModal';
 import { CharacterCard } from '../components/custom/CharacterCard';
 import { CharacterFormModal } from '../components/custom/CharacterFormModal';
 import { CampaignFormModal } from '../components/custom/CampaignFormModal';
+import { PageHeader } from '../components/custom/PageHeader';
 import { Users, Plus } from 'lucide-react';
 
 export function PartyPage() {
@@ -14,8 +16,7 @@ export function PartyPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
   const [editingChar, setEditingChar] = useState(null);
-  const [confirmState, setConfirmState] = useState({ isOpen: false });
-  const closeConfirm = () => setConfirmState({ isOpen: false });
+  const { confirmState, confirm, closeConfirm } = useConfirm();
 
   const activeCampaign = useMemo(
     () => campaigns?.find((campaign) => campaign.id === selectedCampaignId) || null,
@@ -47,11 +48,9 @@ export function PartyPage() {
   };
 
   const handleDelete = (char) => {
-    setConfirmState({
-      isOpen: true,
+    confirm({
       title: 'Rimuovi Personaggio',
       message: `Vuoi rimuovere ${char.name} dal party?`,
-      icon: '🗑️',
       onConfirm: async () => {
         await deleteCharacter(char.id);
         toast.info(`${char.name} rimosso`);
@@ -66,19 +65,16 @@ export function PartyPage() {
   return (
     <div className="space-y-6">
       {/* Header con selezione campagna */}
-      <div className="flex flex-wrap justify-between items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2"><Users size={28} /> Personaggi</h1>
-          <p className="text-base-content/60">
-            Gestisci i personaggi della campagna attiva (selezione dalla topbar)
-          </p>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader
+        icon={<Users size={28} />}
+        title="Personaggi"
+        subtitle="Gestisci i personaggi della campagna attiva (selezione dalla topbar)"
+        actions={
           <button className="btn btn-primary gap-1" onClick={openCreate}>
             <Plus size={16} /> Nuovo Personaggio
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {activeCampaign?.description && (
         <div className="alert alert-info">

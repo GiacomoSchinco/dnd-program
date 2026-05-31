@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { useSpellsDB } from '../hooks/useSpellsDB';
+import { useConfirm } from '../hooks/useConfirm';
 import { SpellSchools } from '../db/database';
 import { toast } from 'sonner';
 import { ConfirmModal } from '../components/custom/ConfirmModal';
 import { CsvToolbar } from '../components/custom/CsvToolbar';
+import { PageHeader } from '../components/custom/PageHeader';
+import { SearchInput } from '../components/custom/SearchInput';
 import { exportCSV, rowToSpell, SPELL_COLUMNS } from '../utils/csvIO';
 import { FormModal, Field, FieldRow } from '../components/custom/FormModal';
-import { Sparkles, Plus, MoreVertical, Pencil, Trash2, Dices, HeartHandshake, Ruler, Clock, BookOpen, Shield, FlaskConical, Search } from 'lucide-react';
+import { Sparkles, Plus, MoreVertical, Pencil, Trash2, Dices, HeartHandshake, Ruler, Clock, BookOpen, Shield, FlaskConical } from 'lucide-react';
 import { DndIcon } from '../components/custom/DndIcon';
 
 function getSchoolIconName(school) {
@@ -42,8 +45,7 @@ export function SpellsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSpell, setEditingSpell] = useState(null);
   const [filterLevel, setFilterLevel] = useState('all');
-  const [confirmState, setConfirmState] = useState({ isOpen: false });
-  const closeConfirm = () => setConfirmState({ isOpen: false });
+  const { confirmState, confirm, closeConfirm } = useConfirm();
   const [filterSchool, setFilterSchool] = useState('all');
   const [search, setSearch] = useState('');
   
@@ -105,11 +107,9 @@ export function SpellsPage() {
   };
 
   const handleDelete = (spell) => {
-    setConfirmState({
-      isOpen: true,
+    confirm({
       title: 'Elimina Incantesimo',
       message: `Vuoi eliminare ${spell.name} dal grimorio?`,
-      icon: '🗑️',
       onConfirm: async () => {
         await deleteSpell(spell.id);
         toast.info(`${spell.name} rimosso`);
@@ -121,34 +121,27 @@ export function SpellsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap justify-between items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2"><Sparkles size={28} /> Grimorio degli Incantesimi</h1>
-          <p className="text-base-content/60">Consulta e gestisci gli incantesimi</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      <PageHeader
+        icon={<Sparkles size={28} />}
+        title="Grimorio degli Incantesimi"
+        subtitle="Consulta e gestisci gli incantesimi"
+        actions={<>
           <CsvToolbar onExport={handleExport} onImport={handleImport} />
           <button className="btn btn-primary gap-1" onClick={() => setIsModalOpen(true)}>
             <Plus size={16} /> Nuovo Incantesimo
           </button>
-        </div>
-      </div>
+        </>}
+      />
 
       {/* Filtri */}
       <div className="flex flex-wrap gap-4 items-end">
         <div className="form-control">
           <label className="label text-sm">Cerca</label>
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" />
-            <input
-              type="text"
-              className="input input-bordered input-sm pl-9 w-52"
-              placeholder="Nome incantesimo..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Nome incantesimo..."
+          />
         </div>
         <div className="form-control">
           <label className="label text-sm">Livello</label>

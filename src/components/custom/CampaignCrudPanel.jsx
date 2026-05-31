@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { usePartyDB } from '../../hooks/usePartyDB';
 import { useCampaignContext } from '../../context/CampaignContext';
+import { useConfirm } from '../../hooks/useConfirm';
 import DataTable from './DataTable';
 import { ConfirmModal } from './ConfirmModal';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
@@ -9,8 +10,7 @@ import { Plus, Pencil, Trash2 } from 'lucide-react';
 export function CampaignCrudPanel({ title = 'Campagne', compact = false }) {
   const { campaigns, addCampaign, updateCampaign, deleteCampaign } = usePartyDB();
   const { selectedCampaignId, setSelectedCampaignId } = useCampaignContext();
-  const [confirmState, setConfirmState] = useState({ isOpen: false });
-  const closeConfirm = () => setConfirmState({ isOpen: false });
+  const { confirmState, confirm, closeConfirm } = useConfirm();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -68,11 +68,9 @@ export function CampaignCrudPanel({ title = 'Campagne', compact = false }) {
   };
 
   const handleDelete = (campaign) => {
-    setConfirmState({
-      isOpen: true,
+    confirm({
       title: 'Elimina Campagna',
       message: `Sei sicuro di voler eliminare la campagna "${campaign.name}"? Verranno eliminati anche tutti i personaggi associati.`,
-      icon: '🗑️',
       onConfirm: async () => {
         await deleteCampaign(campaign.id);
         if (selectedCampaignId === campaign.id) {

@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { useCombatDB } from '../hooks/useCombatDB';
+import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
 import { ConfirmModal } from '../components/custom/ConfirmModal';
 import { CsvToolbar } from '../components/custom/CsvToolbar';
 import { exportCSV, rowToNpc, NPC_COLUMNS } from '../utils/csvIO';
 import { FormModal, Field, FieldRow } from '../components/custom/FormModal';
 import { NpcCard } from '../components/custom/NpcCard';
-import { User, Plus, Search } from 'lucide-react';
+import { PageHeader } from '../components/custom/PageHeader';
+import { SearchInput } from '../components/custom/SearchInput';
+import { User, Plus } from 'lucide-react';
 
 const emptyForm = { name: '', hp: 10, ac: 10, description: '' };
 
@@ -15,8 +18,7 @@ export function NpcPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNpc, setEditingNpc] = useState(null);
   const [formData, setFormData] = useState(emptyForm);
-  const [confirmState, setConfirmState] = useState({ isOpen: false });
-  const closeConfirm = () => setConfirmState({ isOpen: false });
+  const { confirmState, confirm, closeConfirm } = useConfirm();
   const [search, setSearch] = useState('');
 
   const handleSubmit = async (e) => {
@@ -53,11 +55,9 @@ export function NpcPage() {
   };
 
   const handleDelete = (npc) => {
-    setConfirmState({
-      isOpen: true,
+    confirm({
       title: 'Elimina NPC',
       message: `Vuoi eliminare ${npc.name} dalla libreria?`,
-      icon: '🗑️',
       onConfirm: async () => {
         await deleteNpc(npc.id);
         toast.info(`${npc.name} rimosso`);
@@ -71,33 +71,24 @@ export function NpcPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap justify-between items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2"><User size={28} /> Libreria NPC</h1>
-          <p className="text-base-content/60">
-            Gestisci i personaggi non giocanti da aggiungere ai combattimenti
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      <PageHeader
+        icon={<User size={28} />}
+        title="Libreria NPC"
+        subtitle="Gestisci i personaggi non giocanti da aggiungere ai combattimenti"
+        actions={<>
           <CsvToolbar onExport={handleExport} onImport={handleImport} />
           <button className="btn btn-primary gap-1" onClick={() => { setEditingNpc(null); setFormData(emptyForm); setIsModalOpen(true); }}>
             <Plus size={16} /> Nuovo NPC
           </button>
-        </div>
-      </div>
+        </>}
+      />
 
       {/* Cerca */}
-      <div className="relative max-w-sm">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" />
-        <input
-          type="text"
-          className="input input-bordered input-sm pl-9 w-52"
-          placeholder="Cerca NPC..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+      <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Cerca NPC..."
+      />
 
       {/* Lista */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

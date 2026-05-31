@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { useCombatDB } from '../hooks/useCombatDB';
+import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
 import { ConfirmModal } from '../components/custom/ConfirmModal';
 import { MonsterCard } from '../components/custom/MonsterCard';
 import { MonsterFormModal } from '../components/custom/MonsterFormModal';
 import { CsvToolbar } from '../components/custom/CsvToolbar';
+import { PageHeader } from '../components/custom/PageHeader';
+import { SearchInput } from '../components/custom/SearchInput';
 import { exportCSV, rowToMonster, MONSTER_COLUMNS } from '../utils/csvIO';
-import { Skull, Plus, Search } from 'lucide-react';
+import { Skull, Plus } from 'lucide-react';
 import { getMonsterTypeMeta } from '../components/custom/MonsterCard';
 
 const TYPE_OPTIONS = ['all', 'humanoid', 'beast', 'undead', 'dragon', 'giant', 'goblinoid', 'lycanthrope'];
@@ -15,8 +18,7 @@ export function MonstersPage() {
   const { monsterLibrary, addMonster, updateMonster, deleteMonster, importMonsters } = useCombatDB();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMonster, setEditingMonster] = useState(null);
-  const [confirmState, setConfirmState] = useState({ isOpen: false });
-  const closeConfirm = () => setConfirmState({ isOpen: false });
+  const { confirmState, confirm, closeConfirm } = useConfirm();
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
 
@@ -50,11 +52,9 @@ export function MonstersPage() {
   };
 
   const handleDelete = (monster) => {
-    setConfirmState({
-      isOpen: true,
+    confirm({
       title: 'Elimina Mostro',
       message: `Vuoi eliminare ${monster.name} dalla libreria?`,
-      icon: '🗑️',
       onConfirm: async () => {
         await deleteMonster(monster.id);
         toast.info(`${monster.name} rimosso`);
@@ -64,34 +64,27 @@ export function MonstersPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap justify-between items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2"><Skull size={28} /> Libreria Mostri</h1>
-          <p className="text-base-content/60">Gestisci i mostri del tuo bestiario</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      <PageHeader
+        icon={<Skull size={28} />}
+        title="Libreria Mostri"
+        subtitle="Gestisci i mostri del tuo bestiario"
+        actions={<>
           <CsvToolbar onExport={handleExport} onImport={handleImport} />
           <button className="btn btn-primary gap-1" onClick={openCreate}>
             <Plus size={16} /> Nuovo Mostro
           </button>
-        </div>
-      </div>
+        </>}
+      />
 
       {/* Filtri */}
       <div className="flex flex-wrap gap-4 items-end">
         <div className="form-control">
           <label className="label text-sm">Cerca</label>
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" />
-            <input
-              type="text"
-              className="input input-bordered input-sm pl-9 w-52"
-              placeholder="Nome mostro..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Nome mostro..."
+          />
         </div>
         <div className="form-control">
           <label className="label text-sm">Tipo</label>
