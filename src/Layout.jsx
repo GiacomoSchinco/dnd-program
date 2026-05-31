@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './components/custom/Navbar';
+import { CampaignTopbar } from './components/custom/CampaignTopbar';
 import { Toaster } from 'sonner';
 
 export function Layout() {
@@ -9,30 +10,32 @@ export function Layout() {
   return (
     <div className="flex h-screen bg-base-200 overflow-hidden">
       {/* Sidebar */}
-      <div 
+      <div
         className={`transition-all duration-300 ease-in-out ${
           collapsed ? 'w-20' : 'w-64'
-        } flex-shrink-0 bg-base-100 border-r border-primary/20 shadow-xl`}
+        } flex-shrink-0 bg-base-100 border-r border-primary/20 shadow-xl relative`}
       >
+        {/* Bottone toggle sidebar */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="btn btn-circle btn-sm absolute top-4 -right-3 z-50 shadow-lg bg-base-100 border border-base-300 hover:bg-base-200 transition-all duration-200"
+          aria-label={collapsed ? 'Espandi sidebar' : 'Comprimi sidebar'}
+          title={collapsed ? 'Espandi sidebar' : 'Comprimi sidebar'}
+        >
+          {collapsed ? (
+            <span className="text-base">→</span>
+          ) : (
+            <span className="text-base">←</span>
+          )}
+        </button>
+
         <Navbar collapsed={collapsed} />
       </div>
-      
-      {/* Bottone toggle sidebar */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="btn btn-circle btn-sm btn-ghost fixed bottom-6 left-4 z-50 shadow-lg bg-base-100/80 backdrop-blur-sm border border-primary/30 hover:bg-primary/20 transition-all duration-200"
-        style={{ left: collapsed ? 'calc(5rem + 1rem)' : 'calc(16rem + 1rem)' }}
-      >
-        {collapsed ? (
-          <span className="text-lg">→</span>
-        ) : (
-          <span className="text-lg">←</span>
-        )}
-      </button>
       
       {/* Main content */}
       <main className="flex-1 overflow-auto p-6">
         <div className="max-w-7xl mx-auto">
+          <CampaignTopbar />
           <Outlet />
         </div>
       </main>

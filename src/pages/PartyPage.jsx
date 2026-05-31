@@ -1,14 +1,24 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { usePartyDB } from '../hooks/usePartyDB';
-import { CharacterClasses } from '../db/database';
+import { CharacterClasses, CharacterRaces } from '../db/database';
+import { useCampaignContext } from '../context/CampaignContext';
 import { toast } from 'sonner';
+import { ConfirmModal } from '../components/custom/ConfirmModal';
+import { CharacterCard } from '../components/custom/CharacterCard';
 
 export function PartyPage() {
   const { characters, campaigns, addCharacter, updateCharacter, deleteCharacter, addCampaign } = usePartyDB();
+  const { selectedCampaignId, setSelectedCampaignId } = useCampaignContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
   const [editingChar, setEditingChar] = useState(null);
-  const [activeCampaign, setActiveCampaign] = useState(campaigns?.[0] || null);
+  const [confirmState, setConfirmState] = useState({ isOpen: false });
+  const closeConfirm = () => setConfirmState({ isOpen: false });
+
+  const activeCampaign = useMemo(
+    () => campaigns?.find((campaign) => campaign.id === selectedCampaignId) || null,
+    [campaigns, selectedCampaignId],
+  );
   
   const [formData, setFormData] = useState({
     name: '',
@@ -29,6 +39,7 @@ export function PartyPage() {
     e.preventDefault();
     const charData = {
       ...formData,
+      maxHp: formData.hp,
       campaignId: activeCampaign?.id || null
     };
     
@@ -46,7 +57,8 @@ export function PartyPage() {
 
   const handleCampaignSubmit = async (e) => {
     e.preventDefault();
-    await addCampaign(campaignForm);
+    const campaignId = await addCampaign(campaignForm);
+    setSelectedCampaignId(campaignId);
     toast.success(`Campagna ${campaignForm.name} creata!`);
     setIsCampaignModalOpen(false);
     setCampaignForm({ name: '', description: '' });
@@ -58,15 +70,21 @@ export function PartyPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (char) => {
-    if (confirm(`Rimuovere ${char.name} dal party?`)) {
-      await deleteCharacter(char.id);
-      toast.info(`${char.name} rimosso`);
-    }
+  const handleDelete = (char) => {
+    setConfirmState({
+      isOpen: true,
+      title: 'Rimuovi Personaggio',
+      message: `Vuoi rimuovere ${char.name} dal party?`,
+      icon: '🗑️',
+      onConfirm: async () => {
+        await deleteCharacter(char.id);
+        toast.info(`${char.name} rimosso`);
+      },
+    });
   };
 
   const filteredCharacters = characters?.filter(char => 
-    !activeCampaign || char.campaignId === activeCampaign.id
+    !selectedCampaignId || char.campaignId === selectedCampaignId
   );
 
   return (
@@ -74,97 +92,41 @@ export function PartyPage() {
       {/* Header con selezione campagna */}
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">📚 Campagne & Personaggi</h1>
-          <p className="text-base-content/60">Gestisci le tue campagne e i personaggi giocanti</p>
+          <h1 className="text-3xl font-bold">👥 Personaggi</h1>
+          <p className="text-base-content/60">
+            Gestisci i personaggi della campagna attiva (selezione dalla topbar)
+          </p>
         </div>
         <div className="flex gap-2">
-          <button className="btn btn-outline btn-primary" onClick={() => setIsCampaignModalOpen(true)}>
-            📖 Nuova Campagna
-          </button>
           <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
             ➕ Nuovo Personaggio
           </button>
         </div>
       </div>
 
-      {/* Selezione Campagna Attiva */}
-      {campaigns?.length > 0 && (
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body p-4">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <span className="font-semibold">Campagna Attiva:</span>
-                <select
-                  className="select select-bordered select-sm"
-                  value={activeCampaign?.id || ''}
-                  onChange={(e) => {
-                    const selected = campaigns.find(c => c.id === parseInt(e.target.value));
-                    setActiveCampaign(selected);
-                  }}
-                >
-                  {campaigns.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-              {activeCampaign?.description && (
-                <p className="text-sm opacity-70">{activeCampaign.description}</p>
-              )}
-            </div>
-          </div>
+      {activeCampaign?.description && (
+        <div className="alert alert-info">
+          <span>
+            Campagna attiva: <strong>{activeCampaign.name}</strong> - {activeCampaign.description}
+          </span>
         </div>
       )}
 
       {/* Grid Personaggi */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredCharacters?.map((char) => (
-          <div key={char.id} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="card-body">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h2 className="card-title text-xl">{char.name}</h2>
-                  <div className="flex gap-2 mt-1">
-                    <span className="badge badge-primary">{char.class}</span>
-                    <span className="badge badge-secondary">Livello {char.level}</span>
-                  </div>
-                </div>
-                <div className="dropdown dropdown-end">
-                  <button className="btn btn-ghost btn-sm">⋮</button>
-                  <ul className="dropdown-menu dropdown-content z-50 menu p-2 shadow bg-base-200 rounded-box w-40">
-                    <li><button onClick={() => handleEdit(char)}>✏️ Modifica</button></li>
-                    <li><button onClick={() => handleDelete(char)}>🗑️ Elimina</button></li>
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="space-y-2 mt-4">
-                <div className="flex justify-between">
-                  <span className="text-sm opacity-70">Razza</span>
-                  <span className="font-semibold">{char.race || 'Non specificata'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm opacity-70">HP Massimi</span>
-                  <span className="font-semibold text-success">{char.hp}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm opacity-70">Classe Armatura</span>
-                  <span className="font-semibold text-info">{char.ac}</span>
-                </div>
-              </div>
-
-              <div className="card-actions justify-end mt-4">
-                <button 
-                  className="btn btn-sm btn-outline btn-success"
-                  onClick={() => {
-                    // Naviga alla pagina combat con questo personaggio
-                    window.location.href = '/combat';
-                  }}
-                >
-                  ⚔️ Entra in Battaglia
-                </button>
-              </div>
-            </div>
-          </div>
+          <CharacterCard
+            key={char.id}
+            name={char.name}
+            race={char.race}
+            characterClass={char.class}
+            level={char.level}
+            ac={char.ac}
+            currentHp={char.currentHp ?? char.hp}
+            maxHp={char.maxHp ?? char.hp}
+            onEdit={() => handleEdit(char)}
+            onDelete={() => handleDelete(char)}
+          />
         ))}
       </div>
 
@@ -228,12 +190,16 @@ export function PartyPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label">Razza</label>
-                  <input
-                    type="text"
-                    className="input input-bordered"
+                  <select
+                    className="select select-bordered"
                     value={formData.race}
                     onChange={(e) => setFormData({ ...formData, race: e.target.value })}
-                  />
+                  >
+                    <option value="">Seleziona razza...</option>
+                    {CharacterRaces.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-control">
                   <label className="label">CA</label>
@@ -309,6 +275,16 @@ export function PartyPage() {
           <div className="modal-backdrop" onClick={() => setIsCampaignModalOpen(false)}></div>
         </dialog>
       )}
+      <ConfirmModal
+        isOpen={confirmState.isOpen}
+        onClose={closeConfirm}
+        onConfirm={confirmState.onConfirm}
+        title={confirmState.title}
+        message={confirmState.message}
+        icon={confirmState.icon}
+        confirmText="Rimuovi"
+        confirmVariant="error"
+      />
     </div>
   );
 }

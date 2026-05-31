@@ -19,7 +19,7 @@ const themes = [
   { name: 'Pastel', value: 'pastel', icon: '🎨' },
 ];
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ collapsed = false }) {
   const [currentTheme, setCurrentTheme] = useState(() => {
     return localStorage.getItem('theme') || 'fantasy';
   });
@@ -32,9 +32,13 @@ export function ThemeSwitcher() {
 
   return (
     <div className="dropdown dropdown-top">
-      <label tabIndex={0} className="btn btn-ghost btn-sm gap-1">
+      <label
+        tabIndex={0}
+        className={`btn btn-ghost btn-sm ${collapsed ? 'btn-square' : 'gap-1'} ${collapsed ? 'w-10 h-10' : ''}`}
+        title="Cambia tema"
+      >
         <span className="text-lg">🎨</span>
-        <span className="hidden sm:inline">Tema</span>
+        {!collapsed && <span className="hidden sm:inline">Tema</span>}
       </label>
       <div tabIndex={0} className="dropdown-content z-50 card card-compact w-52 p-2 shadow bg-base-200 rounded-box mt-2 max-h-96 overflow-y-auto">
         <div className="grid grid-cols-1 gap-1">

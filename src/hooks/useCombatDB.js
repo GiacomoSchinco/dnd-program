@@ -11,11 +11,22 @@ function normalizeCombatStatus(status) {
   return 'prepared'
 }
 
+function normalizeParticipant(p) {
+  const maxHp = Number(p.maxHp ?? p.hp ?? 1) || 1
+  const currentHp = Number(p.currentHp ?? p.hp ?? maxHp)
+  return {
+    ...p,
+    maxHp,
+    currentHp: Math.max(0, Math.min(maxHp, currentHp)),
+  }
+}
+
 function normalizeCombatRecord(combat) {
   if (!combat) return combat
   return {
     ...combat,
     status: normalizeCombatStatus(combat.status),
+    participants: (combat.participants ?? []).map(normalizeParticipant),
   }
 }
 
@@ -89,6 +100,12 @@ export function useCombatDB() {
     [],
   )
 
+  const npcLibrary = useLiveQuery(
+    () => db.npcs.toArray(),
+    [],
+    [],
+  )
+
   // Seed monsters on first load
   useEffect(() => {
     initializeDB()
@@ -144,7 +161,8 @@ export function useCombatDB() {
     if (!current) return
     const target = current.participants.find((p) => p.id === participantId)
     if (!target) return
-    const newHp = Math.max(0, target.currentHp - amount)
+    const currentHp = Number(target.currentHp ?? target.hp ?? 0)
+    const newHp = Math.max(0, currentHp - Number(amount))
 
     await syncCharacterHpFromParticipant(target, newHp)
 
@@ -171,7 +189,9 @@ export function useCombatDB() {
     if (!current) return
     const target = current.participants.find((p) => p.id === participantId)
     if (!target) return
-    const newHp = Math.min(target.maxHp, target.currentHp + amount)
+    const currentHp = Number(target.currentHp ?? target.hp ?? 0)
+    const maxHp = Number(target.maxHp ?? target.hp ?? currentHp)
+    const newHp = Math.min(maxHp, currentHp + Number(amount))
 
     await syncCharacterHpFromParticipant(target, newHp)
 
@@ -460,6 +480,19 @@ export function useCombatDB() {
     await db.monsters.delete(id)
   }, [])
 
+  // ── NPC library actions ────────────────────────────────────────────────────
+  const addNpc = useCallback(async (npcData) => {
+    await db.npcs.add(npcData)
+  }, [])
+
+  const updateNpc = useCallback(async (id, npcData) => {
+    await db.npcs.update(id, npcData)
+  }, [])
+
+  const deleteNpc = useCallback(async (id) => {
+    await db.npcs.delete(id)
+  }, [])
+
   return {
     // Reactive data
     activeCombat,
@@ -468,6 +501,7 @@ export function useCombatDB() {
     combats,
     combatHistory,
     monsterLibrary,
+    npcLibrary,
     // Combat actions
     saveActiveCombat,
     applyDamage,
@@ -491,5 +525,9 @@ export function useCombatDB() {
     addMonster,
     updateMonster,
     deleteMonster,
+    // NPC actions
+    addNpc,
+    updateNpc,
+    deleteNpc,
   }
 }

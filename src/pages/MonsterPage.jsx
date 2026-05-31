@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useCombatDB } from '../hooks/useCombatDB';
 import { toast } from 'sonner';
+import { ConfirmModal } from '../components/custom/ConfirmModal';
 
 export function MonstersPage() {
   const { monsterLibrary, addMonster, updateMonster, deleteMonster } = useCombatDB();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMonster, setEditingMonster] = useState(null);
+  const [confirmState, setConfirmState] = useState({ isOpen: false });
+  const closeConfirm = () => setConfirmState({ isOpen: false });
   const [formData, setFormData] = useState({
     name: '',
     hp: 10,
@@ -29,11 +32,17 @@ export function MonstersPage() {
     setFormData({ name: '', hp: 10, ac: 10, damage: '1d6', cr: '1/4', type: 'humanoid' });
   };
 
-  const handleDelete = async (monster) => {
-    if (confirm(`Eliminare ${monster.name} dalla libreria?`)) {
-      await deleteMonster(monster.id);
-      toast.info(`${monster.name} rimosso`);
-    }
+  const handleDelete = (monster) => {
+    setConfirmState({
+      isOpen: true,
+      title: 'Elimina Mostro',
+      message: `Vuoi eliminare ${monster.name} dalla libreria?`,
+      icon: '🗑️',
+      onConfirm: async () => {
+        await deleteMonster(monster.id);
+        toast.info(`${monster.name} rimosso`);
+      },
+    });
   };
 
   return (
@@ -179,6 +188,16 @@ export function MonstersPage() {
           <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}></div>
         </dialog>
       )}
+      <ConfirmModal
+        isOpen={confirmState.isOpen}
+        onClose={closeConfirm}
+        onConfirm={confirmState.onConfirm}
+        title={confirmState.title}
+        message={confirmState.message}
+        icon={confirmState.icon}
+        confirmText="Elimina"
+        confirmVariant="error"
+      />
     </div>
   );
 }

@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { useSpellsDB } from '../hooks/useSpellsDB';
 import { SpellSchools } from '../db/database';
 import { toast } from 'sonner';
+import { ConfirmModal } from '../components/custom/ConfirmModal';
 
 export function SpellsPage() {
   const { spells, addSpell, updateSpell, deleteSpell } = useSpellsDB();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSpell, setEditingSpell] = useState(null);
   const [filterLevel, setFilterLevel] = useState('all');
+  const [confirmState, setConfirmState] = useState({ isOpen: false });
+  const closeConfirm = () => setConfirmState({ isOpen: false });
   const [filterSchool, setFilterSchool] = useState('all');
   
   const [formData, setFormData] = useState({
@@ -47,11 +50,17 @@ export function SpellsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (spell) => {
-    if (confirm(`Eliminare ${spell.name} dal grimorio?`)) {
-      await deleteSpell(spell.id);
-      toast.info(`${spell.name} rimosso`);
-    }
+  const handleDelete = (spell) => {
+    setConfirmState({
+      isOpen: true,
+      title: 'Elimina Incantesimo',
+      message: `Vuoi eliminare ${spell.name} dal grimorio?`,
+      icon: '🗑️',
+      onConfirm: async () => {
+        await deleteSpell(spell.id);
+        toast.info(`${spell.name} rimosso`);
+      },
+    });
   };
 
   const levelOptions = ['all', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -284,6 +293,16 @@ export function SpellsPage() {
           <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}></div>
         </dialog>
       )}
+      <ConfirmModal
+        isOpen={confirmState.isOpen}
+        onClose={closeConfirm}
+        onConfirm={confirmState.onConfirm}
+        title={confirmState.title}
+        message={confirmState.message}
+        icon={confirmState.icon}
+        confirmText="Elimina"
+        confirmVariant="error"
+      />
     </div>
   );
 }

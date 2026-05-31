@@ -1,7 +1,12 @@
 import { useCombatDB } from '../hooks/useCombatDB';
+import { CampaignCrudPanel } from '../components/custom/CampaignCrudPanel';
 
 export function HomePage() {
-  const { activeCampaign, activeCombat, combatHistory } = useCombatDB();
+  const { activeCombat, campaigns, combatHistory } = useCombatDB();
+
+  const activeCampaign = activeCombat?.campaignId
+    ? campaigns?.find((campaign) => campaign.id === activeCombat.campaignId)
+    : null;
 
   return (
     <div className="space-y-6">
@@ -13,8 +18,8 @@ export function HomePage() {
             <p className="py-6 text-base-content/70">
               Gestisci combattimenti, traccia HP, salva campagne e molto altro
             </p>
-            <a href="/combat" className="btn btn-primary btn-lg">
-              Inizia Combattimento ⚔️
+            <a href="/campaigns" className="btn btn-primary btn-lg">
+              Apri Hub Combattimento ⚔️
             </a>
           </div>
         </div>
@@ -59,6 +64,8 @@ export function HomePage() {
           <div className="stat-desc">combattimenti salvati</div>
         </div>
       </div>
+
+      <CampaignCrudPanel title="Campagne (CRUD rapido)" compact />
     </div>
   );
 }

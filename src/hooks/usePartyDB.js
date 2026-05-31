@@ -10,7 +10,8 @@ export function usePartyDB() {
     const ensureCurrentHp = async () => {
       const all = await db.characters.toArray()
       for (const char of all) {
-        const maxHp = Number(char.maxHp) || 1
+        // Usa il massimo tra maxHp e hp per recuperare record salvati prima del fix
+      const maxHp = Math.max(Number(char.maxHp) || 0, Number(char.hp) || 0) || 1
         const rawCurrent = char.currentHp
         if (rawCurrent == null || Number.isNaN(Number(rawCurrent))) {
           await db.characters.update(char.id, { currentHp: maxHp, maxHp })
@@ -27,12 +28,30 @@ export function usePartyDB() {
   }, [])
 
   // ── Campaigns ─────────────────────────────────────────────────────────────
-  const addCampaign = useCallback(async (name) => {
-    await db.campaigns.add({ name })
+  const addCampaign = useCallback(async (campaignInput) => {
+    const payload =
+      typeof campaignInput === 'string'
+        ? { name: campaignInput }
+        : {
+            name: campaignInput?.name || 'Nuova Campagna',
+            description: campaignInput?.description || '',
+            createdAt: campaignInput?.createdAt || new Date().toISOString(),
+          }
+
+    const insertedId = await db.campaigns.add(payload)
+    return insertedId
   }, [])
 
-  const updateCampaign = useCallback(async (id, name) => {
-    await db.campaigns.update(id, { name })
+  const updateCampaign = useCallback(async (id, campaignInput) => {
+    const payload =
+      typeof campaignInput === 'string'
+        ? { name: campaignInput }
+        : {
+            name: campaignInput?.name || 'Campagna',
+            description: campaignInput?.description || '',
+          }
+
+    await db.campaigns.update(id, payload)
   }, [])
 
   const deleteCampaign = useCallback(async (id) => {
