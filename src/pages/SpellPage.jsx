@@ -3,9 +3,11 @@ import { useSpellsDB } from '../hooks/useSpellsDB';
 import { SpellSchools } from '../db/database';
 import { toast } from 'sonner';
 import { ConfirmModal } from '../components/custom/ConfirmModal';
+import { CsvToolbar } from '../components/custom/CsvToolbar';
+import { exportCSV, rowToSpell, SPELL_COLUMNS } from '../utils/csvIO';
 
 export function SpellsPage() {
-  const { spells, addSpell, updateSpell, deleteSpell } = useSpellsDB();
+  const { spells, addSpell, updateSpell, deleteSpell, importSpells } = useSpellsDB();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSpell, setEditingSpell] = useState(null);
   const [filterLevel, setFilterLevel] = useState('all');
@@ -29,6 +31,19 @@ export function SpellsPage() {
     if (filterSchool !== 'all' && spell.school !== filterSchool) return false;
     return true;
   });
+
+  const handleExport = () => {
+    if (!spells?.length) { toast.info('Nessun incantesimo da esportare'); return; }
+    exportCSV(spells, SPELL_COLUMNS, 'incantesimi.csv');
+    toast.success(`${spells.length} incantesimi esportati`);
+  };
+
+  const handleImport = async (rows) => {
+    const valid = rows.map(rowToSpell).filter((s) => s.name);
+    if (!valid.length) { toast.error('Nessuna riga valida trovata nel CSV'); return; }
+    await importSpells(valid);
+    toast.success(`${valid.length} incantesimi importati!`);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,9 +88,12 @@ export function SpellsPage() {
           <h1 className="text-3xl font-bold">✨ Grimorio degli Incantesimi</h1>
           <p className="text-base-content/60">Consulta e gestisci gli incantesimi</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-          ➕ Nuovo Incantesimo
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <CsvToolbar onExport={handleExport} onImport={handleImport} />
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            ➕ Nuovo Incantesimo
+          </button>
+        </div>
       </div>
 
       {/* Filtri */}

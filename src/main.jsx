@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { HashRouter } from 'react-router-dom'
 import App from './App.jsx'
 import './index.css'
 import { db } from './db/database'
@@ -37,8 +37,6 @@ const initializeDatabase = async () => {
         })
       }
     }
-
-    console.log('Seed campagne/personaggi completato')
   } catch (error) {
     console.error('Errore inizializzazione database:', error)
   }
@@ -50,9 +48,9 @@ initializeDatabase()
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <CampaignProvider>
-      <BrowserRouter>
+      <HashRouter>
         <App />
-      </BrowserRouter>
+      </HashRouter>
     </CampaignProvider>
   </React.StrictMode>,
 )

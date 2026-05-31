@@ -1,20 +1,39 @@
 import { useState } from 'react';
 import { db } from '../../db/database';
+import { seedMonsters, seedSpells } from '../../db/seedData';
 import { ConfirmModal } from './ConfirmModal';
+import { toast } from 'sonner';
 
 export function ResetButton({ collapsed = false }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleReset = async () => {
     try {
-      await db.combats.clear();
-      await db.characters.clear();
-      await db.campaigns.clear();
-      await db.activeCombat.clear();
-      await db.monsters.clear();
-      await db.spells.clear();
+      // Cancella tutte le tabelle compreso npcs
+      await db.transaction('rw', [
+        db.activeCombat,
+        db.combats,
+        db.campaigns,
+        db.characters,
+        db.monsters,
+        db.spells,
+        db.npcs,
+      ], async () => {
+        await db.activeCombat.clear();
+        await db.combats.clear();
+        await db.campaigns.clear();
+        await db.characters.clear();
+        await db.monsters.clear();
+        await db.spells.clear();
+        await db.npcs.clear();
+        // Re-seed subito dentro la stessa transazione per evitare duplicati
+        await db.monsters.bulkAdd(seedMonsters);
+        await db.spells.bulkAdd(seedSpells);
+      });
+      toast.success('Reset completato!');
       window.location.reload();
     } catch (error) {
+      toast.error('Errore durante il reset');
       console.error('Errore reset:', error);
     }
   };

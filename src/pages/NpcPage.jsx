@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useCombatDB } from '../hooks/useCombatDB';
 import { toast } from 'sonner';
 import { ConfirmModal } from '../components/custom/ConfirmModal';
+import { CsvToolbar } from '../components/custom/CsvToolbar';
+import { exportCSV, rowToNpc, NPC_COLUMNS } from '../utils/csvIO';
 
 const emptyForm = { name: '', hp: 10, ac: 10, description: '' };
 
 export function NpcPage() {
-  const { npcLibrary, addNpc, updateNpc, deleteNpc } = useCombatDB();
+  const { npcLibrary, addNpc, updateNpc, deleteNpc, importNpcs } = useCombatDB();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNpc, setEditingNpc] = useState(null);
   const [formData, setFormData] = useState(emptyForm);
@@ -32,6 +34,19 @@ export function NpcPage() {
     setEditingNpc(npc);
     setFormData({ name: npc.name, hp: npc.hp, ac: npc.ac, description: npc.description || '' });
     setIsModalOpen(true);
+  };
+
+  const handleExport = () => {
+    if (!npcLibrary?.length) { toast.info('Nessun NPC da esportare'); return; }
+    exportCSV(npcLibrary, NPC_COLUMNS, 'npc.csv');
+    toast.success(`${npcLibrary.length} NPC esportati`);
+  };
+
+  const handleImport = async (rows) => {
+    const valid = rows.map(rowToNpc).filter((n) => n.name);
+    if (!valid.length) { toast.error('Nessuna riga valida trovata nel CSV'); return; }
+    await importNpcs(valid);
+    toast.success(`${valid.length} NPC importati!`);
   };
 
   const handleDelete = (npc) => {
@@ -61,9 +76,12 @@ export function NpcPage() {
             Gestisci i personaggi non giocanti da aggiungere ai combattimenti
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => { setEditingNpc(null); setFormData(emptyForm); setIsModalOpen(true); }}>
-          ➕ Nuovo NPC
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <CsvToolbar onExport={handleExport} onImport={handleImport} />
+          <button className="btn btn-primary" onClick={() => { setEditingNpc(null); setFormData(emptyForm); setIsModalOpen(true); }}>
+            ➕ Nuovo NPC
+          </button>
+        </div>
       </div>
 
       {/* Cerca */}

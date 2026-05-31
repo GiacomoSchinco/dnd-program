@@ -62,10 +62,12 @@ function sortParticipantsByInitiative(participants = []) {
 }
 
 async function initializeDB() {
-  const count = await db.monsters.count()
-  if (count === 0) {
-    await db.monsters.bulkAdd(seedMonsters)
-  }
+  await db.transaction('rw', db.monsters, async () => {
+    const count = await db.monsters.count()
+    if (count === 0) {
+      await db.monsters.bulkAdd(seedMonsters)
+    }
+  })
 }
 
 export function useCombatDB() {
@@ -77,15 +79,6 @@ export function useCombatDB() {
   const campaigns = useLiveQuery(() => db.campaigns.toArray(), [], [])
   const characters = useLiveQuery(() => db.characters.toArray(), [], [])
   const combats = useLiveQuery(
-    async () => {
-      const records = await db.combats.orderBy('date').reverse().toArray()
-      return records.map(normalizeCombatRecord)
-    },
-    [],
-    [],
-  )
-
-  const combatHistory = useLiveQuery(
     async () => {
       const records = await db.combats.orderBy('date').reverse().toArray()
       return records.map(normalizeCombatRecord)
@@ -163,25 +156,15 @@ export function useCombatDB() {
     if (!target) return
     const currentHp = Number(target.currentHp ?? target.hp ?? 0)
     const newHp = Math.max(0, currentHp - Number(amount))
-
     await syncCharacterHpFromParticipant(target, newHp)
-
-    await db.activeCombat.put({
+    const nextState = {
       ...current,
       participants: current.participants.map((p) =>
-        p.id === participantId
-          ? { ...p, currentHp: newHp }
-          : p,
+        p.id === participantId ? { ...p, currentHp: newHp } : p,
       ),
-    })
-    await persistLinkedCombat({
-      ...current,
-      participants: current.participants.map((p) =>
-        p.id === participantId
-          ? { ...p, currentHp: newHp }
-          : p,
-      ),
-    })
+    }
+    await db.activeCombat.put(nextState)
+    await persistLinkedCombat(nextState)
   }, [persistLinkedCombat, syncCharacterHpFromParticipant])
 
   const heal = useCallback(async (participantId, amount) => {
@@ -192,43 +175,25 @@ export function useCombatDB() {
     const currentHp = Number(target.currentHp ?? target.hp ?? 0)
     const maxHp = Number(target.maxHp ?? target.hp ?? currentHp)
     const newHp = Math.min(maxHp, currentHp + Number(amount))
-
     await syncCharacterHpFromParticipant(target, newHp)
-
-    await db.activeCombat.put({
+    const nextState = {
       ...current,
       participants: current.participants.map((p) =>
-        p.id === participantId
-          ? { ...p, currentHp: newHp }
-          : p,
+        p.id === participantId ? { ...p, currentHp: newHp } : p,
       ),
-    })
-    await persistLinkedCombat({
-      ...current,
-      participants: current.participants.map((p) =>
-        p.id === participantId
-          ? { ...p, currentHp: newHp }
-          : p,
-      ),
-    })
+    }
+    await db.activeCombat.put(nextState)
+    await persistLinkedCombat(nextState)
   }, [persistLinkedCombat, syncCharacterHpFromParticipant])
 
   const nextTurn = useCallback(async () => {
     const current = await db.activeCombat.get('current')
     if (!current || !current.participants.length) return
     const nextIndex = (current.currentTurnIndex + 1) % current.participants.length
-    const newRound =
-      nextIndex === 0 ? (current.round ?? 1) + 1 : current.round ?? 1
-    await db.activeCombat.put({
-      ...current,
-      currentTurnIndex: nextIndex,
-      round: newRound,
-    })
-    await persistLinkedCombat({
-      ...current,
-      currentTurnIndex: nextIndex,
-      round: newRound,
-    })
+    const newRound = nextIndex === 0 ? (current.round ?? 1) + 1 : current.round ?? 1
+    const nextState = { ...current, currentTurnIndex: nextIndex, round: newRound }
+    await db.activeCombat.put(nextState)
+    await persistLinkedCombat(nextState)
   }, [persistLinkedCombat])
 
   const sortByInitiative = useCallback(async () => {
@@ -480,6 +445,10 @@ export function useCombatDB() {
     await db.monsters.delete(id)
   }, [])
 
+  const importMonsters = useCallback(async (monsters) => {
+    await db.monsters.bulkAdd(monsters)
+  }, [])
+
   // ── NPC library actions ────────────────────────────────────────────────────
   const addNpc = useCallback(async (npcData) => {
     await db.npcs.add(npcData)
@@ -493,13 +462,17 @@ export function useCombatDB() {
     await db.npcs.delete(id)
   }, [])
 
+  const importNpcs = useCallback(async (npcs) => {
+    await db.npcs.bulkAdd(npcs)
+  }, [])
+
   return {
     // Reactive data
     activeCombat,
     campaigns,
     characters,
     combats,
-    combatHistory,
+    combatHistory: combats,
     monsterLibrary,
     npcLibrary,
     // Combat actions
@@ -525,9 +498,11 @@ export function useCombatDB() {
     addMonster,
     updateMonster,
     deleteMonster,
+    importMonsters,
     // NPC actions
     addNpc,
     updateNpc,
     deleteNpc,
+    importNpcs,
   }
 }

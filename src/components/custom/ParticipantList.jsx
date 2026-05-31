@@ -43,7 +43,7 @@ export function ParticipantList({
         : idx === currentTurnIndex;
         const currentHp = participant.currentHp ?? participant.hp ?? 0;
         const maxHp = participant.maxHp ?? participant.hp ?? 1;
-        const hpPercent = (currentHp / maxHp) * 100;
+        const hpPercent = maxHp > 0 ? (currentHp / maxHp) * 100 : 0;
         
         let hpColor = 'progress-primary';
         if (hpPercent < 25) hpColor = 'progress-error';

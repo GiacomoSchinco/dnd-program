@@ -4,10 +4,12 @@ import { db } from '../db/database'
 import { seedSpells } from '../db/seedData'
 
 async function initializeSpells() {
-  const count = await db.spells.count()
-  if (count === 0) {
-    await db.spells.bulkAdd(seedSpells)
-  }
+  await db.transaction('rw', db.spells, async () => {
+    const count = await db.spells.count()
+    if (count === 0) {
+      await db.spells.bulkAdd(seedSpells)
+    }
+  })
 }
 
 export function useSpellsDB() {
@@ -33,5 +35,9 @@ export function useSpellsDB() {
     await db.spells.delete(id)
   }, [])
 
-  return { spells, addSpell, updateSpell, deleteSpell }
+  const importSpells = useCallback(async (spells) => {
+    await db.spells.bulkAdd(spells)
+  }, [])
+
+  return { spells, addSpell, updateSpell, deleteSpell, importSpells }
 }

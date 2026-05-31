@@ -1,15 +1,15 @@
 // Mostri iniziali
 export const seedMonsters = [
-  { name: '🧌 Goblin', hp: 7, ac: 15, damage: '1d6+2', cr: '1/4', type: 'goblinoid', xp: 50 },
-  { name: '👹 Orco', hp: 30, ac: 13, damage: '1d12+3', cr: '1/2', type: 'humanoid', xp: 100 },
-  { name: '💀 Scheletro', hp: 13, ac: 13, damage: '1d6+2', cr: '1/4', type: 'undead', xp: 50 },
-  { name: '🧙 Mago Oscuro', hp: 40, ac: 12, damage: '2d8+3', cr: '2', type: 'humanoid', xp: 450 },
-  { name: '🗿 Troll', hp: 84, ac: 15, damage: '2d6+4', cr: '5', type: 'giant', xp: 1800 },
-  { name: '🐉 Drago Rosso Giovane', hp: 150, ac: 18, damage: '2d10+6', cr: '10', type: 'dragon', xp: 5900 },
-  { name: '🐺 Lupo Mannaro', hp: 58, ac: 11, damage: '1d8+4', cr: '3', type: 'lycanthrope', xp: 700 },
-  { name: '🕷️ Ragno Gigante', hp: 26, ac: 14, damage: '1d8+3', cr: '1', type: 'beast', xp: 200 },
-  { name: '👑 Re Lich', hp: 135, ac: 17, damage: '3d8+5', cr: '15', type: 'undead', xp: 13000 },
-  { name: '🐉 Drago d\'Oro Antico', hp: 300, ac: 22, damage: '4d12+10', cr: '24', type: 'dragon', xp: 62000 }
+  { name: 'Goblin', hp: 7, ac: 15, damage: '1d6+2', cr: '1/4', type: 'goblinoid', xp: 50 },
+  { name: 'Orco', hp: 30, ac: 13, damage: '1d12+3', cr: '1/2', type: 'humanoid', xp: 100 },
+  { name: 'Scheletro', hp: 13, ac: 13, damage: '1d6+2', cr: '1/4', type: 'undead', xp: 50 },
+  { name: 'Mago Oscuro', hp: 40, ac: 12, damage: '2d8+3', cr: '2', type: 'humanoid', xp: 450 },
+  { name: 'Troll', hp: 84, ac: 15, damage: '2d6+4', cr: '5', type: 'giant', xp: 1800 },
+  { name: 'Drago Rosso Giovane', hp: 150, ac: 18, damage: '2d10+6', cr: '10', type: 'dragon', xp: 5900 },
+  { name: 'Lupo Mannaro', hp: 58, ac: 11, damage: '1d8+4', cr: '3', type: 'lycanthrope', xp: 700 },
+  { name: 'Ragno Gigante', hp: 26, ac: 14, damage: '1d8+3', cr: '1', type: 'beast', xp: 200 },
+  { name: 'Re Lich', hp: 135, ac: 17, damage: '3d8+5', cr: '15', type: 'undead', xp: 13000 },
+  { name: 'Drago d\'Oro Antico', hp: 300, ac: 22, damage: '4d12+10', cr: '24', type: 'dragon', xp: 62000 }
 ];
 
 // Campagne seed estese
