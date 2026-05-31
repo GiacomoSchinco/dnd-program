@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { RefreshCw, SkipForward, Flag, Save, Swords } from 'lucide-react';
 
 /**
  * Header del combattimento: breadcrumb, titolo, round info, bottoni azioni.
@@ -11,7 +12,9 @@ export function CombatHeader({
   onSortInitiative,
   onTerminate,
   onSave,
+  onStart,
 }) {
+  const isPrepared = combatStatus === 'prepared';
   const navigate = useNavigate();
 
   return (
@@ -46,19 +49,27 @@ export function CombatHeader({
             ← Indietro
           </button>
         )}
-        <button className="btn btn-secondary" onClick={onSortInitiative}>
-          🔄 Iniziativa
-        </button>
-        <button className="btn btn-primary" onClick={onNextTurn}>
-          ⏩ Turno Successivo
-        </button>
-        {combatStatus !== 'terminated' && (
-          <button className="btn btn-warning" onClick={onTerminate}>
-            🏁 Termina
+        {isPrepared ? (
+          <button className="btn btn-success gap-1" onClick={onStart}>
+            <Swords size={16} /> Inizia Battaglia
+          </button>
+        ) : (
+          <>
+            <button className="btn btn-secondary gap-1" onClick={onSortInitiative}>
+              <RefreshCw size={16} /> Iniziativa
+            </button>
+            <button className="btn btn-primary gap-1" onClick={onNextTurn}>
+              <SkipForward size={16} /> Turno Successivo
+            </button>
+          </>
+        )}
+        {combatStatus !== 'terminated' && !isPrepared && (
+          <button className="btn btn-warning gap-1" onClick={onTerminate}>
+            <Flag size={16} /> Termina
           </button>
         )}
-        <button className="btn btn-success" onClick={onSave}>
-          💾 Salva
+        <button className="btn btn-ghost gap-1" onClick={onSave}>
+          <Save size={16} /> Salva
         </button>
       </div>
     </div>

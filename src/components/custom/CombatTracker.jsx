@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { ParticipantList } from './ParticipantList';
+import { SearchSelect } from './SearchSelect';
+import { Shield, Plus, User, Pencil, Swords, Skull } from 'lucide-react';
 
 export function CombatTracker({
   activeCombat,
@@ -123,7 +125,7 @@ export function CombatTracker({
   const currentParticipantId = participants[currentTurnIndex]?.id ?? null;
 
   return (
-    <div className="h-full overflow-hidden flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-4">
       {isTerminated && (
         <div className="shrink-0">
           <span className="badge badge-error badge-lg">Battaglia Terminata</span>
@@ -134,55 +136,45 @@ export function CombatTracker({
         {/* Colonna Alleati (PG + NPC) */}
         <div className="flex flex-col gap-3 min-h-0">
           <div className="flex items-center justify-between shrink-0">
-            <h2 className="text-lg font-bold text-success">🛡️ Alleati ({pcs.length})</h2>
+            <h2 className="text-lg font-bold text-success flex items-center gap-1"><Shield size={16} /> Alleati ({pcs.length})</h2>
             <div className="flex gap-2">
-              {/* Dropdown PG */}
-              <div className="dropdown dropdown-end">
-                <button className="btn btn-sm btn-success" disabled={isTerminated}>
-                  ➕ PG
-                </button>
-                <ul className="dropdown-content z-50 menu p-2 shadow bg-base-200 rounded-box w-64">
-                  <li className="menu-title">Seleziona Personaggio</li>
-                  {campaignCharacters.map((char) => (
-                    <li key={char.id}>
-                      <button onClick={() => prepareAddPG(char.id)}>
-                        {char.name} (HP {char.currentHp ?? char.maxHp}/{char.maxHp})
-                      </button>
-                    </li>
-                  ))}
-                  {campaignCharacters.length === 0 && (
-                    <li><span className="text-base-content/50">Nessun PG nella campagna</span></li>
-                  )}
-                </ul>
-              </div>
-              {/* Dropdown NPC */}
-              <div className="dropdown dropdown-end">
-                <button className="btn btn-sm btn-info" disabled={isTerminated}>
-                  👤 NPC
-                </button>
-                <ul className="dropdown-content z-50 menu p-2 shadow bg-base-200 rounded-box w-64 max-h-72 overflow-y-auto">
-                  <li className="menu-title">Dalla libreria</li>
-                  {npcLibrary.map((npc) => (
-                    <li key={npc.id}>
-                      <button onClick={() => prepareAddNpcFromLibrary(npc.id)}>
-                        {npc.name} (HP {npc.hp} | CA {npc.ac})
-                      </button>
-                    </li>
-                  ))}
-                  {npcLibrary.length === 0 && (
-                    <li><span className="text-base-content/50">Nessun NPC in libreria</span></li>
-                  )}
-                  <li className="menu-title mt-1">Crea al volo</li>
-                  <li>
-                    <button
-                      className="text-info font-semibold"
-                      onClick={() => setNpcForm({ isOpen: true, name: '', hp: 10, ac: 10, initiative: '' })}
-                    >
-                      ✏️ Crea nuovo NPC...
-                    </button>
-                  </li>
-                </ul>
-              </div>
+              {/* SearchSelect PG */}
+              <SearchSelect
+                placeholder="Cerca personaggio..."
+                disabled={isTerminated}
+                buttonClassName="btn btn-sm btn-success gap-1"
+                buttonContent={<><Plus size={14} /> PG</>}
+                emptyText="Nessun PG nella campagna"
+                options={campaignCharacters.map((c) => ({
+                  value: String(c.id),
+                  label: c.name,
+                  sublabel: `HP ${c.currentHp ?? c.maxHp}/${c.maxHp} · CA ${c.ac ?? 10}`,
+                }))}
+                onSelect={(id) => prepareAddPG(id)}
+              />
+              {/* SearchSelect NPC */}
+              <SearchSelect
+                placeholder="Cerca NPC..."
+                disabled={isTerminated}
+                buttonClassName="btn btn-sm btn-info gap-1"
+                buttonContent={<><User size={14} /> NPC</>}
+                emptyText="Nessun NPC in libreria"
+                options={npcLibrary.map((n) => ({
+                  value: String(n.id),
+                  label: n.name,
+                  sublabel: `HP ${n.hp} · CA ${n.ac}`,
+                }))}
+                onSelect={(id) => prepareAddNpcFromLibrary(id)}
+                extraActions={
+                  <button
+                    type="button"
+                    className="w-full text-left px-3 py-2 hover:bg-base-300 transition-colors flex items-center gap-2 text-info font-semibold text-sm"
+                    onClick={() => setNpcForm({ isOpen: true, name: '', hp: 10, ac: 10, initiative: '' })}
+                  >
+                    <Pencil size={13} /> Crea nuovo NPC...
+                  </button>
+                }
+              />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto min-h-0">
@@ -203,22 +195,20 @@ export function CombatTracker({
         {/* Colonna Mostri */}
         <div className="flex flex-col gap-3 min-h-0">
           <div className="flex items-center justify-between shrink-0">
-            <h2 className="text-lg font-bold text-error">👹 Mostri ({monsters.length})</h2>
-            <div className="dropdown dropdown-end">
-              <button className="btn btn-sm btn-error" disabled={isTerminated}>
-                ➕ Aggiungi Mostro
-              </button>
-              <ul className="dropdown-content z-50 menu p-2 shadow bg-base-200 rounded-box w-64 max-h-64 overflow-y-auto">
-                <li className="menu-title">Seleziona Mostro</li>
-                {monsterLibrary.map((monster) => (
-                  <li key={monster.id}>
-                    <button onClick={() => prepareAddMonster(monster.id)}>
-                      {monster.name} (HP {monster.hp} | CA {monster.ac})
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <h2 className="text-lg font-bold text-error flex items-center gap-1"><Skull size={16} /> Mostri ({monsters.length})</h2>
+            <SearchSelect
+              placeholder="Cerca mostro..."
+              disabled={isTerminated}
+              buttonClassName="btn btn-sm btn-error gap-1"
+              buttonContent={<><Plus size={14} /> Aggiungi Mostro</>}
+              emptyText="Nessun mostro in libreria"
+              options={monsterLibrary.map((m) => ({
+                value: String(m.id),
+                label: m.name,
+                sublabel: `HP ${m.hp} · CA ${m.ac} · CR ${m.cr}`,
+              }))}
+              onSelect={(id) => prepareAddMonster(id)}
+            />
           </div>
           <div className="flex-1 overflow-y-auto min-h-0">
             <ParticipantList
@@ -240,7 +230,7 @@ export function CombatTracker({
       {npcForm.isOpen && (
         <dialog className="modal modal-open">
           <div className="modal-box max-w-sm">
-            <h3 className="font-bold text-lg mb-4">👤 Crea NPC</h3>
+            <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><User size={18} /> Crea NPC</h3>
             <div className="space-y-3">
               <div className="form-control">
                 <label className="label"><span className="label-text">Nome</span></label>
@@ -296,8 +286,8 @@ export function CombatTracker({
               <button className="btn btn-ghost" onClick={() => setNpcForm({ isOpen: false, name: '', hp: 10, ac: 10, initiative: '' })}>
                 Annulla
               </button>
-              <button className="btn btn-info" onClick={handleCreateNpc}>
-                ➕ Aggiungi
+              <button className="btn btn-info gap-1" onClick={handleCreateNpc}>
+                <Plus size={14} /> Aggiungi
               </button>
             </div>
           </div>
@@ -309,7 +299,7 @@ export function CombatTracker({
       {pending && (
         <dialog className="modal modal-open">
           <div className="modal-box max-w-sm">
-            <h3 className="font-bold text-lg mb-1">⚔️ Inserisci Iniziativa</h3>
+            <h3 className="font-bold text-lg mb-1 flex items-center gap-2"><Swords size={18} /> Inserisci Iniziativa</h3>
             <p className="text-sm text-base-content/60 mb-4">{pending.label}</p>
             <div className="form-control">
               <label className="label">
@@ -330,8 +320,8 @@ export function CombatTracker({
             </div>
             <div className="modal-action">
               <button className="btn btn-ghost" onClick={closeInitiativeModal}>Annulla</button>
-              <button className="btn btn-primary" onClick={handleConfirmAdd}>
-                ➕ Aggiungi
+              <button className="btn btn-primary gap-1" onClick={handleConfirmAdd}>
+                <Plus size={14} /> Aggiungi
               </button>
             </div>
           </div>

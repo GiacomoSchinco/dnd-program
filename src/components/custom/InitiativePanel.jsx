@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
+import { User, Skull, Swords, SkipForward } from 'lucide-react';
 
-const TYPE_ICONS = { pc: '🧙', player: '🧙', npc: '👤', monster: '🐉' };
+const TYPE_ICON_MAP = { pc: <User size={14} />, player: <User size={14} />, npc: <User size={14} />, monster: <Skull size={14} /> };
 
 /**
  * Pannello flottante draggabile con lista iniziativa.
@@ -10,9 +11,10 @@ const TYPE_ICONS = { pc: '🧙', player: '🧙', npc: '👤', monster: '🐉' };
  *   round              – round corrente
  */
 export function InitiativePanel({ participants = [], currentTurnIndex = 0, round = 1, onNextTurn }) {
-  const [iconMode, setIconMode] = useState(false);
+  const [iconMode, setIconMode] = useState(true);
   const [pos, setPos] = useState({ x: 16, y: 100 });
   const draggingRef = useRef(false);
+  const movedRef = useRef(false);
   const offsetRef = useRef({ x: 0, y: 0 });
   const panelRef = useRef(null);
 
@@ -24,6 +26,7 @@ export function InitiativePanel({ participants = [], currentTurnIndex = 0, round
   const startDrag = (e) => {
     if (e.button !== 0) return;
     draggingRef.current = true;
+    movedRef.current = false;
     const rect = panelRef.current?.getBoundingClientRect();
     if (rect) offsetRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     e.preventDefault();
@@ -32,6 +35,7 @@ export function InitiativePanel({ participants = [], currentTurnIndex = 0, round
   useEffect(() => {
     const onMove = (e) => {
       if (!draggingRef.current) return;
+      movedRef.current = true;
       setPos({ x: e.clientX - offsetRef.current.x, y: e.clientY - offsetRef.current.y });
     };
     const onUp = () => { draggingRef.current = false; };
@@ -56,16 +60,15 @@ export function InitiativePanel({ participants = [], currentTurnIndex = 0, round
       <div
         ref={panelRef}
         style={{ position: 'fixed', left: pos.x, top: pos.y, zIndex: 1000 }}
-        className="select-none"
+        className="select-none cursor-grab active:cursor-grabbing"
         onMouseDown={startDrag}
+        onMouseUp={() => { if (!movedRef.current) setIconMode(false); }}
       >
         <button
-          className="btn btn-primary btn-circle shadow-xl text-lg"
-          onMouseDown={(e) => e.stopPropagation()}
-          onClick={() => setIconMode(false)}
+          className="btn btn-primary btn-circle shadow-xl text-lg pointer-events-none"
           title={`Apri iniziativa — Round ${round}`}
         >
-          ⚔️
+          <Swords size={16} />
         </button>
         {/* Indicatore round */}
         <span className="badge badge-primary badge-xs absolute -top-1 -right-1 pointer-events-none">
@@ -86,7 +89,7 @@ export function InitiativePanel({ participants = [], currentTurnIndex = 0, round
         className="flex items-center gap-2 px-4 py-3 bg-primary text-primary-content cursor-grab active:cursor-grabbing"
         onMouseDown={startDrag}
       >
-        <span className="flex-1 font-bold tracking-wide">⚔️ Iniziativa</span>
+        <span className="flex items-center gap-1 flex-1 font-bold tracking-wide"><Swords size={14} /> Iniziativa</span>
         <span className="text-sm opacity-80 tabular-nums">
           Round {round} · {currentTurnIndex + 1}/{participants.length}
         </span>
@@ -129,7 +132,7 @@ export function InitiativePanel({ participants = [], currentTurnIndex = 0, round
               </span>
 
               {/* Icona tipo */}
-              <span className="text-sm shrink-0">{TYPE_ICONS[p.type] ?? '❓'}</span>
+              <span className="flex items-center shrink-0">{TYPE_ICON_MAP[p.type] ?? <User size={14} />}</span>
 
               {/* Nome */}
               <span className={`flex-1 text-sm truncate ${isActive ? 'font-bold' : 'font-medium'}`}>
@@ -170,10 +173,10 @@ export function InitiativePanel({ participants = [], currentTurnIndex = 0, round
       {onNextTurn && (
         <div className="px-3 py-2 border-t border-base-content/10">
           <button
-            className="btn btn-primary btn-sm w-full"
+            className="btn btn-primary btn-sm w-full gap-1"
             onClick={onNextTurn}
           >
-            ⏩ Turno Successivo
+            <SkipForward size={14} /> Turno Successivo
           </button>
         </div>
       )}

@@ -1,15 +1,15 @@
 import { NavLink } from 'react-router-dom';
-import { ResetButton } from './ResetButton';
-import { ThemeSwitcher } from './ThemeSwitcher';
+import { Home, Swords, Users, BookOpen, Skull, User, Sparkles, Settings, Dices } from 'lucide-react';
 
 const links = [
-  { to: '/', icon: '🏰', label: 'Home' },
-  { to: '/campaigns', icon: '⚔️', label: 'Hub Combattimento' },
-  { to: '/party', icon: '👥', label: 'Party' },
-  { to: '/campaign-management', icon: '📚', label: 'Campagne' },
-  { to: '/monsters', icon: '🐉', label: 'Mostri' },
-  { to: '/npcs', icon: '👤', label: 'NPC' },
-  { to: '/spells', icon: '✨', label: 'Magie' },
+  { to: '/', icon: Home, label: 'Home' },
+  { to: '/campaigns', icon: Swords, label: 'Hub Combattimento' },
+  { to: '/party', icon: Users, label: 'Party' },
+  { to: '/campaign-management', icon: BookOpen, label: 'Campagne' },
+  { to: '/monsters', icon: Skull, label: 'Mostri' },
+  { to: '/npcs', icon: User, label: 'NPC' },
+  { to: '/spells', icon: Sparkles, label: 'Magie' },
+  { to: '/settings', icon: Settings, label: 'Impostazioni' },
 ];
 
 export function Navbar({ collapsed = false }) {
@@ -26,13 +26,13 @@ export function Navbar({ collapsed = false }) {
           ${collapsed ? 'py-[0.55rem] px-0' : ''}
         `}
       >
-        <span className="text-[1.5rem] text-primary">🎲</span>
+        <Dices size={24} className="text-primary" />
         {!collapsed && <span>D&amp;D Tracker</span>}
       </div>
 
       {/* Links */}
       <div className={`flex flex-col gap-[0.35rem] w-full ${collapsed ? 'items-center' : ''}`}>
-        {links.map(({ to, icon, label }) => (
+        {links.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={`${to}-${label}`}
             to={to}
@@ -54,15 +54,10 @@ export function Navbar({ collapsed = false }) {
             }}
             title={label}
           >
-            <span className="text-[1.3rem] leading-none">{icon}</span>
+            <Icon size={20} />
             {!collapsed && <span className="text-[0.7rem] opacity-90">{label}</span>}
           </NavLink>
         ))}
-      </div>
-
-      <div className="mt-auto pt-4 flex flex-col gap-2 items-center w-full">
-        <ThemeSwitcher collapsed={collapsed} />
-        <ResetButton collapsed={collapsed} />
       </div>
     </nav>
   );

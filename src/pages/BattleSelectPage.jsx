@@ -6,11 +6,17 @@ import DataTable from '../components/custom/DataTable';
 import { useCampaignContext } from '../context/CampaignContext';
 import { toast } from 'sonner';
 import { ConfirmModal } from '../components/custom/ConfirmModal';
+import { Swords, Plus, Trash2 } from 'lucide-react';
+
+import { FormModal, Field } from '../components/custom/FormModal';
 
 export function BattleSelectPage() {
   const { campaignId } = useParams();
   const [confirmState, setConfirmState] = useState({ isOpen: false });
   const closeConfirm = () => setConfirmState({ isOpen: false });
+  const [newBattleModal, setNewBattleModal] = useState(false);
+  const [newBattleName, setNewBattleName] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
   const navigate = useNavigate();
   const { campaigns } = usePartyDB();
   const { setSelectedCampaignId } = useCampaignContext();
@@ -25,9 +31,18 @@ export function BattleSelectPage() {
     setSelectedCampaignId(parsedCampaignId);
   }, [parsedCampaignId, setSelectedCampaignId]);
 
-  const handleNewBattle = async () => {
-    await createCombatForCampaign(parsedCampaignId, 'Nuova Battaglia');
-    navigate('/combat');
+  const handleNewBattle = async (e) => {
+    e.preventDefault();
+    if (isCreating) return;
+    setIsCreating(true);
+    try {
+      const name = newBattleName.trim() || 'Nuova Battaglia';
+      await createCombatForCampaign(parsedCampaignId, name);
+      setNewBattleModal(false);
+      setNewBattleName('');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleLoadBattle = async (combatId) => {
@@ -61,11 +76,11 @@ export function BattleSelectPage() {
               <li>Battaglie</li>
             </ul>
           </div>
-          <h1 className="text-3xl font-bold mt-2">⚔️ Battaglie</h1>
+          <h1 className="text-3xl font-bold mt-2 flex items-center gap-2"><Swords size={28} /> Battaglie</h1>
           <p className="text-base-content/60">Seleziona una battaglia o creane una nuova</p>
         </div>
-        <button className="btn btn-primary" onClick={handleNewBattle}>
-          ➕ Nuova Battaglia
+        <button className="btn btn-primary gap-1" onClick={() => { setNewBattleName(''); setNewBattleModal(true); }}>
+          <Plus size={16} /> Nuova Battaglia
         </button>
       </div>
 
@@ -99,19 +114,19 @@ export function BattleSelectPage() {
           actions: (_, row) => (
             <div className="flex gap-2 justify-end">
               <button
-                className="btn btn-xs btn-primary"
+                className="btn btn-xs btn-primary gap-1"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleLoadBattle(row.id);
                 }}
               >
-                ⚔️ Riprendi
+                <Swords size={12} /> Riprendi
               </button>
               <button
-                className="btn btn-xs btn-error"
+                className="btn btn-xs btn-error gap-1"
                 onClick={(e) => handleDeleteBattle(row.id, e)}
               >
-                🗑️ Elimina
+                <Trash2 size={12} /> Elimina
               </button>
             </div>
           ),
@@ -131,6 +146,25 @@ export function BattleSelectPage() {
         confirmText="Elimina"
         confirmVariant="error"
       />
+      <FormModal
+        isOpen={newBattleModal}
+        title="Nuova Battaglia"
+        confirmText="Crea"
+        loading={isCreating}
+        onClose={() => setNewBattleModal(false)}
+        onSubmit={handleNewBattle}
+      >
+        <Field label="Nome battaglia">
+          <input
+            type="text"
+            className="input input-bordered w-full"
+            placeholder="es. Assalto alla fortezza"
+            value={newBattleName}
+            onChange={(e) => setNewBattleName(e.target.value)}
+            autoFocus
+          />
+        </Field>
+      </FormModal>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
+import { Pencil, Trash2, ScrollText } from 'lucide-react';
 
 function toLabel(key) {
     return key
@@ -55,7 +56,12 @@ export default function DataTable({
     const visibleKeys = useMemo(() => {
         const idStr = String(idKey);
         if (visibleColumns && visibleColumns.length) {
-            return visibleColumns.filter((k) => k !== idStr && !hiddenColumns.includes(k));
+            return visibleColumns.filter((k) => {
+                if (k === idStr) return false;
+                if (hiddenColumns.includes(k)) return false;
+                // Colonne virtuali (non nei dati) sono ammesse se hanno un customRenderer
+                return true;
+            });
         }
         return keys.filter((k) => k !== idStr && !hiddenColumns.includes(k));
     }, [keys, idKey, hiddenColumns, visibleColumns]);
@@ -91,6 +97,8 @@ export default function DataTable({
             return {
                 id: key,
                 header: headerLabel,
+                // Se la chiave non esiste nel record (colonna virtuale come 'actions'),
+                // passa undefined al renderer — il customRenderer gestirà il rendering
                 cell: (row) => renderCellForKey(key, row[key], row),
             };
         });
@@ -103,24 +111,24 @@ export default function DataTable({
                     <div className="flex gap-2">
                         {onEdit && (
                             <button
-                                className="btn btn-xs btn-primary"
+                                className="btn btn-xs btn-primary gap-1"
                                 onClick={(e) => { 
                                     e.stopPropagation(); 
                                     onEdit(row[idKey], row); 
                                 }}
                             >
-                                ✏️ Modifica
+                                <Pencil size={12} /> Modifica
                             </button>
                         )}
                         {onDelete && (
                             <button
-                                className="btn btn-xs btn-error"
+                                className="btn btn-xs btn-error gap-1"
                                 onClick={(e) => { 
                                     e.stopPropagation(); 
                                     onDelete(row[idKey], row); 
                                 }}
                             >
-                                🗑️ Elimina
+                                <Trash2 size={12} /> Elimina
                             </button>
                         )}
                     </div>
@@ -152,7 +160,7 @@ export default function DataTable({
                             <tr>
                                 <td colSpan={columns.length} className="text-center py-16">
                                     <div className="flex flex-col items-center gap-4">
-                                        <div className="text-6xl opacity-30">📜</div>
+                                        <ScrollText size={48} className="opacity-30" />
                                         <p className="text-base-content/70 text-lg">{emptyMessage}</p>
                                         <p className="text-base-content/40 text-sm italic">Nessun dato disponibile...</p>
                                     </div>
@@ -188,7 +196,6 @@ export default function DataTable({
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <span className="text-sm text-base-content/70 flex items-center gap-1">
-                                <span>📄</span>
                                 Righe:
                             </span>
                             <select
@@ -236,7 +243,6 @@ export default function DataTable({
 
                     <div className="mt-3 text-center">
                         <p className="text-xs text-base-content/50 flex items-center justify-center gap-2">
-                            <span>📅</span>
                             Mostrati {((currentPage - 1) * rowsPerPage) + 1} - {Math.min(currentPage * rowsPerPage, totalRows)} di {totalRows} elementi
                         </p>
                     </div>

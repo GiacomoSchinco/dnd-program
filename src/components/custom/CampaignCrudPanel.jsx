@@ -4,6 +4,7 @@ import { usePartyDB } from '../../hooks/usePartyDB';
 import { useCampaignContext } from '../../context/CampaignContext';
 import DataTable from './DataTable';
 import { ConfirmModal } from './ConfirmModal';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 
 export function CampaignCrudPanel({ title = 'Campagne', compact = false }) {
   const { campaigns, addCampaign, updateCampaign, deleteCampaign } = usePartyDB();
@@ -88,8 +89,8 @@ export function CampaignCrudPanel({ title = 'Campagne', compact = false }) {
       <div className="card-body">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="card-title">{title}</h2>
-          <button className="btn btn-primary btn-sm" onClick={() => setIsCreateOpen(true)}>
-            ➕ Nuova Campagna
+          <button className="btn btn-primary btn-sm gap-1" onClick={() => setIsCreateOpen(true)}>
+            <Plus size={14} /> Nuova Campagna
           </button>
         </div>
 
@@ -119,31 +120,16 @@ export function CampaignCrudPanel({ title = 'Campagne', compact = false }) {
               actions: (_, row) => (
                 <div className="flex gap-1 justify-end">
                   <button
-                    className="btn btn-xs btn-outline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedCampaignId(row.id);
-                    }}
+                    className="btn btn-xs btn-primary gap-1"
+                    onClick={(e) => { e.stopPropagation(); openEdit(row); }}
                   >
-                    Usa
+                    <Pencil size={12} /> Modifica
                   </button>
                   <button
-                    className="btn btn-xs btn-primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openEdit(row);
-                    }}
+                    className="btn btn-xs btn-error gap-1"
+                    onClick={(e) => { e.stopPropagation(); handleDelete(row); }}
                   >
-                    Modifica
-                  </button>
-                  <button
-                    className="btn btn-xs btn-error"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(row);
-                    }}
-                  >
-                    Elimina
+                    <Trash2 size={12} /> Elimina
                   </button>
                 </div>
               ),

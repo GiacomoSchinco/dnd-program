@@ -1,3 +1,6 @@
+import { Heart, Pencil, Trash2, Shield } from 'lucide-react';
+import { DndIcon } from './DndIcon';
+
 // Mappa classi in italiano
 const getItalianClass = (className) => {
   const map = {
@@ -17,14 +20,43 @@ const getItalianClass = (className) => {
   return map[className] || className || '—';
 };
 
-// Mappa emoji per classe
-const getClassEmoji = (className) => {
+// Colore classe → classe DaisyUI semantica (rispetta il cambio tema)
+const getClassColor = (className) => {
   const map = {
-    'Guerriero': '⚔️', 'Mago': '🔮', 'Ladro': '🗡️', 'Chierico': '✨',
-    'Barbaro': '💪', 'Paladino': '🛡️', 'Ranger': '🏹', 'Stregone': '🌀',
-    'Warlock': '🌑', 'Bardo': '🎵', 'Druido': '🌿', 'Monaco': '🥋',
+    'Guerriero': 'text-error',     'Fighter': 'text-error',       // guerriero/rosso
+    'Barbaro':   'text-error',     'Barbarian': 'text-error',
+    'Mago':      'text-info',      'Wizard': 'text-info',          // arcano/blu
+    'Stregone':  'text-accent',    'Sorcerer': 'text-accent',      // magia spontanea
+    'Warlock':   'text-secondary', 'Bardo': 'text-secondary',      // oscuro/versatile
+    'Bard':      'text-secondary',
+    'Chierico':  'text-warning',   'Cleric': 'text-warning',       // sacro/oro
+    'Paladino':  'text-warning',   'Paladin': 'text-warning',
+    'Ranger':    'text-success',   'Druido': 'text-success',       // natura/verde
+    'Druid':     'text-success',
+    'Ladro':     'text-neutral-content', 'Rogue': 'text-neutral-content',
+    'Monaco':    'text-primary',   'Monk': 'text-primary',
+    'Artificere':'text-info',      'Artificer': 'text-info',
   };
-  return map[className] || '🎲';
+  return map[className] ?? 'text-base-content/60';
+};
+
+const getClassIconName = (className) => {
+  const map = {
+    'Guerriero': 'fighter', 'Fighter': 'fighter',
+    'Mago': 'wizard', 'Wizard': 'wizard',
+    'Ladro': 'rogue', 'Rogue': 'rogue',
+    'Chierico': 'cleric', 'Cleric': 'cleric',
+    'Barbaro': 'barbarian', 'Barbarian': 'barbarian',
+    'Paladino': 'paladin', 'Paladin': 'paladin',
+    'Ranger': 'ranger',
+    'Stregone': 'sorcerer', 'Sorcerer': 'sorcerer',
+    'Warlock': 'warlock',
+    'Bardo': 'bard', 'Bard': 'bard',
+    'Druido': 'druid', 'Druid': 'druid',
+    'Monaco': 'monk', 'Monk': 'monk',
+    'Artificere': 'artificer', 'Artificer': 'artificer',
+  };
+  return map[className] ?? null;
 };
 
 export function CharacterCard({
@@ -49,8 +81,13 @@ export function CharacterCard({
   const currentHpValue = currentHp ?? maxHp ?? 0;
   const maxHpValue = maxHp ?? currentHp ?? 100;
   const tempHpValue = tempHp ?? 0;
-  const emoji = getClassEmoji(characterClass);
+  const classIconName = getClassIconName(characterClass);
   const classLabel = getItalianClass(characterClass);
+  const classColor = getClassColor(characterClass);
+
+  const ClassIconEl = classIconName
+    ? <DndIcon name={classIconName} size={28} className={classColor} />
+    : <span className={`font-bold text-base ${classColor}`}>{classLabel?.[0] ?? '?'}</span>;
 
   // Versione compatta per liste partecipanti
   if (variant === 'participant') {
@@ -59,8 +96,8 @@ export function CharacterCard({
         className="card card-side bg-base-100 shadow-md hover:shadow-lg transition-all cursor-pointer"
         onClick={onClick}
       >
-        <div className="flex items-center justify-center px-4 bg-base-200 rounded-l-2xl text-3xl">
-          {emoji}
+        <div className="flex items-center justify-center px-4 bg-base-200 rounded-l-2xl">
+          {ClassIconEl}
         </div>
         <div className="card-body p-3 gap-1">
           <div className="flex justify-between items-start">
@@ -89,8 +126,8 @@ export function CharacterCard({
 
         {/* Header: emoji + nome + livello */}
         <div className="flex items-center gap-3">
-          <div className="text-4xl w-12 h-12 flex items-center justify-center bg-base-200 rounded-xl shrink-0">
-            {emoji}
+          <div className="w-12 h-12 flex items-center justify-center bg-base-200 rounded-xl shrink-0">
+            {ClassIconEl}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
@@ -107,7 +144,7 @@ export function CharacterCard({
         {maxHp != null && (
           <div>
             <div className="flex justify-between text-xs text-base-content/60 mb-1">
-              <span>❤️ HP</span>
+              <span className="flex items-center gap-1"><Heart size={12} /> HP</span>
               <span className="font-semibold text-base-content">
                 {currentHpValue} / {maxHpValue}
                 {tempHpValue > 0 && <span className="text-info ml-1">+{tempHpValue}</span>}
@@ -120,7 +157,7 @@ export function CharacterCard({
         {/* CA */}
         {ac != null && (
           <div className="flex items-center gap-1 text-sm">
-            <span className="text-base-content/50">🛡️ CA</span>
+            <span className="flex items-center gap-1 text-base-content/50"><Shield size={12} /> CA</span>
             <span className="font-bold">{ac}</span>
           </div>
         )}
@@ -129,13 +166,13 @@ export function CharacterCard({
         {(onEdit || onDelete) && (
           <div className="flex gap-2 pt-2 border-t border-base-200">
             {onEdit && (
-              <button className="btn btn-sm btn-ghost flex-1" onClick={onEdit}>
-                ✏️ Modifica
+              <button className="btn btn-sm btn-ghost flex-1 gap-1" onClick={onEdit}>
+                <Pencil size={14} /> Modifica
               </button>
             )}
             {onDelete && (
-              <button className="btn btn-sm btn-ghost btn-error flex-1" onClick={onDelete}>
-                🗑️ Elimina
+              <button className="btn btn-sm btn-ghost btn-error flex-1 gap-1" onClick={onDelete}>
+                <Trash2 size={14} /> Elimina
               </button>
             )}
           </div>

@@ -1,4 +1,12 @@
 import { useEffect, useRef } from 'react';
+import { Trash2, AlertTriangle, Zap, AlertCircle } from 'lucide-react';
+
+const ICON_MAP = {
+  '🗑️': <Trash2 size={28} />,
+  '⚠️': <AlertTriangle size={28} />,
+  '💥': <Zap size={28} />,
+  '❗': <AlertCircle size={28} />,
+};
 
 export function ConfirmModal({
   isOpen,
@@ -50,7 +58,7 @@ export function ConfirmModal({
       <div className="modal-box">
         {/* Header con icona */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="text-3xl">{icon}</div>
+          <div className="text-primary">{ICON_MAP[icon] ?? <AlertTriangle size={28} />}</div>
           <h3 className="font-bold text-lg">{title}</h3>
         </div>
 

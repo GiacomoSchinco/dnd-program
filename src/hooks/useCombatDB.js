@@ -373,12 +373,6 @@ export function useCombatDB() {
     }
 
     const combatId = await db.combats.add(combatRecord)
-    await db.activeCombat.put({
-      id: 'current',
-      combatId,
-      campaignId,
-      ...combatRecord,
-    })
     return combatId
   }, [])
 

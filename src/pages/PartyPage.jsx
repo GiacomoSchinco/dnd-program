@@ -6,6 +6,7 @@ import { ConfirmModal } from '../components/custom/ConfirmModal';
 import { CharacterCard } from '../components/custom/CharacterCard';
 import { CharacterFormModal } from '../components/custom/CharacterFormModal';
 import { CampaignFormModal } from '../components/custom/CampaignFormModal';
+import { Users, Plus } from 'lucide-react';
 
 export function PartyPage() {
   const { characters, campaigns, addCharacter, updateCharacter, deleteCharacter, addCampaign } = usePartyDB();
@@ -67,14 +68,14 @@ export function PartyPage() {
       {/* Header con selezione campagna */}
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">👥 Personaggi</h1>
+          <h1 className="text-3xl font-bold flex items-center gap-2"><Users size={28} /> Personaggi</h1>
           <p className="text-base-content/60">
             Gestisci i personaggi della campagna attiva (selezione dalla topbar)
           </p>
         </div>
         <div className="flex gap-2">
-          <button className="btn btn-primary" onClick={openCreate}>
-            ➕ Nuovo Personaggio
+          <button className="btn btn-primary gap-1" onClick={openCreate}>
+            <Plus size={16} /> Nuovo Personaggio
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Swords } from 'lucide-react';
 import { useCombatDB } from '../hooks/useCombatDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { CombatTracker } from '../components/custom/CombatTracker';
@@ -26,6 +27,7 @@ export function CombatPage() {
   const { selectedCampaignId } = useCampaignContext();
   const navigate = useNavigate();
 
+
   const currentCampaign = campaigns?.find((c) => c.id === activeCombat?.campaignId);
   const campaignCharacters = (characters ?? []).filter(
     (c) => c.campaignId === activeCombat?.campaignId,
@@ -37,7 +39,7 @@ export function CombatPage() {
       <div className="hero min-h-[60vh]">
         <div className="hero-content text-center">
           <div className="max-w-md">
-            <h1 className="text-5xl font-bold">⚔️ Nessun Combattimento</h1>
+            <h1 className="text-5xl font-bold flex items-center gap-3"><Swords size={40} /> Nessun Combattimento</h1>
             <p className="py-6">Seleziona una campagna e una battaglia per iniziare</p>
             <button className="btn btn-primary btn-lg" onClick={() => navigate('/campaigns')}>
               Scegli Campagna
@@ -56,6 +58,7 @@ export function CombatPage() {
         combatStatus={combatStatus}
         onNextTurn={nextTurn}
         onSortInitiative={sortByInitiative}
+        onStart={() => setCombatStatus(activeCombat.combatId, 'in_progress')}
         onTerminate={() => setCombatStatus(activeCombat.combatId, 'terminated')}
         onSave={saveToHistory}
       />

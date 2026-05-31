@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ParticipantActions } from './ParticipantActions';
+import { Target, Pencil, Heart } from 'lucide-react';
 
 export function ParticipantList({
   participants,
@@ -107,8 +108,8 @@ export function ParticipantList({
                       disabled={isTerminated}
                       title="Modifica iniziativa"
                     >
-                      <span>🎯 Init {participant.initiative || 0}</span>
-                      {!isTerminated && <span className="text-xs">✏️</span>}
+                      <span className="flex items-center gap-1"><Target size={12} /> Init {participant.initiative || 0}</span>
+                      {!isTerminated && <Pencil size={10} />}
                     </button>
                   )}
                   
@@ -122,7 +123,7 @@ export function ParticipantList({
               {/* HP e Barra */}
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span>❤️ HP</span>
+                  <span className="flex items-center gap-1"><Heart size={12} /> HP</span>
                   <span className="font-bold">
                     {currentHp} / {maxHp}
                   </span>

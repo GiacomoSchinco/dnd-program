@@ -3,6 +3,7 @@ import { db } from '../../db/database';
 import { seedMonsters, seedSpells } from '../../db/seedData';
 import { ConfirmModal } from './ConfirmModal';
 import { toast } from 'sonner';
+import { Trash2 } from 'lucide-react';
 
 export function ResetButton({ collapsed = false }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,7 +46,7 @@ export function ResetButton({ collapsed = false }) {
         className={`btn btn-error btn-sm ${collapsed ? 'btn-square w-10 h-10' : ''}`}
         title="Reset completo"
       >
-        {collapsed ? '🗑️' : '🗑️ Reset Completo'}
+        {collapsed ? <Trash2 size={16} /> : <><Trash2 size={16} /> Reset Completo</>}
       </button>
       <ConfirmModal
         isOpen={isOpen}

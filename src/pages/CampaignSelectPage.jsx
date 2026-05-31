@@ -6,6 +6,7 @@ import { useCampaignContext } from '../context/CampaignContext';
 import DataTable from '../components/custom/DataTable';
 import { toast } from 'sonner';
 import { ConfirmModal } from '../components/custom/ConfirmModal';
+import { Swords, Plus, Trash2 } from 'lucide-react';
 
 export function CampaignSelectPage() {
   const navigate = useNavigate();
@@ -14,9 +15,6 @@ export function CampaignSelectPage() {
   const { campaigns, addCampaign } = usePartyDB();
   const { combats, createCombatForCampaign, loadCombat, deleteFromHistory } = useCombatDB();
   const { selectedCampaignId, setSelectedCampaignId } = useCampaignContext();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newCampaignName, setNewCampaignName] = useState('');
-  const [newCampaignDesc, setNewCampaignDesc] = useState('');
 
   const activeCampaign = campaigns?.find((campaign) => campaign.id === selectedCampaignId) || null;
   const selectedCampaignCombats = (combats ?? []).filter(
@@ -28,7 +26,8 @@ export function CampaignSelectPage() {
       toast.error('Seleziona prima una campagna dalla topbar');
       return;
     }
-    await createCombatForCampaign(selectedCampaignId, 'Nuova Battaglia');
+    const combatId = await createCombatForCampaign(selectedCampaignId, 'Nuova Battaglia');
+    await loadCombat(combatId);
     navigate('/combat');
   };
 
@@ -51,34 +50,14 @@ export function CampaignSelectPage() {
     });
   };
 
-  const handleCreateCampaign = async () => {
-    if (!newCampaignName.trim()) {
-      toast.error('Inserisci un nome');
-      return;
-    }
-    const campaignId = await addCampaign({
-      name: newCampaignName,
-      description: newCampaignDesc,
-      createdAt: new Date().toISOString()
-    });
-    setSelectedCampaignId(campaignId);
-    toast.success(`Campagna "${newCampaignName}" creata!`);
-    setIsModalOpen(false);
-    setNewCampaignName('');
-    setNewCampaignDesc('');
-    navigate('/campaigns');
-  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">⚔️ Hub Combattimento</h1>
+          <h1 className="text-3xl font-bold flex items-center gap-2"><Swords size={28} /> Hub Combattimento</h1>
           <p className="text-base-content/60">La campagna attiva si seleziona dalla topbar globale</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-          ➕ Nuova Campagna
-        </button>
       </div>
 
       {campaigns?.length === 0 ? (
@@ -114,8 +93,8 @@ export function CampaignSelectPage() {
                   )}
                 </div>
 
-                <button className="btn btn-primary" onClick={handleNewBattle} disabled={!activeCampaign}>
-                  ➕ Nuova Battaglia
+                <button className="btn btn-primary gap-1" onClick={handleNewBattle} disabled={!activeCampaign}>
+                  <Plus size={16} /> Nuova Battaglia
                 </button>
               </div>
             </div>
@@ -149,19 +128,19 @@ export function CampaignSelectPage() {
                 actions: (_, row) => (
                   <div className="flex gap-2 justify-end">
                     <button
-                      className="btn btn-xs btn-primary"
+                      className="btn btn-xs btn-primary gap-1"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleLoadBattle(row.id);
                       }}
                     >
-                      ⚔️ Riprendi
+                      <Swords size={12} /> Riprendi
                     </button>
                     <button
-                      className="btn btn-xs btn-error"
+                      className="btn btn-xs btn-error gap-1"
                       onClick={(e) => handleDeleteBattle(row.id, e)}
                     >
-                      🗑️ Elimina
+                      <Trash2 size={12} /> Elimina
                     </button>
                   </div>
                 ),
@@ -175,40 +154,6 @@ export function CampaignSelectPage() {
         </div>
       )}
 
-      {/* Modal Nuova Campagna */}
-      {isModalOpen && (
-        <dialog className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">Nuova Campagna</h3>
-            <div className="space-y-4 mt-4">
-              <div className="form-control">
-                <label className="label">Nome Campagna</label>
-                <input
-                  type="text"
-                  className="input input-bordered"
-                  value={newCampaignName}
-                  onChange={(e) => setNewCampaignName(e.target.value)}
-                  placeholder="es. La Miniera Perduta"
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">Descrizione (opzionale)</label>
-                <textarea
-                  className="textarea textarea-bordered"
-                  rows="3"
-                  value={newCampaignDesc}
-                  onChange={(e) => setNewCampaignDesc(e.target.value)}
-                  placeholder="Descrivi la tua avventura..."
-                />
-              </div>
-              <div className="modal-action">
-                <button className="btn" onClick={() => setIsModalOpen(false)}>Annulla</button>
-                <button className="btn btn-primary" onClick={handleCreateCampaign}>Crea</button>
-              </div>
-            </div>
-          </div>
-        </dialog>
-      )}
       <ConfirmModal
         isOpen={confirmState.isOpen}
         onClose={closeConfirm}

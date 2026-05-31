@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ConfirmModal } from './ConfirmModal';
+import { Dices, Pencil, Trash2 } from 'lucide-react';
 
 function rollDamageFormula(formula) {
   const match = formula.match(/(\d*)d(\d+)(?:\+(\d+))?/);
@@ -71,21 +72,21 @@ export function ParticipantActions({ participant, applyDamage, heal, removeParti
         <button className="btn btn-success btn-sm" onClick={() => heal(participant.id, 10)}>+10</button>
 
         {participant.damage && (
-          <button className="btn btn-warning btn-sm" onClick={handleRollDamage}>
-            🎲 {participant.damage}
+          <button className="btn btn-warning btn-sm gap-1" onClick={handleRollDamage}>
+            <Dices size={14} /> {participant.damage}
           </button>
         )}
 
-        <button
-          className="btn btn-outline btn-sm"
+          <button
+          className="btn btn-outline btn-sm gap-1"
           onClick={() => setShowCustom((v) => !v)}
           title="Danno/cura personalizzato"
         >
-          ✏️ Custom
+          <Pencil size={14} /> Custom
         </button>
 
         <button className="btn btn-ghost btn-sm ml-auto" onClick={handleRemove}>
-          🗑️
+          <Trash2 size={16} />
         </button>
       </div>
 

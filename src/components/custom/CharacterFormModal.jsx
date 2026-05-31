@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CharacterClasses, CharacterRaces } from '../../db/database';
+import { FormModal, Field, FieldRow } from './FormModal';
 
 const EMPTY = { name: '', class: '', level: 1, race: '', hp: 10, ac: 10 };
 
@@ -10,114 +11,64 @@ export function CharacterFormModal({ isOpen, editingChar, onClose, onSubmit }) {
     if (isOpen) setFormData(editingChar ?? EMPTY);
   }, [isOpen, editingChar]);
 
-  if (!isOpen) return null;
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-
   const set = (field) => (e) =>
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
 
   const setNum = (field, fallback = 1) => (e) =>
     setFormData((prev) => ({ ...prev, [field]: parseInt(e.target.value) || fallback }));
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
   return (
-    <dialog className="modal modal-open">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg">
-          {editingChar ? 'Modifica Personaggio' : 'Nuovo Personaggio'}
-        </h3>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="form-control">
-            <label className="label">Nome</label>
-            <input
-              type="text"
-              className="input input-bordered"
-              value={formData.name}
-              onChange={set('name')}
-              required
-              autoFocus
-            />
-          </div>
+    <FormModal
+      isOpen={isOpen}
+      title={editingChar ? 'Modifica Personaggio' : 'Nuovo Personaggio'}
+      confirmText={editingChar ? 'Aggiorna' : 'Crea'}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+    >
+      <Field label="Nome" required>
+        <input type="text" className="input input-bordered w-full"
+          value={formData.name} onChange={set('name')} required autoFocus />
+      </Field>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">Classe</label>
-              <select
-                className="select select-bordered"
-                value={formData.class}
-                onChange={set('class')}
-                required
-              >
-                <option value="">Seleziona</option>
-                {Object.values(CharacterClasses).map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-control">
-              <label className="label">Livello</label>
-              <input
-                type="number"
-                className="input input-bordered"
-                value={formData.level}
-                onChange={setNum('level')}
-                min="1"
-                max="20"
-              />
-            </div>
-          </div>
+      <FieldRow>
+        <Field label="Classe" required>
+          <select className="select select-bordered w-full" value={formData.class} onChange={set('class')} required>
+            <option value="">Seleziona...</option>
+            {Object.values(CharacterClasses).map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Livello">
+          <input type="number" min="1" max="20" className="input input-bordered w-full"
+            value={formData.level} onChange={setNum('level')} />
+        </Field>
+      </FieldRow>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">Razza</label>
-              <select
-                className="select select-bordered"
-                value={formData.race}
-                onChange={set('race')}
-              >
-                <option value="">Seleziona razza...</option>
-                {CharacterRaces.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-control">
-              <label className="label">CA</label>
-              <input
-                type="number"
-                className="input input-bordered"
-                value={formData.ac}
-                onChange={setNum('ac')}
-                min="1"
-              />
-            </div>
-          </div>
+      <FieldRow>
+        <Field label="Razza">
+          <select className="select select-bordered w-full" value={formData.race} onChange={set('race')}>
+            <option value="">Seleziona razza...</option>
+            {CharacterRaces.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="CA">
+          <input type="number" min="1" className="input input-bordered w-full"
+            value={formData.ac} onChange={setNum('ac')} />
+        </Field>
+      </FieldRow>
 
-          <div className="form-control">
-            <label className="label">HP Massimi</label>
-            <input
-              type="number"
-              className="input input-bordered"
-              value={formData.hp}
-              onChange={setNum('hp')}
-              min="1"
-            />
-          </div>
-
-          <div className="modal-action">
-            <button type="button" className="btn" onClick={onClose}>
-              Annulla
-            </button>
-            <button type="submit" className="btn btn-primary">
-              {editingChar ? 'Aggiorna' : 'Crea'}
-            </button>
-          </div>
-        </form>
-      </div>
-      <div className="modal-backdrop" onClick={onClose} />
-    </dialog>
+      <Field label="HP Massimi">
+        <input type="number" min="1" className="input input-bordered w-full"
+          value={formData.hp} onChange={setNum('hp')} />
+      </Field>
+    </FormModal>
   );
 }

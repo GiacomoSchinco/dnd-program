@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { FormModal, Field, FieldRow } from './FormModal';
 
-const EMPTY = { name: '', hp: 10, ac: 10, damage: '1d6', cr: '1/4', type: 'humanoid' };
+const EMPTY = { name: '', hp: 10, ac: 10, damage: '1d6', cr: '1/4', type: 'humanoid', description: '' };
 
 export function MonsterFormModal({ isOpen, editingMonster, onClose, onSubmit }) {
   const [formData, setFormData] = useState(EMPTY);
@@ -9,107 +10,76 @@ export function MonsterFormModal({ isOpen, editingMonster, onClose, onSubmit }) 
     if (isOpen) setFormData(editingMonster ?? EMPTY);
   }, [isOpen, editingMonster]);
 
-  if (!isOpen) return null;
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-
   const set = (field) => (e) =>
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
 
   const setNum = (field, fallback = 1) => (e) =>
     setFormData((prev) => ({ ...prev, [field]: parseInt(e.target.value) || fallback }));
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
   return (
-    <dialog className="modal modal-open">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg">
-          {editingMonster ? 'Modifica Mostro' : 'Nuovo Mostro'}
-        </h3>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="form-control">
-            <label className="label">Nome</label>
-            <input
-              type="text"
-              className="input input-bordered"
-              value={formData.name}
-              onChange={set('name')}
-              required
-              autoFocus
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">HP</label>
-              <input
-                type="number"
-                min="1"
-                className="input input-bordered"
-                value={formData.hp}
-                onChange={setNum('hp')}
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">CA</label>
-              <input
-                type="number"
-                min="1"
-                className="input input-bordered"
-                value={formData.ac}
-                onChange={setNum('ac')}
-              />
-            </div>
-          </div>
-          <div className="form-control">
-            <label className="label">Dado Danno (es. 2d6+3)</label>
-            <input
-              type="text"
-              className="input input-bordered"
-              value={formData.damage}
-              onChange={set('damage')}
-              placeholder="2d6+3"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">CR (Sfida)</label>
-              <input
-                type="text"
-                className="input input-bordered"
-                value={formData.cr}
-                onChange={set('cr')}
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">Tipo</label>
-              <select
-                className="select select-bordered"
-                value={formData.type}
-                onChange={set('type')}
-              >
-                <option value="humanoid">Umanoide</option>
-                <option value="beast">Bestia</option>
-                <option value="undead">Non Morto</option>
-                <option value="dragon">Drago</option>
-                <option value="giant">Gigante</option>
-                <option value="goblinoid">Goblinide</option>
-                <option value="lycanthrope">Lupo Mannaro</option>
-              </select>
-            </div>
-          </div>
-          <div className="modal-action">
-            <button type="button" className="btn" onClick={onClose}>
-              Annulla
-            </button>
-            <button type="submit" className="btn btn-primary">
-              {editingMonster ? 'Aggiorna' : 'Crea'}
-            </button>
-          </div>
-        </form>
-      </div>
-      <div className="modal-backdrop" onClick={onClose} />
-    </dialog>
+    <FormModal
+      isOpen={isOpen}
+      title={editingMonster ? 'Modifica Mostro' : 'Nuovo Mostro'}
+      confirmText={editingMonster ? 'Aggiorna' : 'Crea'}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+    >
+      <Field label="Nome" required>
+        <input
+          type="text"
+          className="input input-bordered w-full"
+          value={formData.name}
+          onChange={set('name')}
+          required
+          autoFocus
+        />
+      </Field>
+
+      <FieldRow>
+        <Field label="HP">
+          <input type="number" min="1" className="input input-bordered w-full"
+            value={formData.hp} onChange={setNum('hp')} />
+        </Field>
+        <Field label="CA">
+          <input type="number" min="1" className="input input-bordered w-full"
+            value={formData.ac} onChange={setNum('ac')} />
+        </Field>
+      </FieldRow>
+
+      <Field label="Dado Danno" hint="es. 2d6+3">
+        <input type="text" className="input input-bordered w-full"
+          value={formData.damage} onChange={set('damage')} placeholder="2d6+3" />
+      </Field>
+
+      <FieldRow>
+        <Field label="CR (Sfida)">
+          <input type="text" className="input input-bordered w-full"
+            value={formData.cr} onChange={set('cr')} />
+        </Field>
+        <Field label="Tipo">
+          <select className="select select-bordered w-full" value={formData.type} onChange={set('type')}>
+            <option value="humanoid">Umanoide</option>
+            <option value="beast">Bestia</option>
+            <option value="undead">Non Morto</option>
+            <option value="dragon">Drago</option>
+            <option value="giant">Gigante</option>
+            <option value="goblinoid">Goblinide</option>
+            <option value="lycanthrope">Licantropo</option>
+          </select>
+        </Field>
+      </FieldRow>
+
+      <Field label="Descrizione (opzionale)">
+        <textarea className="textarea textarea-bordered w-full" rows="3"
+          value={formData.description}
+          onChange={set('description')}
+          placeholder="Lore, tattiche, note sul mostro..." />
+      </Field>
+    </FormModal>
   );
 }

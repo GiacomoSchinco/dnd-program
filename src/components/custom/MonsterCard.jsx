@@ -1,36 +1,40 @@
+import { Heart, Shield, Dices, User, Skull, Flame, Leaf, Mountain, Swords, Moon } from 'lucide-react';
+import { LibraryCard } from './LibraryCard';
+
+const TYPE_META = {
+  humanoid:    { icon: User,     color: 'text-base-content',   label: 'Umanoide' },
+  beast:       { icon: Leaf,     color: 'text-success',         label: 'Bestia' },
+  undead:      { icon: Skull,    color: 'text-neutral-content', label: 'Non Morto' },
+  dragon:      { icon: Flame,    color: 'text-error',           label: 'Drago' },
+  giant:       { icon: Mountain, color: 'text-warning',         label: 'Gigante' },
+  goblinoid:   { icon: Swords,   color: 'text-accent',          label: 'Goblinide' },
+  lycanthrope: { icon: Moon,     color: 'text-secondary',       label: 'Licantropo' },
+};
+
+export function getMonsterTypeMeta(type) {
+  return TYPE_META[type] ?? { icon: User, color: 'text-base-content', label: type ?? '—' };
+}
+
 export function MonsterCard({ monster, onEdit, onDelete }) {
+  const meta = getMonsterTypeMeta(monster.type);
+  const Icon = meta.icon;
+
   return (
-    <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-      <div className="card-body p-4">
-        <div className="flex justify-between items-start">
-          <h3 className="card-title text-lg">{monster.name}</h3>
-          <div className="dropdown dropdown-end">
-            <button tabIndex={0} className="btn btn-ghost btn-xs">⋮</button>
-            <ul tabIndex={0} className="dropdown-content menu z-50 p-2 shadow bg-base-200 rounded-box w-32">
-              <li><button onClick={onEdit}>✏️ Modifica</button></li>
-              <li><button onClick={onDelete}>🗑️ Elimina</button></li>
-            </ul>
-          </div>
-        </div>
-        <div className="space-y-1 text-sm">
-          <div className="flex justify-between">
-            <span className="opacity-70">HP:</span>
-            <span className="font-semibold">{monster.hp}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="opacity-70">CA:</span>
-            <span className="font-semibold">{monster.ac}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="opacity-70">Danno:</span>
-            <span className="font-semibold">{monster.damage}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="opacity-70">CR:</span>
-            <span className="badge badge-xs badge-primary">{monster.cr}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <LibraryCard
+      icon={<Icon size={28} className={meta.color} />}
+      title={monster.name}
+      badges={[
+        { label: `CR ${monster.cr}`, className: 'badge-primary' },
+        { label: meta.label, className: `${meta.color} border border-current/30` },
+      ]}
+      stats={[
+        { icon: <Heart size={12} />, label: 'HP', value: monster.hp },
+        { icon: <Shield size={12} />, label: 'CA', value: monster.ac },
+        { icon: <Dices size={12} />, label: 'Danno', value: monster.damage, mono: true },
+      ]}
+      description={monster.description}
+      onEdit={onEdit}
+      onDelete={onDelete}
+    />
   );
 }

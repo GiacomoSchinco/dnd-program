@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { Download, Upload } from 'lucide-react';
 import { parseCSV } from '../../utils/csvIO';
 
 /**
@@ -27,14 +28,14 @@ export function CsvToolbar({ onExport, onImport }) {
   return (
     <div className="flex gap-2">
       <button className="btn btn-outline btn-sm gap-1" onClick={onExport} title="Scarica CSV">
-        ⬇️ Esporta CSV
+        <Download size={14} /> Esporta CSV
       </button>
       <button
         className="btn btn-outline btn-sm gap-1"
         onClick={() => fileRef.current.click()}
         title="Importa da file CSV"
       >
-        ⬆️ Importa CSV
+        <Upload size={14} /> Importa CSV
       </button>
       <input
         ref={fileRef}
