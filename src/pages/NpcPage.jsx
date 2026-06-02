@@ -1,30 +1,27 @@
 import { useState } from 'react';
-import { useCombatDB } from '../hooks/useCombatDB';
+import { useNpcLibraryDB } from '../hooks/useNpcLibraryDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
-import { ConfirmModal } from '../components/custom/ConfirmModal';
+import { DeleteConfirmModal } from '../components/custom/DeleteConfirmModal';
+import { EmptyState } from '../components/custom/EmptyState';
 import { CsvToolbar } from '../components/custom/CsvToolbar';
 import { exportCSV, rowToNpc, NPC_COLUMNS } from '../utils/csvIO';
-import { FormModal, Field, FieldRow } from '../components/custom/FormModal';
+import { NpcFormModal } from '../components/custom/NpcFormModal';
 import { NpcCard } from '../components/custom/NpcCard';
 import { PageHeader } from '../components/custom/PageHeader';
 import { SearchInput } from '../components/custom/SearchInput';
 import { User, Plus } from 'lucide-react';
 
-const emptyForm = { name: '', hp: 10, ac: 10, description: '' };
-
 export function NpcPage() {
-  const { npcLibrary, addNpc, updateNpc, deleteNpc, importNpcs } = useCombatDB();
+  const { npcLibrary, addNpc, updateNpc, deleteNpc, importNpcs } = useNpcLibraryDB();
+  const { confirmState, confirm, closeConfirm } = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNpc, setEditingNpc] = useState(null);
-  const [formData, setFormData] = useState(emptyForm);
-  const { confirmState, confirm, closeConfirm } = useConfirm();
   const [search, setSearch] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (editingNpc) {
-      await updateNpc(editingNpc.id, formData);
+  const handleSubmit = async (formData, editingItem) => {
+    if (editingItem) {
+      await updateNpc(editingItem.id, formData);
       toast.success(`${formData.name} aggiornato!`);
     } else {
       await addNpc(formData);
@@ -32,14 +29,9 @@ export function NpcPage() {
     }
     setIsModalOpen(false);
     setEditingNpc(null);
-    setFormData(emptyForm);
   };
 
-  const handleEdit = (npc) => {
-    setEditingNpc(npc);
-    setFormData({ name: npc.name, hp: npc.hp, ac: npc.ac, description: npc.description || '' });
-    setIsModalOpen(true);
-  };
+  const handleEdit = (npc) => { setEditingNpc(npc); setIsModalOpen(true); };
 
   const handleExport = () => {
     if (!npcLibrary?.length) { toast.info('Nessun NPC da esportare'); return; }
@@ -77,7 +69,7 @@ export function NpcPage() {
         subtitle="Gestisci i personaggi non giocanti da aggiungere ai combattimenti"
         actions={<>
           <CsvToolbar onExport={handleExport} onImport={handleImport} />
-          <button className="btn btn-primary gap-1" onClick={() => { setEditingNpc(null); setFormData(emptyForm); setIsModalOpen(true); }}>
+          <button className="btn btn-primary gap-1" onClick={() => { setEditingNpc(null); setIsModalOpen(true); }}>
             <Plus size={16} /> Nuovo NPC
           </button>
         </>}
@@ -101,58 +93,21 @@ export function NpcPage() {
           />
         ))}
         {filtered.length === 0 && (
-          <div className="col-span-full">
-            <div className="alert">
-              <span>{search ? 'Nessun NPC trovato.' : 'Nessun NPC in libreria. Creane uno!'}</span>
-            </div>
-          </div>
+          <EmptyState
+            colSpan
+            message={search ? 'Nessun NPC trovato.' : 'Nessun NPC in libreria. Creane uno!'}
+          />
         )}
       </div>
 
-      {/* Modal Crea/Modifica */}
-      <FormModal
+      <NpcFormModal
         isOpen={isModalOpen}
-        title={editingNpc ? 'Modifica NPC' : 'Nuovo NPC'}
-        confirmText={editingNpc ? 'Aggiorna' : 'Crea'}
-        onClose={() => setIsModalOpen(false)}
+        editingNpc={editingNpc}
+        onClose={() => { setIsModalOpen(false); setEditingNpc(null); }}
         onSubmit={handleSubmit}
-      >
-        <Field label="Nome" required>
-          <input type="text" className="input input-bordered w-full"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required autoFocus />
-        </Field>
-        <FieldRow>
-          <Field label="HP">
-            <input type="number" min="1" className="input input-bordered w-full"
-              value={formData.hp}
-              onChange={(e) => setFormData({ ...formData, hp: parseInt(e.target.value) || 1 })} />
-          </Field>
-          <Field label="CA">
-            <input type="number" min="1" className="input input-bordered w-full"
-              value={formData.ac}
-              onChange={(e) => setFormData({ ...formData, ac: parseInt(e.target.value) || 1 })} />
-          </Field>
-        </FieldRow>
-        <Field label="Descrizione (opzionale)">
-          <textarea className="textarea textarea-bordered w-full" rows="2"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Ruolo, note, background..." />
-        </Field>
-      </FormModal>
-
-      <ConfirmModal
-        isOpen={confirmState.isOpen}
-        onClose={closeConfirm}
-        onConfirm={confirmState.onConfirm}
-        title={confirmState.title}
-        message={confirmState.message}
-        icon={confirmState.icon}
-        confirmText="Elimina"
-        confirmVariant="error"
       />
+
+      <DeleteConfirmModal confirmState={confirmState} onClose={closeConfirm} />
     </div>
   );
 }

@@ -3,7 +3,8 @@ import { usePartyDB } from '../hooks/usePartyDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
-import { ConfirmModal } from '../components/custom/ConfirmModal';
+import { DeleteConfirmModal } from '../components/custom/DeleteConfirmModal';
+import { EmptyState } from '../components/custom/EmptyState';
 import { CharacterCard } from '../components/custom/CharacterCard';
 import { CharacterFormModal } from '../components/custom/CharacterFormModal';
 import { CampaignFormModal } from '../components/custom/CampaignFormModal';
@@ -103,13 +104,14 @@ export function PartyPage() {
       </div>
 
       {filteredCharacters?.length === 0 && (
-        <div className="alert alert-info">
-          <span>
-            {activeCampaign
+        <EmptyState
+          message={
+            activeCampaign
               ? 'Nessun personaggio in questa campagna. Creane uno nuovo!'
-              : 'Nessuna campagna attiva. Crea una campagna per iniziare!'}
-          </span>
-        </div>
+              : 'Nessuna campagna attiva. Crea una campagna per iniziare!'
+          }
+          variant="info"
+        />
       )}
 
       <CharacterFormModal
@@ -125,16 +127,7 @@ export function PartyPage() {
         onSubmit={handleCampaignSubmit}
       />
 
-      <ConfirmModal
-        isOpen={confirmState.isOpen}
-        onClose={closeConfirm}
-        onConfirm={confirmState.onConfirm}
-        title={confirmState.title}
-        message={confirmState.message}
-        icon={confirmState.icon}
-        confirmText="Rimuovi"
-        confirmVariant="error"
-      />
+      <DeleteConfirmModal confirmState={confirmState} onClose={closeConfirm} confirmText="Rimuovi" />
     </div>
   );
 }

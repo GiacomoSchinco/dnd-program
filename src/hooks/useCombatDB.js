@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useCallback } from 'react'
 import { db } from '../db/database'
 import { seedMonsters } from '../db/seedData'
+import { toast } from 'sonner'
 
 function normalizeCombatStatus(status) {
   if (status === 'completed') return 'terminated'
@@ -150,50 +151,65 @@ export function useCombatDB() {
   }, [])
 
   const applyDamage = useCallback(async (participantId, amount) => {
-    const current = await db.activeCombat.get('current')
-    if (!current) return
-    const target = current.participants.find((p) => p.id === participantId)
-    if (!target) return
-    const currentHp = Number(target.currentHp ?? target.hp ?? 0)
-    const newHp = Math.max(0, currentHp - Number(amount))
-    await syncCharacterHpFromParticipant(target, newHp)
-    const nextState = {
-      ...current,
-      participants: current.participants.map((p) =>
-        p.id === participantId ? { ...p, currentHp: newHp } : p,
-      ),
+    try {
+      const current = await db.activeCombat.get('current')
+      if (!current) return
+      const target = current.participants.find((p) => p.id === participantId)
+      if (!target) return
+      const currentHp = Number(target.currentHp ?? target.hp ?? 0)
+      const newHp = Math.max(0, currentHp - Number(amount))
+      await syncCharacterHpFromParticipant(target, newHp)
+      const nextState = {
+        ...current,
+        participants: current.participants.map((p) =>
+          p.id === participantId ? { ...p, currentHp: newHp } : p,
+        ),
+      }
+      await db.activeCombat.put(nextState)
+      await persistLinkedCombat(nextState)
+    } catch (err) {
+      console.error('[useCombatDB] applyDamage', err)
+      toast.error('Errore nell\'applicazione del danno')
     }
-    await db.activeCombat.put(nextState)
-    await persistLinkedCombat(nextState)
   }, [persistLinkedCombat, syncCharacterHpFromParticipant])
 
   const heal = useCallback(async (participantId, amount) => {
-    const current = await db.activeCombat.get('current')
-    if (!current) return
-    const target = current.participants.find((p) => p.id === participantId)
-    if (!target) return
-    const currentHp = Number(target.currentHp ?? target.hp ?? 0)
-    const maxHp = Number(target.maxHp ?? target.hp ?? currentHp)
-    const newHp = Math.min(maxHp, currentHp + Number(amount))
-    await syncCharacterHpFromParticipant(target, newHp)
-    const nextState = {
-      ...current,
-      participants: current.participants.map((p) =>
-        p.id === participantId ? { ...p, currentHp: newHp } : p,
-      ),
+    try {
+      const current = await db.activeCombat.get('current')
+      if (!current) return
+      const target = current.participants.find((p) => p.id === participantId)
+      if (!target) return
+      const currentHp = Number(target.currentHp ?? target.hp ?? 0)
+      const maxHp = Number(target.maxHp ?? target.hp ?? currentHp)
+      const newHp = Math.min(maxHp, currentHp + Number(amount))
+      await syncCharacterHpFromParticipant(target, newHp)
+      const nextState = {
+        ...current,
+        participants: current.participants.map((p) =>
+          p.id === participantId ? { ...p, currentHp: newHp } : p,
+        ),
+      }
+      await db.activeCombat.put(nextState)
+      await persistLinkedCombat(nextState)
+    } catch (err) {
+      console.error('[useCombatDB] heal', err)
+      toast.error('Errore nella guarigione')
     }
-    await db.activeCombat.put(nextState)
-    await persistLinkedCombat(nextState)
   }, [persistLinkedCombat, syncCharacterHpFromParticipant])
 
   const nextTurn = useCallback(async () => {
-    const current = await db.activeCombat.get('current')
-    if (!current || !current.participants.length) return
-    const nextIndex = (current.currentTurnIndex + 1) % current.participants.length
-    const newRound = nextIndex === 0 ? (current.round ?? 1) + 1 : current.round ?? 1
-    const nextState = { ...current, currentTurnIndex: nextIndex, round: newRound }
-    await db.activeCombat.put(nextState)
-    await persistLinkedCombat(nextState)
+    try {
+      const current = await db.activeCombat.get('current')
+      if (!current || !current.participants.length) return
+      const nextIndex = (current.currentTurnIndex + 1) % current.participants.length
+      const newRound = nextIndex === 0 ? (current.round ?? 1) + 1 : current.round ?? 1
+      const nextState = { ...current, currentTurnIndex: nextIndex, round: newRound }
+      await db.activeCombat.put(nextState)
+      await persistLinkedCombat(nextState)
+    } catch (err) {
+      console.error('[useCombatDB] nextTurn', err)
+      toast.error('Errore nel passaggio al turno successivo')
+    }
   }, [persistLinkedCombat])
 
   const sortByInitiative = useCallback(async () => {
@@ -216,72 +232,82 @@ export function useCombatDB() {
   }, [persistLinkedCombat])
 
   const addParticipant = useCallback(async (participant) => {
-    const current = await db.activeCombat.get('current')
-    const currentParticipants = current?.participants ?? []
+    try {
+      const current = await db.activeCombat.get('current')
+      const currentParticipants = current?.participants ?? []
 
-    const participantWithName =
-      participant?.type === 'monster'
-        ? {
-            ...participant,
-            name: getNextMonsterName(participant?.name, currentParticipants),
-          }
-        : participant
+      const participantWithName =
+        participant?.type === 'monster'
+          ? {
+              ...participant,
+              name: getNextMonsterName(participant?.name, currentParticipants),
+            }
+          : participant
 
-    const newParticipant = { id: crypto.randomUUID(), ...participantWithName }
+      const newParticipant = { id: crypto.randomUUID(), ...participantWithName }
 
-    if (!current) {
-      const sortedParticipants = sortParticipantsByInitiative([newParticipant])
-      const nextState = {
-        id: 'current',
-        name: 'Nuovo Combattimento',
-        status: 'prepared',
-        participants: sortedParticipants,
-        currentTurnIndex: 0,
-        round: 1,
+      if (!current) {
+        const sortedParticipants = sortParticipantsByInitiative([newParticipant])
+        const nextState = {
+          id: 'current',
+          name: 'Nuovo Combattimento',
+          status: 'prepared',
+          participants: sortedParticipants,
+          currentTurnIndex: 0,
+          round: 1,
+        }
+        await db.activeCombat.put(nextState)
+        await persistLinkedCombat(nextState)
+      } else {
+        const currentParticipantId = current.participants?.[current.currentTurnIndex]?.id ?? null
+        const sortedParticipants = sortParticipantsByInitiative([
+          ...current.participants,
+          newParticipant,
+        ])
+        const nextTurnIndex = currentParticipantId
+          ? Math.max(
+              0,
+              sortedParticipants.findIndex((participant) => participant.id === currentParticipantId),
+            )
+          : 0
+
+        const nextState = {
+          ...current,
+          participants: sortedParticipants,
+          currentTurnIndex: nextTurnIndex,
+        }
+        await db.activeCombat.put(nextState)
+        await persistLinkedCombat(nextState)
       }
-      await db.activeCombat.put(nextState)
-      await persistLinkedCombat(nextState)
-    } else {
-      const currentParticipantId = current.participants?.[current.currentTurnIndex]?.id ?? null
-      const sortedParticipants = sortParticipantsByInitiative([
-        ...current.participants,
-        newParticipant,
-      ])
-      const nextTurnIndex = currentParticipantId
-        ? Math.max(
-            0,
-            sortedParticipants.findIndex((participant) => participant.id === currentParticipantId),
-          )
-        : 0
-
-      const nextState = {
-        ...current,
-        participants: sortedParticipants,
-        currentTurnIndex: nextTurnIndex,
-      }
-      await db.activeCombat.put(nextState)
-      await persistLinkedCombat(nextState)
+    } catch (err) {
+      console.error('[useCombatDB] addParticipant', err)
+      toast.error('Errore nell\'aggiunta del partecipante')
     }
   }, [persistLinkedCombat])
 
   const removeParticipant = useCallback(async (participantId) => {
-    const current = await db.activeCombat.get('current')
-    if (!current) return
-    const filtered = current.participants.filter((p) => p.id !== participantId)
-    const newIndex = Math.min(
-      current.currentTurnIndex,
-      Math.max(0, filtered.length - 1),
-    )
-    await db.activeCombat.put({
-      ...current,
-      participants: filtered,
-      currentTurnIndex: newIndex,
-    })
-    await persistLinkedCombat({
-      ...current,
-      participants: filtered,
-      currentTurnIndex: newIndex,
-    })
+    try {
+      const current = await db.activeCombat.get('current')
+      if (!current) return
+      const filtered = current.participants.filter((p) => p.id !== participantId)
+      const newIndex = Math.min(
+        current.currentTurnIndex,
+        Math.max(0, filtered.length - 1),
+      )
+      await db.activeCombat.put({
+        ...current,
+        participants: filtered,
+        currentTurnIndex: newIndex,
+      })
+      await persistLinkedCombat({
+        ...current,
+        participants: filtered,
+        currentTurnIndex: newIndex,
+      })
+    } catch (err) {
+      console.error('[useCombatDB] removeParticipant', err)
+      toast.error('Errore nella rimozione del partecipante')
+    }
   }, [persistLinkedCombat])
 
   const updateParticipantInitiative = useCallback(
@@ -316,11 +342,24 @@ export function useCombatDB() {
 
   // ── History actions ────────────────────────────────────────────────────────
   const saveToHistory = useCallback(async (name) => {
-    const current = await db.activeCombat.get('current')
-    if (!current) return
+    try {
+      const current = await db.activeCombat.get('current')
+      if (!current) return
 
-    if (current.combatId) {
-      await db.combats.update(current.combatId, {
+      if (current.combatId) {
+        await db.combats.update(current.combatId, {
+          name: name || current.name || 'Combattimento',
+          date: new Date().toISOString(),
+          status: normalizeCombatStatus(current.status),
+          participants: current.participants,
+          currentTurnIndex: current.currentTurnIndex,
+          round: current.round ?? 1,
+          campaignId: current.campaignId ?? null,
+        })
+        return
+      }
+
+      await db.combats.add({
         name: name || current.name || 'Combattimento',
         date: new Date().toISOString(),
         status: normalizeCombatStatus(current.status),
@@ -329,51 +368,54 @@ export function useCombatDB() {
         round: current.round ?? 1,
         campaignId: current.campaignId ?? null,
       })
-      return
+    } catch (err) {
+      console.error('[useCombatDB] saveToHistory', err)
+      toast.error('Errore nel salvataggio della battaglia')
     }
-
-    await db.combats.add({
-      name: name || current.name || 'Combattimento',
-      date: new Date().toISOString(),
-      status: normalizeCombatStatus(current.status),
-      participants: current.participants,
-      currentTurnIndex: current.currentTurnIndex,
-      round: current.round ?? 1,
-      campaignId: current.campaignId ?? null,
-    })
   }, [])
 
   const loadFromHistory = useCallback(async (combatId) => {
-    const combat = await db.combats.get(combatId)
-    if (!combat) return
-    const sortedParticipants = sortParticipantsByInitiative(combat.participants ?? [])
-    await db.activeCombat.put({
-      id: 'current',
-      combatId: combat.id,
-      campaignId: combat.campaignId ?? null,
-      name: combat.name,
-      status: normalizeCombatStatus(combat.status),
-      participants: sortedParticipants,
-      currentTurnIndex: 0,
-      round: combat.round ?? 1,
-    })
+    try {
+      const combat = await db.combats.get(combatId)
+      if (!combat) return
+      const sortedParticipants = sortParticipantsByInitiative(combat.participants ?? [])
+      await db.activeCombat.put({
+        id: 'current',
+        combatId: combat.id,
+        campaignId: combat.campaignId ?? null,
+        name: combat.name,
+        status: normalizeCombatStatus(combat.status),
+        participants: sortedParticipants,
+        currentTurnIndex: 0,
+        round: combat.round ?? 1,
+      })
+    } catch (err) {
+      console.error('[useCombatDB] loadFromHistory', err)
+      toast.error('Errore nel caricamento della battaglia')
+    }
   }, [])
 
   const createCombatForCampaign = useCallback(async (campaignId, name) => {
-    if (campaignId == null) return null
+    try {
+      if (campaignId == null) return null
 
-    const combatRecord = {
-      name: name?.trim() || 'Nuova Battaglia',
-      date: new Date().toISOString(),
-      status: 'prepared',
-      campaignId,
-      participants: [],
-      currentTurnIndex: 0,
-      round: 1,
+      const combatRecord = {
+        name: name?.trim() || 'Nuova Battaglia',
+        date: new Date().toISOString(),
+        status: 'prepared',
+        campaignId,
+        participants: [],
+        currentTurnIndex: 0,
+        round: 1,
+      }
+
+      const combatId = await db.combats.add(combatRecord)
+      return combatId
+    } catch (err) {
+      console.error('[useCombatDB] createCombatForCampaign', err)
+      toast.error('Errore nella creazione della battaglia')
+      return null
     }
-
-    const combatId = await db.combats.add(combatRecord)
-    return combatId
   }, [])
 
   const loadCombat = useCallback(async (combatId) => {
@@ -381,25 +423,35 @@ export function useCombatDB() {
   }, [loadFromHistory])
 
   const setCombatStatus = useCallback(async (combatId, status) => {
-    if (combatId == null) return
-    const normalized = normalizeCombatStatus(status)
+    try {
+      if (combatId == null) return
+      const normalized = normalizeCombatStatus(status)
 
-    await db.combats.update(combatId, {
-      status: normalized,
-      date: new Date().toISOString(),
-    })
-
-    const current = await db.activeCombat.get('current')
-    if (current?.combatId === combatId) {
-      await db.activeCombat.put({
-        ...current,
+      await db.combats.update(combatId, {
         status: normalized,
+        date: new Date().toISOString(),
       })
+
+      const current = await db.activeCombat.get('current')
+      if (current?.combatId === combatId) {
+        await db.activeCombat.put({
+          ...current,
+          status: normalized,
+        })
+      }
+    } catch (err) {
+      console.error('[useCombatDB] setCombatStatus', err)
+      toast.error('Errore nel cambiamento di stato')
     }
   }, [])
 
   const deleteFromHistory = useCallback(async (combatId) => {
-    await db.combats.delete(combatId)
+    try {
+      await db.combats.delete(combatId)
+    } catch (err) {
+      console.error('[useCombatDB] deleteFromHistory', err)
+      toast.error('Errore nell\'eliminazione della battaglia')
+    }
   }, [])
 
   const completeCombat = useCallback(async (combatId) => {
@@ -428,36 +480,76 @@ export function useCombatDB() {
 
   // ── Monster library actions ────────────────────────────────────────────────
   const addMonster = useCallback(async (monsterData) => {
-    await db.monsters.add(monsterData)
+    try {
+      await db.monsters.add(monsterData)
+    } catch (err) {
+      console.error('[useCombatDB] addMonster', err)
+      toast.error('Errore nell\'aggiunta del mostro')
+    }
   }, [])
 
   const updateMonster = useCallback(async (id, monsterData) => {
-    await db.monsters.update(id, monsterData)
+    try {
+      await db.monsters.update(id, monsterData)
+    } catch (err) {
+      console.error('[useCombatDB] updateMonster', err)
+      toast.error('Errore nella modifica del mostro')
+    }
   }, [])
 
   const deleteMonster = useCallback(async (id) => {
-    await db.monsters.delete(id)
+    try {
+      await db.monsters.delete(id)
+    } catch (err) {
+      console.error('[useCombatDB] deleteMonster', err)
+      toast.error('Errore nell\'eliminazione del mostro')
+    }
   }, [])
 
   const importMonsters = useCallback(async (monsters) => {
-    await db.monsters.bulkAdd(monsters)
+    try {
+      await db.monsters.bulkAdd(monsters)
+    } catch (err) {
+      console.error('[useCombatDB] importMonsters', err)
+      toast.error('Errore nell\'importazione dei mostri')
+    }
   }, [])
 
   // ── NPC library actions ────────────────────────────────────────────────────
   const addNpc = useCallback(async (npcData) => {
-    await db.npcs.add(npcData)
+    try {
+      await db.npcs.add(npcData)
+    } catch (err) {
+      console.error('[useCombatDB] addNpc', err)
+      toast.error('Errore nell\'aggiunta dell\'NPC')
+    }
   }, [])
 
   const updateNpc = useCallback(async (id, npcData) => {
-    await db.npcs.update(id, npcData)
+    try {
+      await db.npcs.update(id, npcData)
+    } catch (err) {
+      console.error('[useCombatDB] updateNpc', err)
+      toast.error('Errore nella modifica dell\'NPC')
+    }
   }, [])
 
   const deleteNpc = useCallback(async (id) => {
-    await db.npcs.delete(id)
+    try {
+      await db.npcs.delete(id)
+    } catch (err) {
+      console.error('[useCombatDB] deleteNpc', err)
+      toast.error('Errore nell\'eliminazione dell\'NPC')
+    }
   }, [])
 
   const importNpcs = useCallback(async (npcs) => {
-    await db.npcs.bulkAdd(npcs)
+    try {
+      await db.npcs.bulkAdd(npcs)
+    } catch (err) {
+      console.error('[useCombatDB] importNpcs', err)
+      toast.error('Errore nell\'importazione degli NPC')
+    }
   }, [])
 
   return {

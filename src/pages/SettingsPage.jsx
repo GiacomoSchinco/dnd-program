@@ -1,7 +1,8 @@
-import { useRef } from 'react';
+import { useRef } from 'react'; // used by CsvRow
 import { toast } from 'sonner';
 import { useTheme } from '../hooks/useTheme';
-import { useCombatDB } from '../hooks/useCombatDB';
+import { useMonsterLibraryDB } from '../hooks/useMonsterLibraryDB';
+import { useNpcLibraryDB } from '../hooks/useNpcLibraryDB';
 import { useSpellsDB } from '../hooks/useSpellsDB';
 import { ConfirmModal } from '../components/custom/ConfirmModal';
 import { useState } from 'react';
@@ -13,22 +14,6 @@ import {
   MONSTER_COLUMNS, SPELL_COLUMNS, NPC_COLUMNS,
 } from '../utils/csvIO';
 import { Settings2, Palette, FolderOpen, Database, Check, Skull, Sparkles, User, Download, Upload, Trash2 } from 'lucide-react';
-
-// ── CSV helpers ────────────────────────────────────────────────────────────
-
-function useFileInput(onLoad) {
-  const ref = useRef(null);
-  const open = () => ref.current.click();
-  const onChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => onLoad(parseCSV(ev.target.result));
-    reader.readAsText(file, 'utf-8');
-    e.target.value = '';
-  };
-  return { ref, open, onChange };
-}
 
 // ── Section card ──────────────────────────────────────────────────────────
 
@@ -47,7 +32,7 @@ function Section({ icon, title, children }) {
 
 // ── CSV row ────────────────────────────────────────────────────────────────
 
-function CsvRow({ label, count, filename, onExport, onImport }) {
+function CsvRow({ label, count, onExport, onImport }) {
   const fileRef = useRef(null);
   const handleFile = (e) => {
     const file = e.target.files[0];
@@ -81,7 +66,8 @@ function CsvRow({ label, count, filename, onExport, onImport }) {
 
 export function SettingsPage() {
   const { theme, setTheme, themes } = useTheme();
-  const { monsterLibrary, npcLibrary, importMonsters, importNpcs } = useCombatDB();
+  const { monsterLibrary, importMonsters } = useMonsterLibraryDB();
+  const { npcLibrary, importNpcs } = useNpcLibraryDB();
   const { spells, importSpells } = useSpellsDB();
   const [resetOpen, setResetOpen] = useState(false);
 

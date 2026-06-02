@@ -10,6 +10,7 @@ import { MonstersPage } from './pages/MonsterPage';
 import { SpellsPage } from './pages/SpellPage';
 import { NpcPage } from './pages/NpcPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/npcs" element={<NpcPage />} />
         <Route path="/spells" element={<SpellsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   );

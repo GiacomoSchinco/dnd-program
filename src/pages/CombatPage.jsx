@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Swords } from 'lucide-react';
+import { Swords, Trophy } from 'lucide-react';
 import { useCombatDB } from '../hooks/useCombatDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { CombatTracker } from '../components/custom/CombatTracker';
@@ -62,6 +62,26 @@ export function CombatPage() {
         onTerminate={() => setCombatStatus(activeCombat.combatId, 'terminated')}
         onSave={saveToHistory}
       />
+
+      {combatStatus === 'terminated' && (
+        <div className="alert alert-success shadow-lg">
+          <Trophy size={20} />
+          <div>
+            <span className="font-bold">Battaglia conclusa!</span>
+            <span className="ml-2 text-sm opacity-80">Il combattimento è terminato.</span>
+          </div>
+          <button
+            className="btn btn-sm btn-ghost ml-auto"
+            onClick={() =>
+              currentCampaign
+                ? navigate(`/campaign/${currentCampaign.id}/battles`)
+                : navigate('/campaigns')
+            }
+          >
+            Torna alle battaglie
+          </button>
+        </div>
+      )}
 
       {/* Pannello iniziativa flottante */}
       <InitiativePanel

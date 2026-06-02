@@ -4,7 +4,8 @@ import { usePartyDB } from '../../hooks/usePartyDB';
 import { useCampaignContext } from '../../context/CampaignContext';
 import { useConfirm } from '../../hooks/useConfirm';
 import DataTable from './DataTable';
-import { ConfirmModal } from './ConfirmModal';
+import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { FormModal, Field } from './FormModal';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 
 export function CampaignCrudPanel({ title = 'Campagne', compact = false }) {
@@ -23,7 +24,8 @@ export function CampaignCrudPanel({ title = 'Campagne', compact = false }) {
     return [...(campaigns ?? [])].sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
   }, [campaigns]);
 
-  const handleCreate = async () => {
+  const handleCreate = async (e) => {
+    e.preventDefault();
     if (!createForm.name.trim()) {
       toast.error('Inserisci il nome della campagna');
       return;
@@ -50,7 +52,8 @@ export function CampaignCrudPanel({ title = 'Campagne', compact = false }) {
     setIsEditOpen(true);
   };
 
-  const handleEdit = async () => {
+  const handleEdit = async (e) => {
+    e.preventDefault();
     if (!editingCampaign) return;
     if (!editForm.name.trim()) {
       toast.error('Inserisci il nome della campagna');
@@ -146,69 +149,62 @@ export function CampaignCrudPanel({ title = 'Campagne', compact = false }) {
         )}
       </div>
 
-      {isCreateOpen && (
-        <dialog className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">Nuova Campagna</h3>
-            <div className="space-y-3 mt-4">
-              <input
-                className="input input-bordered w-full"
-                placeholder="Nome campagna"
-                value={createForm.name}
-                onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-              />
-              <textarea
-                className="textarea textarea-bordered w-full"
-                placeholder="Descrizione"
-                rows="3"
-                value={createForm.description}
-                onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
-              />
-            </div>
-            <div className="modal-action">
-              <button className="btn" onClick={() => setIsCreateOpen(false)}>Annulla</button>
-              <button className="btn btn-primary" onClick={handleCreate}>Crea</button>
-            </div>
-          </div>
-        </dialog>
-      )}
+      <FormModal
+        isOpen={isCreateOpen}
+        title="Nuova Campagna"
+        confirmText="Crea"
+        onClose={() => { setIsCreateOpen(false); setCreateForm({ name: '', description: '' }); }}
+        onSubmit={handleCreate}
+      >
+        <Field label="Nome" required>
+          <input
+            className="input input-bordered w-full"
+            placeholder="Nome campagna"
+            value={createForm.name}
+            onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+            autoFocus
+            required
+          />
+        </Field>
+        <Field label="Descrizione">
+          <textarea
+            className="textarea textarea-bordered w-full"
+            placeholder="Descrizione"
+            rows="3"
+            value={createForm.description}
+            onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+          />
+        </Field>
+      </FormModal>
 
-      {isEditOpen && (
-        <dialog className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">Modifica Campagna</h3>
-            <div className="space-y-3 mt-4">
-              <input
-                className="input input-bordered w-full"
-                placeholder="Nome campagna"
-                value={editForm.name}
-                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-              />
-              <textarea
-                className="textarea textarea-bordered w-full"
-                placeholder="Descrizione"
-                rows="3"
-                value={editForm.description}
-                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-              />
-            </div>
-            <div className="modal-action">
-              <button className="btn" onClick={() => setIsEditOpen(false)}>Annulla</button>
-              <button className="btn btn-primary" onClick={handleEdit}>Salva</button>
-            </div>
-          </div>
-        </dialog>
-      )}
-      <ConfirmModal
-        isOpen={confirmState.isOpen}
-        onClose={closeConfirm}
-        onConfirm={confirmState.onConfirm}
-        title={confirmState.title}
-        message={confirmState.message}
-        icon={confirmState.icon}
-        confirmText="Elimina"
-        confirmVariant="error"
-      />
+      <FormModal
+        isOpen={isEditOpen}
+        title="Modifica Campagna"
+        confirmText="Salva"
+        onClose={() => { setIsEditOpen(false); setEditingCampaign(null); }}
+        onSubmit={handleEdit}
+      >
+        <Field label="Nome" required>
+          <input
+            className="input input-bordered w-full"
+            placeholder="Nome campagna"
+            value={editForm.name}
+            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+            autoFocus
+            required
+          />
+        </Field>
+        <Field label="Descrizione">
+          <textarea
+            className="textarea textarea-bordered w-full"
+            placeholder="Descrizione"
+            rows="3"
+            value={editForm.description}
+            onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+          />
+        </Field>
+      </FormModal>
+      <DeleteConfirmModal confirmState={confirmState} onClose={closeConfirm} />
     </div>
   );
 }

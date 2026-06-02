@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useCombatDB } from '../hooks/useCombatDB';
+import { useMonsterLibraryDB } from '../hooks/useMonsterLibraryDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
-import { ConfirmModal } from '../components/custom/ConfirmModal';
+import { DeleteConfirmModal } from '../components/custom/DeleteConfirmModal';
+import { EmptyState } from '../components/custom/EmptyState';
+import { FilterSelect } from '../components/custom/FilterSelect';
 import { MonsterCard } from '../components/custom/MonsterCard';
 import { MonsterFormModal } from '../components/custom/MonsterFormModal';
 import { CsvToolbar } from '../components/custom/CsvToolbar';
@@ -15,7 +17,7 @@ import { getMonsterTypeMeta } from '../components/custom/MonsterCard';
 const TYPE_OPTIONS = ['all', 'humanoid', 'beast', 'undead', 'dragon', 'giant', 'goblinoid', 'lycanthrope'];
 
 export function MonstersPage() {
-  const { monsterLibrary, addMonster, updateMonster, deleteMonster, importMonsters } = useCombatDB();
+  const { monsterLibrary, addMonster, updateMonster, deleteMonster, importMonsters } = useMonsterLibraryDB();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMonster, setEditingMonster] = useState(null);
   const { confirmState, confirm, closeConfirm } = useConfirm();
@@ -62,6 +64,12 @@ export function MonstersPage() {
     });
   };
 
+  const filteredMonsters = (monsterLibrary ?? []).filter((m) => {
+    if (search && !m.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (filterType !== 'all' && m.type !== filterType) return false;
+    return true;
+  });
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -80,35 +88,18 @@ export function MonstersPage() {
       <div className="flex flex-wrap gap-4 items-end">
         <div className="form-control">
           <label className="label text-sm">Cerca</label>
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Nome mostro..."
-          />
+          <SearchInput value={search} onChange={setSearch} placeholder="Nome mostro..." />
         </div>
-        <div className="form-control">
-          <label className="label text-sm">Tipo</label>
-          <select
-            className="select select-bordered select-sm"
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-          >
-            {TYPE_OPTIONS.map((t) => (
-              <option key={t} value={t}>
-                {t === 'all' ? 'Tutti' : getMonsterTypeMeta(t).label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <FilterSelect label="Tipo" value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+          {TYPE_OPTIONS.map((t) => (
+            <option key={t} value={t}>{t === 'all' ? 'Tutti' : getMonsterTypeMeta(t).label}</option>
+          ))}
+        </FilterSelect>
       </div>
 
       {/* Grid Mostri */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {monsterLibrary?.filter(m => {
-          if (search && !m.name.toLowerCase().includes(search.toLowerCase())) return false;
-          if (filterType !== 'all' && m.type !== filterType) return false;
-          return true;
-        }).map((monster) => (
+        {filteredMonsters.map((monster) => (
           <MonsterCard
             key={monster.id}
             monster={monster}
@@ -117,18 +108,10 @@ export function MonstersPage() {
           />
         ))}
         {monsterLibrary?.length === 0 && (
-          <div className="col-span-full alert">
-            <span>Nessun mostro in libreria. Creane uno!</span>
-          </div>
+          <EmptyState colSpan message="Nessun mostro in libreria. Creane uno!" />
         )}
-        {monsterLibrary?.length > 0 && monsterLibrary.filter(m => {
-          if (search && !m.name.toLowerCase().includes(search.toLowerCase())) return false;
-          if (filterType !== 'all' && m.type !== filterType) return false;
-          return true;
-        }).length === 0 && (
-          <div className="col-span-full alert alert-info">
-            <span>Nessun mostro trovato con questi filtri.</span>
-          </div>
+        {monsterLibrary?.length > 0 && filteredMonsters.length === 0 && (
+          <EmptyState colSpan message="Nessun mostro trovato con questi filtri." variant="info" />
         )}
       </div>
 
@@ -139,16 +122,7 @@ export function MonstersPage() {
         onSubmit={handleSubmit}
       />
 
-      <ConfirmModal
-        isOpen={confirmState.isOpen}
-        onClose={closeConfirm}
-        onConfirm={confirmState.onConfirm}
-        title={confirmState.title}
-        message={confirmState.message}
-        icon={confirmState.icon}
-        confirmText="Elimina"
-        confirmVariant="error"
-      />
+      <DeleteConfirmModal confirmState={confirmState} onClose={closeConfirm} />
     </div>
   );
 }
