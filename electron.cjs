@@ -13,21 +13,16 @@ function createWindow() {
     autoHideMenuBar: true,
     title: 'D&D Combat Tracker',
     webPreferences: {
-      // Keep contextIsolation enabled for security
       contextIsolation: true,
-      // Disable Node.js in renderer — not needed, Dexie runs in browser context
       nodeIntegration: false,
       sandbox: true,
     },
-    icon: path.join(__dirname, 'public', 'favicon.ico'),
   });
 
   if (isDev) {
-    // Development: load from Vite dev server
     win.loadURL('http://localhost:5173');
     win.webContents.openDevTools();
   } else {
-    // Production: load built index.html
     win.loadFile(path.join(__dirname, 'dist', 'index.html'));
   }
 

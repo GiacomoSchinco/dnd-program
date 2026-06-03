@@ -13,6 +13,28 @@
     "electron:build": "vite build && electron-builder",
     "electron:build:portable": "vite build && electron-builder --win portable"
   },
+  "build": {
+    "appId": "com.dndprogram.app",
+    "productName": "D&D Combat Tracker",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron.cjs",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  },
   "dependencies": {
     "clsx": "^2.1.1",
     "dexie": "^4.4.3",
