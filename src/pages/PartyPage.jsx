@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { usePartyDB } from '../hooks/usePartyDB';
+import { useDB } from '../hooks/useDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
@@ -12,7 +12,7 @@ import { PageHeader } from '../components/custom/PageHeader';
 import { Users, Plus } from 'lucide-react';
 
 export function PartyPage() {
-  const { characters, campaigns, addCharacter, updateCharacter, deleteCharacter, addCampaign } = usePartyDB();
+  const { characters, campaigns, addCharacter, updateCharacter, deleteCharacter, addCampaign } = useDB();
   const { selectedCampaignId, setSelectedCampaignId } = useCampaignContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);

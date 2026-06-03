@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Swords, Trophy } from 'lucide-react';
-import { useCombatDB } from '../hooks/useCombatDB';
+import { useDB } from '../hooks/useDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { CombatTracker } from '../components/custom/CombatTracker';
 import { InitiativePanel } from '../components/custom/InitiativePanel';
@@ -23,7 +23,7 @@ export function CombatPage() {
     updateParticipantInitiative,
     saveToHistory,
     setCombatStatus,
-  } = useCombatDB();
+  } = useDB();
   const { selectedCampaignId } = useCampaignContext();
   const navigate = useNavigate();
 

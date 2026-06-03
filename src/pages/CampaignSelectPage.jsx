@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePartyDB } from '../hooks/usePartyDB';
-import { useCombatDB } from '../hooks/useCombatDB';
+import { useDB } from '../hooks/useDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { useConfirm } from '../hooks/useConfirm';
 import DataTable from '../components/custom/DataTable';
@@ -12,8 +11,7 @@ import { Swords, Plus, Trash2 } from 'lucide-react';
 export function CampaignSelectPage() {
   const navigate = useNavigate();
   const { confirmState, confirm, closeConfirm } = useConfirm();
-  const { campaigns, addCampaign } = usePartyDB();
-  const { combats, createCombatForCampaign, loadCombat, deleteFromHistory } = useCombatDB();
+  const { campaigns, addCampaign, combats, createCombatForCampaign, loadCombat, deleteFromHistory } = useDB();
   const { selectedCampaignId, setSelectedCampaignId } = useCampaignContext();
 
   const activeCampaign = campaigns?.find((campaign) => campaign.id === selectedCampaignId) || null;

@@ -1,11 +1,11 @@
-import { useCombatDB } from '../hooks/useCombatDB';
+import { useDB } from '../hooks/useDB';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Dices, Swords, Plus, BookOpen, Skull, Sparkles, Users, BarChart3, ScrollText } from 'lucide-react';
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { activeCombat, campaigns, combatHistory } = useCombatDB();
+  const { activeCombat, campaigns, combatHistory } = useDB();
 
   const activeCampaign = activeCombat?.campaignId
     ? campaigns?.find((campaign) => campaign.id === activeCombat.campaignId)

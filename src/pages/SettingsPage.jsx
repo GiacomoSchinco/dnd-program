@@ -1,9 +1,7 @@
 import { useRef } from 'react'; // used by CsvRow
 import { toast } from 'sonner';
 import { useTheme } from '../hooks/useTheme';
-import { useMonsterLibraryDB } from '../hooks/useMonsterLibraryDB';
-import { useNpcLibraryDB } from '../hooks/useNpcLibraryDB';
-import { useSpellsDB } from '../hooks/useSpellsDB';
+import { useDB } from '../hooks/useDB';
 import { ConfirmModal } from '../components/custom/ConfirmModal';
 import { useState } from 'react';
 import { db } from '../db/database';
@@ -66,9 +64,7 @@ function CsvRow({ label, count, onExport, onImport }) {
 
 export function SettingsPage() {
   const { theme, setTheme, themes } = useTheme();
-  const { monsterLibrary, importMonsters } = useMonsterLibraryDB();
-  const { npcLibrary, importNpcs } = useNpcLibraryDB();
-  const { spells, importSpells } = useSpellsDB();
+  const { monsterLibrary, importMonsters, npcLibrary, importNpcs, spells, importSpells } = useDB();
   const [resetOpen, setResetOpen] = useState(false);
 
   // ── Reset ──────────────────────────────────────────────────────────────

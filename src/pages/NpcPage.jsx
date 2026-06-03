@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNpcLibraryDB } from '../hooks/useNpcLibraryDB';
+import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
 import { DeleteConfirmModal } from '../components/custom/DeleteConfirmModal';
@@ -13,7 +13,7 @@ import { SearchInput } from '../components/custom/SearchInput';
 import { User, Plus } from 'lucide-react';
 
 export function NpcPage() {
-  const { npcLibrary, addNpc, updateNpc, deleteNpc, importNpcs } = useNpcLibraryDB();
+  const { npcLibrary, addNpc, updateNpc, deleteNpc, importNpcs } = useDB();
   const { confirmState, confirm, closeConfirm } = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNpc, setEditingNpc] = useState(null);

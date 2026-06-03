@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { usePartyDB } from '../../hooks/usePartyDB';
+import { useDB } from '../../hooks/useDB';
 import { useCampaignContext } from '../../context/CampaignContext';
 import { useConfirm } from '../../hooks/useConfirm';
 import DataTable from './DataTable';
@@ -9,7 +9,7 @@ import { FormModal, Field } from './FormModal';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 
 export function CampaignCrudPanel({ title = 'Campagne', compact = false }) {
-  const { campaigns, addCampaign, updateCampaign, deleteCampaign } = usePartyDB();
+  const { campaigns, addCampaign, updateCampaign, deleteCampaign } = useDB();
   const { selectedCampaignId, setSelectedCampaignId } = useCampaignContext();
   const { confirmState, confirm, closeConfirm } = useConfirm();
 

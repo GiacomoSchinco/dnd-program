@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSpellsDB } from '../hooks/useSpellsDB';
+import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { SpellSchools } from '../db/database';
 import { toast } from 'sonner';
@@ -17,7 +17,7 @@ import { SpellCard } from '../components/custom/SpellCard';
 const LEVEL_OPTIONS = ['all', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 export function SpellsPage() {
-  const { spells, addSpell, updateSpell, deleteSpell, importSpells } = useSpellsDB();
+  const { spells, addSpell, updateSpell, deleteSpell, importSpells } = useDB();
   const { confirmState, confirm, closeConfirm } = useConfirm();
 
   const [isModalOpen, setIsModalOpen] = useState(false);

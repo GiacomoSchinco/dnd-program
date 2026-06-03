@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCombatDB } from '../hooks/useCombatDB';
-import { usePartyDB } from '../hooks/usePartyDB';
+import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
 import DataTable from '../components/custom/DataTable';
 import { useCampaignContext } from '../context/CampaignContext';
@@ -18,9 +17,8 @@ export function BattleSelectPage() {
   const [newBattleName, setNewBattleName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const navigate = useNavigate();
-  const { campaigns } = usePartyDB();
+  const { campaigns, combats, createCombatForCampaign, loadCombat, deleteFromHistory } = useDB();
   const { setSelectedCampaignId } = useCampaignContext();
-  const { combats, createCombatForCampaign, loadCombat, deleteFromHistory } = useCombatDB();
 
   const parsedCampaignId = Number.parseInt(campaignId, 10);
   const campaign = campaigns?.find((c) => c.id === parsedCampaignId);

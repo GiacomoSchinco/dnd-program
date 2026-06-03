@@ -1,13 +1,11 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { usePartyDB } from '../../hooks/usePartyDB';
+import { useDB } from '../../hooks/useDB';
 import { useCampaignContext } from '../../context/CampaignContext';
-import { useCombatDB } from '../../hooks/useCombatDB';
 
 export function CampaignTopbar() {
-  const { campaigns } = usePartyDB();
+  const { campaigns, combats, activeCombat, loadCombat } = useDB();
   const { selectedCampaignId, setSelectedCampaignId } = useCampaignContext();
-  const { combats, activeCombat, loadCombat } = useCombatDB();
   const { pathname } = useLocation();
   const isOnCombat = pathname === '/combat';
 

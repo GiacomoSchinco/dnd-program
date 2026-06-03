@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMonsterLibraryDB } from '../hooks/useMonsterLibraryDB';
+import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
 import { DeleteConfirmModal } from '../components/custom/DeleteConfirmModal';
@@ -17,7 +17,7 @@ import { getMonsterTypeMeta } from '../components/custom/MonsterCard';
 const TYPE_OPTIONS = ['all', 'humanoid', 'beast', 'undead', 'dragon', 'giant', 'goblinoid', 'lycanthrope'];
 
 export function MonstersPage() {
-  const { monsterLibrary, addMonster, updateMonster, deleteMonster, importMonsters } = useMonsterLibraryDB();
+  const { monsterLibrary, addMonster, updateMonster, deleteMonster, importMonsters } = useDB();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMonster, setEditingMonster] = useState(null);
   const { confirmState, confirm, closeConfirm } = useConfirm();

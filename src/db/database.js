@@ -1,5 +1,7 @@
 import Dexie from 'dexie';
+import { seedMonsters, seedSpells } from './seedData';
 
+export { seedMonsters, seedSpells };
 export const db = new Dexie('DnDCombatDB');
 
 // Versione 1: Struttura base
