@@ -1,30 +1,11 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { db } from '../db/database';
 import type { Campaign, Character } from '../types';
 
 export function useCampaigns() {
   const campaigns = useLiveQuery(() => db.campaigns.toArray(), [], [] as Campaign[]);
   const characters = useLiveQuery(() => db.characters.toArray(), [], [] as Character[]);
-
-  useEffect(() => {
-    const ensureCurrentHp = async () => {
-      const all = await db.characters.toArray();
-      for (const char of all) {
-        const maxHp = Math.max(Number(char.maxHp) || 0, Number(char.hp) || 0) || 1;
-        const rawCurrent = char.currentHp;
-        if (rawCurrent == null || Number.isNaN(Number(rawCurrent))) {
-          await db.characters.update(char.id!, { currentHp: maxHp, maxHp });
-          continue;
-        }
-        const clamped = Math.max(0, Math.min(maxHp, Number(rawCurrent)));
-        if (clamped !== Number(rawCurrent) || maxHp !== Number(char.maxHp)) {
-          await db.characters.update(char.id!, { currentHp: clamped, maxHp });
-        }
-      }
-    };
-    ensureCurrentHp();
-  }, []);
 
   const addCampaign = useCallback(async (campaignInput: string | Partial<Campaign>) => {
     const payload: Omit<Campaign, 'id'> = typeof campaignInput === 'string'

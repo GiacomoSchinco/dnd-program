@@ -56,8 +56,8 @@ export function CombatPage() {
         combatStatus={combatStatus}
         onNextTurn={nextTurn}
         onSortInitiative={sortByInitiative}
-        onStart={() => setCombatStatus(activeCombat.combatId!, 'in_progress')}
-        onTerminate={() => setCombatStatus(activeCombat.combatId!, 'terminated')}
+        onStart={() => setCombatStatus(activeCombat.combatId, 'in_progress')}
+        onTerminate={() => setCombatStatus(activeCombat.combatId, 'terminated')}
         onSave={saveToHistory}
       />
 

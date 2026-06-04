@@ -1,5 +1,6 @@
 import { useRef, ChangeEvent, ReactNode } from 'react'; // used by CsvRow
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { useDB } from '../hooks/useDB';
 import { ConfirmModal } from '../components/ui';
@@ -83,6 +84,7 @@ export function SettingsPage() {
   const { theme, setTheme, themes } = useTheme();
   const { monsterLibrary, importMonsters, npcLibrary, importNpcs, spells, importSpells } = useDB();
   const [resetOpen, setResetOpen] = useState(false);
+  const navigate = useNavigate();
 
   // ── Reset ──────────────────────────────────────────────────────────────
   const handleReset = async () => {
@@ -102,7 +104,7 @@ export function SettingsPage() {
         await db.spells.bulkAdd(seedSpells);
       });
       toast.success('Database resettato!');
-      window.location.reload();
+      navigate('/');
     } catch (err) {
       toast.error('Errore durante il reset');
       console.error(err);

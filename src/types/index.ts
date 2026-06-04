@@ -190,6 +190,7 @@ export const CharacterRaces = [
 ] as const;
 
 export const CharacterClasses = {
+  ARTIFICIERE: 'Artificiere',
   BARBARO: 'Barbaro',
   BARDO: 'Bardo',
   CHIERICO: 'Chierico',

@@ -61,6 +61,26 @@ export class DnDCombatDB extends Dexie {
       spells: '++id, name, level, school',
       npcs: '++id, name',
     });
+
+    this.version(4).stores({
+      activeCombat: 'id',
+      combats: '++id, date, name, campaignId',
+      monsters: '++id, name, cr',
+      campaigns: '++id, name, description',
+      characters: '++id, campaignId, name, class',
+      spells: '++id, name, level, school',
+      npcs: '++id, name',
+    }).upgrade(async (trans) => {
+      const chars: Character[] = await trans.table('characters').toArray();
+      for (const char of chars) {
+        const maxHp = Math.max(Number(char.maxHp) || 0, Number(char.hp) || 0) || 1;
+        const rawCurrent = char.currentHp;
+        const currentHp = rawCurrent == null || Number.isNaN(Number(rawCurrent))
+          ? maxHp
+          : Math.max(0, Math.min(maxHp, Number(rawCurrent)));
+        await trans.table('characters').update(char.id, { currentHp, maxHp });
+      }
+    });
   }
 }
 

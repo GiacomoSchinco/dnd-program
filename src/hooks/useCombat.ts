@@ -223,13 +223,16 @@ export function useCombat() {
     } catch { toast.error('Errore nella creazione della battaglia'); return null; }
   }, []);
 
-  const setCombatStatus = useCallback(async (combatId: number, status: Combat['status']) => {
+  const setCombatStatus = useCallback(async (combatId: number | null | undefined, status: Combat['status']) => {
     try {
-      if (combatId == null) return;
       const normalized = normalizeCombatStatus(status);
-      await db.combats.update(combatId, { status: normalized, date: new Date().toISOString() });
+      if (combatId != null) {
+        await db.combats.update(combatId, { status: normalized, date: new Date().toISOString() });
+      }
       const current = await db.activeCombat.get('current');
-      if (current?.combatId === combatId) await db.activeCombat.put({ ...current, status: normalized });
+      if (current && (combatId == null || current.combatId === combatId)) {
+        await db.activeCombat.put({ ...current, status: normalized });
+      }
     } catch { toast.error('Errore nel cambiamento di stato'); }
   }, []);
 

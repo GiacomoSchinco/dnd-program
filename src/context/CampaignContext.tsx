@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
 
 const STORAGE_KEY = 'activeCampaignId';
 
@@ -21,7 +21,7 @@ export function CampaignProvider({ children }: CampaignProviderProps) {
     return Number.isNaN(parsed) ? null : parsed;
   });
 
-  const setSelectedCampaignId = (value: number | string | null) => {
+  const setSelectedCampaignId = useCallback((value: number | string | null) => {
     const normalized = value == null ? null : Number(value);
     if (normalized == null || Number.isNaN(normalized)) {
       localStorage.removeItem(STORAGE_KEY);
@@ -30,14 +30,14 @@ export function CampaignProvider({ children }: CampaignProviderProps) {
     }
     localStorage.setItem(STORAGE_KEY, String(normalized));
     setSelectedCampaignIdState(normalized);
-  };
+  }, []);
 
   const contextValue = useMemo(
     () => ({
       selectedCampaignId,
       setSelectedCampaignId,
     }),
-    [selectedCampaignId],
+    [selectedCampaignId, setSelectedCampaignId],
   );
 
   return <CampaignContext.Provider value={contextValue}>{children}</CampaignContext.Provider>;

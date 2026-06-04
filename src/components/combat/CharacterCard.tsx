@@ -1,4 +1,4 @@
-import { Heart, Pencil, Trash2, Shield } from 'lucide-react';
+import { Heart, Pencil, Trash2, Shield, Plus, Minus } from 'lucide-react';
 import { DndIcon } from '../ui/DndIcon';
 import { getClassIcon, getClassColor, getClassName } from '../../utils/icons';
 
@@ -14,6 +14,8 @@ interface CharacterCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
   onClick?: () => void;
+  onHeal?: (amount: number) => void;
+  onDamage?: (amount: number) => void;
   variant?: 'character' | 'participant';
 }
 
@@ -29,6 +31,8 @@ export function CharacterCard({
   onEdit,
   onDelete,
   onClick,
+  onHeal,
+  onDamage,
   variant = 'character', // 'character' | 'participant'
 }: CharacterCardProps) {
   const hpPercent = currentHp != null && maxHp ? (currentHp / maxHp) * 100 : 100;
@@ -109,6 +113,29 @@ export function CharacterCard({
               </span>
             </div>
             <progress className={`progress ${hpColor} w-full h-2`} value={currentHpValue} max={maxHpValue} />
+          </div>
+        )}
+
+        {/* Pulsanti cura/danno */}
+        {onHeal && onDamage && (
+          <div className="flex items-stretch gap-3 pt-1">
+            <div className="flex-1 flex flex-col items-center gap-1">
+              <span className="text-[10px] font-bold text-error/70 uppercase tracking-wider">Danno</span>
+              <div className="flex gap-1">
+                <button className="btn btn-xs btn-soft btn-error min-w-0 px-1.5" onClick={() => onDamage(10)} title="Danno 10">-10</button>
+                <button className="btn btn-xs btn-soft btn-error min-w-0 px-1.5" onClick={() => onDamage(5)} title="Danno 5">-5</button>
+                <button className="btn btn-xs btn-soft btn-error min-w-0 px-1.5" onClick={() => onDamage(1)} title="Danno 1">-1</button>
+              </div>
+            </div>
+            <div className="flex items-center justify-center w-px bg-base-300/50 self-stretch" />
+            <div className="flex-1 flex flex-col items-center gap-1">
+              <span className="text-[10px] font-bold text-success/70 uppercase tracking-wider">Cura</span>
+              <div className="flex gap-1">
+                <button className="btn btn-xs btn-soft btn-success min-w-0 px-1.5" onClick={() => onHeal(1)} title="Cura 1">+1</button>
+                <button className="btn btn-xs btn-soft btn-success min-w-0 px-1.5" onClick={() => onHeal(5)} title="Cura 5">+5</button>
+                <button className="btn btn-xs btn-soft btn-success min-w-0 px-1.5" onClick={() => onHeal(10)} title="Cura 10">+10</button>
+              </div>
+            </div>
           </div>
         )}
 

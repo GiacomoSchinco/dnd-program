@@ -48,6 +48,24 @@ export function PartyPage() {
     setIsCampaignModalOpen(false);
   };
 
+  const handleHeal = (char: Character) => (amount: number) => {
+    const currentHp = Math.min(
+      (char.currentHp ?? char.hp) + amount,
+      char.maxHp ?? char.hp,
+    );
+    updateCharacter(char.id!, { currentHp });
+    toast.success(`${char.name} curato di ${amount} HP`);
+  };
+
+  const handleDamage = (char: Character) => (amount: number) => {
+    const currentHp = Math.max(
+      (char.currentHp ?? char.hp) - amount,
+      0,
+    );
+    updateCharacter(char.id!, { currentHp });
+    toast.error(`${char.name} subisce ${amount} danni`);
+  };
+
   const handleDelete = (char: Character) => {
     confirm({
       title: 'Rimuovi Personaggio',
@@ -99,6 +117,8 @@ export function PartyPage() {
             maxHp={char.maxHp ?? char.hp}
             onEdit={() => openEdit(char)}
             onDelete={() => handleDelete(char)}
+            onHeal={handleHeal(char)}
+            onDamage={handleDamage(char)}
           />
         ))}
       </div>

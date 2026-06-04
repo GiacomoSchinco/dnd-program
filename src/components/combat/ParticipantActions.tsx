@@ -20,11 +20,12 @@ interface ParticipantActionsProps {
 }
 
 function rollDamageFormula(formula: string) {
-  const match = formula.match(/(\d*)d(\d+)(?:\+(\d+))?/);
+  const match = formula.match(/(\d*)d(\d+)(?:([+-])(\d+))?/);
   if (!match) return null;
   const count = parseInt(match[1]) || 1;
   const sides = parseInt(match[2]);
-  const bonus = parseInt(match[3]) || 0;
+  const sign = match[3] === '-' ? -1 : 1;
+  const bonus = sign * (parseInt(match[4]) || 0);
   let total = bonus;
   for (let i = 0; i < count; i++) {
     total += Math.floor(Math.random() * sides) + 1;
@@ -58,7 +59,7 @@ export function ParticipantActions({ participant, applyDamage, heal, removeParti
   };
 
   const handleRollDamage = () => {
-    const total = rollDamageFormula(participant.damage!);
+    const total = rollDamageFormula(participant.damage ?? '');
     if (total == null) return;
     applyDamage(participant.id, total);
     showToast(`${participant.name} subisce ${total} danni (${participant.damage})`);

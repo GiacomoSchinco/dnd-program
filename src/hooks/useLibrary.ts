@@ -4,12 +4,17 @@ import { db, seedMonsters, seedSpells } from '../db/database';
 import { toast } from 'sonner';
 import type { Monster, Npc, Spell } from '../types';
 
+// Flag a livello di modulo: il seed viene eseguito una sola volta per sessione
+let _seedInitialized = false;
+
 export function useLibrary() {
   const monsterLibrary = useLiveQuery(() => db.monsters.toArray(), [], [] as Monster[]);
   const npcLibrary = useLiveQuery(() => db.npcs.toArray(), [], [] as Npc[]);
   const spells = useLiveQuery(() => db.spells.orderBy('level').toArray(), [], [] as Spell[]);
 
   useEffect(() => {
+    if (_seedInitialized) return;
+    _seedInitialized = true;
     const initializeDB = async () => {
       await db.transaction('rw', [db.monsters, db.spells], async () => {
         if (await db.monsters.count() === 0) await db.monsters.bulkAdd(seedMonsters);

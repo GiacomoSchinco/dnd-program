@@ -52,7 +52,8 @@ export function getNextMonsterName(baseName: string = 'Mostro', participants: Co
     })
     .filter((n): n is number => n !== null && Number.isInteger(n) && n > 0);
 
-  const nextNumber = usedNumbers.length ? Math.max(...usedNumbers) + 1 : 1;
+  if (usedNumbers.length === 0) return normalizedBase;
+  const nextNumber = Math.max(...usedNumbers) + 1;
   return `${normalizedBase} ${nextNumber}`;
 }
 
