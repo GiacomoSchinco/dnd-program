@@ -1,4 +1,4 @@
-export { CampaignCrudPanel } from './CampaignCrudPanel'
+export { CampaignPanel } from './CampaignPanel'
 export { CampaignFormModal } from './CampaignFormModal'
 export { CampaignTopbar } from './CampaignTopbar'
 export { CampaignHeader } from './CampaignHeader'

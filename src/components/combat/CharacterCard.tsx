@@ -1,4 +1,4 @@
-import { Heart, Pencil, Trash2, Shield, Plus, Minus } from 'lucide-react';
+import { Heart, Pencil, Trash2, Shield } from 'lucide-react';
 import { DndIcon } from '../ui/DndIcon';
 import { getClassIcon, getClassColor, getClassName } from '../../utils/icons';
 

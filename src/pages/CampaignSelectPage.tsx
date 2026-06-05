@@ -4,7 +4,7 @@ import { useDB } from '../hooks/useDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { DataTable, ConfirmModal, FormModal, Field } from '../components/ui';
-import { CampaignCrudPanel } from '../components/campaign';
+import { CampaignPanel } from '../components/campaign';
 import { toast } from 'sonner';
 import { Swords, Plus, Trash2 } from 'lucide-react';
 import { Campaign, Combat } from '../types';
@@ -74,7 +74,7 @@ export function CampaignSelectPage() {
             <div>
               <h2 className="text-2xl font-bold">Nessuna Campagna</h2>
               <p className="py-4">Crea la tua prima campagna per iniziare</p>
-              <CampaignCrudPanel title="" compact />
+              <CampaignPanel title="" compact />
             </div>
           </div>
         </div>

@@ -3,19 +3,19 @@ import { toast } from 'sonner';
 import { useDB } from '../../hooks/useDB';
 import { useCampaignContext } from '../../context/CampaignContext';
 import { useConfirm } from '../../hooks/useConfirm';
-import { DeleteConfirmModal } from '../../components/ui';
+import { DeleteConfirmModal } from '../ui';
 import { CampaignHeader } from './CampaignHeader';
 import { CampaignTable } from './CampaignTable';
 import { CampaignFormModal } from './CampaignFormModal';
 import type { CampaignFormData } from './CampaignFormModal';
 import { Campaign } from '../../types';
 
-interface CampaignCrudPanelProps {
+interface CampaignPanelProps {
   title?: string;
   compact?: boolean;
 }
 
-export function CampaignCrudPanel({ title = 'Campagne', compact = false }: CampaignCrudPanelProps) {
+export function CampaignPanel({ title = 'Campagne', compact = false }: CampaignPanelProps) {
   const { campaigns, addCampaign, updateCampaign, deleteCampaign } = useDB();
   const { selectedCampaignId, setSelectedCampaignId } = useCampaignContext();
   const { confirmState, confirm, closeConfirm } = useConfirm();
