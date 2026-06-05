@@ -1,4 +1,4 @@
-import { CampaignCrudPanel } from '../components/campaign';
+import { CampaignPanel } from '../components/campaign';
 
 export function CampaignPage() {
   return (
@@ -10,7 +10,7 @@ export function CampaignPage() {
         </p>
       </div>
 
-      <CampaignCrudPanel title="Campagne" />
+      <CampaignPanel title="Campagne" />
     </div>
   );
 }
