@@ -118,7 +118,7 @@ export function SettingsPage() {
     toast.success(`${monsterLibrary.length} mostri esportati`);
   };
   const handleMonsterImport = async (rows: Record<string, string>[]) => {
-    const valid = rows.map(rowToMonster).filter((m) => m.name);
+    const valid = rows.map(rowToMonster).filter((m): m is NonNullable<typeof m> => m !== null);
     if (!valid.length) { toast.error('Nessuna riga valida nel CSV'); return; }
     await importMonsters(valid);
     toast.success(`${valid.length} mostri importati!`);
@@ -131,7 +131,7 @@ export function SettingsPage() {
     toast.success(`${spells.length} incantesimi esportati`);
   };
   const handleSpellImport = async (rows: Record<string, string>[]) => {
-    const valid = rows.map(rowToSpell).filter((s) => s.name);
+    const valid = rows.map(rowToSpell).filter((s): s is NonNullable<typeof s> => s !== null);
     if (!valid.length) { toast.error('Nessuna riga valida nel CSV'); return; }
     await importSpells(valid);
     toast.success(`${valid.length} incantesimi importati!`);
@@ -144,7 +144,7 @@ export function SettingsPage() {
     toast.success(`${npcLibrary.length} NPC esportati`);
   };
   const handleNpcImport = async (rows: Record<string, string>[]) => {
-    const valid = rows.map(rowToNpc).filter((n) => n.name);
+    const valid = rows.map(rowToNpc).filter((n): n is NonNullable<typeof n> => n !== null);
     if (!valid.length) { toast.error('Nessuna riga valida nel CSV'); return; }
     await importNpcs(valid);
     toast.success(`${valid.length} NPC importati!`);

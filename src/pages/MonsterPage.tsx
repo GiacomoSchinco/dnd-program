@@ -43,7 +43,7 @@ export function MonstersPage() {
   };
 
   const handleImport = async (rows: Record<string, string>[]) => {
-    const valid = rows.map(rowToMonster).filter((m) => m.name);
+    const valid = rows.map(rowToMonster).filter((m): m is NonNullable<typeof m> => m !== null);
     if (!valid.length) { toast.error('Nessuna riga valida trovata nel CSV'); return; }
     await importMonsters(valid);
     toast.success(`${valid.length} mostri importati!`);

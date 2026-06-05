@@ -16,10 +16,16 @@ export function useLibrary() {
     if (_seedInitialized) return;
     _seedInitialized = true;
     const initializeDB = async () => {
-      await db.transaction('rw', [db.monsters, db.spells], async () => {
-        if (await db.monsters.count() === 0) await db.monsters.bulkAdd(seedMonsters);
-        if (await db.spells.count() === 0) await db.spells.bulkAdd(seedSpells);
-      });
+      try {
+        await db.transaction('rw', [db.monsters, db.spells], async () => {
+          if (await db.monsters.count() === 0) await db.monsters.bulkAdd(seedMonsters);
+          if (await db.spells.count() === 0) await db.spells.bulkAdd(seedSpells);
+        });
+      } catch {
+        // Reset flag so next mount can retry
+        _seedInitialized = false;
+        toast.error('Errore nel caricamento dei dati iniziali');
+      }
     };
     initializeDB();
   }, []);

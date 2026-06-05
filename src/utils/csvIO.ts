@@ -96,11 +96,13 @@ export const NPC_COLUMNS     = ['name', 'hp', 'ac', 'description'];
 
 // ── Per-entity row mappers (CSV row → DB object) ───────────────────────────
 
-export function rowToMonster(row: Record<string, string>): Omit<Monster, 'id'> {
-  const hp = parseInt(row.hp) || 10;
-  const ac = parseInt(row.ac) || 10;
+export function rowToMonster(row: Record<string, string>): Omit<Monster, 'id'> | null {
+  const name = (row.name || '').trim();
+  if (!name) return null;
+  const hp = Math.max(1, Math.min(9999, parseInt(row.hp, 10) || 10));
+  const ac = Math.max(1, Math.min(30, parseInt(row.ac, 10) || 10));
   return {
-    name:   (row.name   || '').trim(),
+    name,
     hp,
     ac,
     damage: (row.damage || '1d6').trim(),
@@ -109,10 +111,13 @@ export function rowToMonster(row: Record<string, string>): Omit<Monster, 'id'> {
   };
 }
 
-export function rowToSpell(row: Record<string, string>): Omit<Spell, 'id'> {
+export function rowToSpell(row: Record<string, string>): Omit<Spell, 'id'> | null {
+  const name = (row.name || '').trim();
+  if (!name) return null;
+  const level = Math.max(0, Math.min(9, parseInt(row.level, 10) || 0));
   return {
-    name:     (row.name     || '').trim(),
-    level:    parseInt(row.level)  || 0,
+    name,
+    level,
     school:   (row.school   || 'Evocazione').trim(),
     damage:   (row.damage   || '').trim(),
     healing:  (row.healing  || '').trim(),
@@ -122,11 +127,13 @@ export function rowToSpell(row: Record<string, string>): Omit<Spell, 'id'> {
   };
 }
 
-export function rowToNpc(row: Record<string, string>): Omit<Npc, 'id'> {
+export function rowToNpc(row: Record<string, string>): Omit<Npc, 'id'> | null {
+  const name = (row.name || '').trim();
+  if (!name) return null;
   return {
-    name:        (row.name        || '').trim(),
-    hp:          parseInt(row.hp) || 10,
-    ac:          parseInt(row.ac) || 10,
+    name,
+    hp:          Math.max(1, Math.min(9999, parseInt(row.hp, 10) || 10)),
+    ac:          Math.max(1, Math.min(30, parseInt(row.ac, 10) || 10)),
     description: (row.description || '').trim(),
   };
 }

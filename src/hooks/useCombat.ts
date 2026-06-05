@@ -30,16 +30,20 @@ export function useCombat() {
 
   const syncCharacterHpFromParticipant = useCallback(async (participant: CombatParticipant, newHp: number) => {
     if (!participant || participant.type !== 'pc') return;
+    // Usa sempre characterId se disponibile
     if (participant.characterId != null) {
       await db.characters.update(participant.characterId, { currentHp: newHp });
       return;
     }
+    // Fallback: cerca per nome SOLO nella stessa campagna per evitare corruzione cross-campagna
     if (participant.campaignId != null) {
-      const scoped = await db.characters.where('campaignId').equals(participant.campaignId).filter((c) => c.name === participant.name).toArray();
-      if (scoped.length === 1) { await db.characters.update(scoped[0].id!, { currentHp: newHp }); return; }
+      const scoped = await db.characters
+        .where('campaignId').equals(participant.campaignId)
+        .filter((c) => c.name === participant.name)
+        .toArray();
+      if (scoped.length === 1) await db.characters.update(scoped[0].id!, { currentHp: newHp });
+      // Se 0 o >1 match, non aggiorniamo per sicurezza
     }
-    const byName = await db.characters.where('name').equals(participant.name).toArray();
-    if (byName.length === 1) await db.characters.update(byName[0].id!, { currentHp: newHp });
   }, []);
 
   const saveActiveCombat = useCallback(async (combatData: Partial<ActiveCombat>) => {
@@ -48,38 +52,42 @@ export function useCombat() {
 
   const applyDamage = useCallback(async (participantId: string, amount: number) => {
     try {
-      const current = await db.activeCombat.get('current');
-      if (!current) return;
-      const target = current.participants.find((p) => p.id === participantId);
-      if (!target) return;
-      const currentHp = Number(target.currentHp ?? target.hp ?? 0);
-      const newHp = Math.max(0, currentHp - Number(amount));
-      await syncCharacterHpFromParticipant(target, newHp);
-      const nextState: ActiveCombat = {
-        ...current,
-        participants: current.participants.map((p) => p.id === participantId ? { ...p, currentHp: newHp } : p),
-      };
-      await db.activeCombat.put(nextState);
-      await persistLinkedCombat(nextState);
+      await db.transaction('rw', [db.activeCombat, db.combats, db.characters], async () => {
+        const current = await db.activeCombat.get('current');
+        if (!current) return;
+        const target = current.participants.find((p) => p.id === participantId);
+        if (!target) return;
+        const currentHp = Number(target.currentHp ?? target.hp ?? 0);
+        const newHp = Math.max(0, currentHp - Number(amount));
+        await syncCharacterHpFromParticipant(target, newHp);
+        const nextState: ActiveCombat = {
+          ...current,
+          participants: current.participants.map((p) => p.id === participantId ? { ...p, currentHp: newHp } : p),
+        };
+        await db.activeCombat.put(nextState);
+        await persistLinkedCombat(nextState);
+      });
     } catch { toast.error('Errore nell\'applicazione del danno'); }
   }, [persistLinkedCombat, syncCharacterHpFromParticipant]);
 
   const heal = useCallback(async (participantId: string, amount: number) => {
     try {
-      const current = await db.activeCombat.get('current');
-      if (!current) return;
-      const target = current.participants.find((p) => p.id === participantId);
-      if (!target) return;
-      const currentHp = Number(target.currentHp ?? target.hp ?? 0);
-      const maxHp = Number(target.maxHp ?? target.hp ?? currentHp);
-      const newHp = Math.min(maxHp, currentHp + Number(amount));
-      await syncCharacterHpFromParticipant(target, newHp);
-      const nextState: ActiveCombat = {
-        ...current,
-        participants: current.participants.map((p) => p.id === participantId ? { ...p, currentHp: newHp } : p),
-      };
-      await db.activeCombat.put(nextState);
-      await persistLinkedCombat(nextState);
+      await db.transaction('rw', [db.activeCombat, db.combats, db.characters], async () => {
+        const current = await db.activeCombat.get('current');
+        if (!current) return;
+        const target = current.participants.find((p) => p.id === participantId);
+        if (!target) return;
+        const currentHp = Number(target.currentHp ?? target.hp ?? 0);
+        const maxHp = Number(target.maxHp ?? target.hp ?? currentHp);
+        const newHp = Math.min(maxHp, currentHp + Number(amount));
+        await syncCharacterHpFromParticipant(target, newHp);
+        const nextState: ActiveCombat = {
+          ...current,
+          participants: current.participants.map((p) => p.id === participantId ? { ...p, currentHp: newHp } : p),
+        };
+        await db.activeCombat.put(nextState);
+        await persistLinkedCombat(nextState);
+      });
     } catch { toast.error('Errore nella guarigione'); }
   }, [persistLinkedCombat, syncCharacterHpFromParticipant]);
 
@@ -115,9 +123,13 @@ export function useCombat() {
         : participant;
       const newParticipant = normalizeParticipant(participantWithName);
       if (!current) {
+        // Non dovrebbe mai succedere in produzione (il combat è sempre caricato prima)
+        // ma se succede manteniamo il contesto vuoto senza sovrascrivere dati
         const sortedParticipants = sortParticipantsByInitiative([newParticipant]);
         const nextState: ActiveCombat = {
           id: 'current',
+          combatId: undefined,
+          campaignId: null,
           name: 'Nuovo Combattimento',
           status: 'prepared',
           participants: sortedParticipants,
@@ -259,6 +271,7 @@ export function useCombat() {
   return {
     activeCombat,
     combats,
+    /** @deprecated usa combats */
     combatHistory: combats,
     saveActiveCombat,
     applyDamage,
@@ -270,11 +283,12 @@ export function useCombat() {
     updateParticipantInitiative,
     saveToHistory,
     loadFromHistory,
+    /** @deprecated usa loadFromHistory */
     loadCombat: loadFromHistory,
     setCombatStatus,
     createCombatForCampaign,
+    /** @deprecated usa setCombatStatus(id, 'terminated') */
     completeCombat: (id: number) => setCombatStatus(id, 'terminated'),
-    terminateCombat: (id: number) => setCombatStatus(id, 'terminated'),
     deleteFromHistory,
     newCombat,
   };

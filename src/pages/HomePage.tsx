@@ -1,12 +1,14 @@
 import { useDB } from '../hooks/useDB';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useCampaignContext } from '../context/CampaignContext';
 import { Dices, Swords, Plus, BookOpen, Skull, Sparkles, Users, BarChart3, ScrollText } from 'lucide-react';
 import { DndIcon } from '../components/ui/DndIcon';
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { activeCombat, campaigns, combatHistory } = useDB();
+  const { activeCombat, campaigns, combatHistory, loadCombat } = useDB();
+  const { setSelectedCampaignId } = useCampaignContext();
 
   const activeCampaign = activeCombat?.campaignId
     ? campaigns?.find((campaign) => campaign.id === activeCombat.campaignId)
@@ -206,7 +208,11 @@ export function HomePage() {
                 <div 
                   key={combat.id}
                   className="flex justify-between items-center p-2 rounded-lg hover:bg-base-200 cursor-pointer transition-colors"
-                  onClick={() => navigate(`/combat/${combat.id}`)}
+                  onClick={async () => {
+                    if (combat.campaignId != null) setSelectedCampaignId(combat.campaignId);
+                    await loadCombat(combat.id!);
+                    navigate('/combat');
+                  }}
                 >
                   <div>
                     <span className="font-medium">{combat.name}</span>
