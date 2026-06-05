@@ -37,9 +37,9 @@ export function SpellsPage() {
   };
 
   const handleImport = async (rows: Record<string, string>[]) => {
-    const valid = rows.map(rowToSpell).filter((s) => s.name);
+    const valid = rows.map(rowToSpell).filter((s): s is Omit<Spell, "id"> => s !== null && !!s.name);
     if (!valid.length) { toast.error('Nessuna riga valida trovata nel CSV'); return; }
-    await importSpells(valid);
+    await importSpells(valid.filter((s): s is Omit<Spell, "id"> => s !== null));
     toast.success(`${valid.length} incantesimi importati!`);
   };
 
