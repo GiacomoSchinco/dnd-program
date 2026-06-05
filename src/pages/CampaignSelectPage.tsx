@@ -4,9 +4,8 @@ import { useDB } from '../hooks/useDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { DataTable, ConfirmModal, FormModal, Field } from '../components/ui';
-import { CampaignPanel } from '../components/campaign';
 import { toast } from 'sonner';
-import { Swords, Plus, Trash2 } from 'lucide-react';
+import { Swords, Plus, Trash2, BookOpen } from 'lucide-react';
 import { Campaign, Combat } from '../types';
 import { PageWrapper, EmptyState } from '../components/ui';
 
@@ -71,10 +70,15 @@ export function CampaignSelectPage() {
 
       {campaigns?.length === 0 ? (
         <EmptyState
-          message="Non hai ancora creato una campagna. Creane una per iniziare!"
+          message="Non hai ancora creato una campagna. Vai alla gestione campagne per iniziare!"
           variant="info"
         >
-          <CampaignPanel title="" compact />
+          <button
+            className="btn btn-primary btn-sm gap-2 mt-2"
+            onClick={() => navigate('/campaigns')}
+          >
+            <BookOpen size={16} /> Gestisci Campagne
+          </button>
         </EmptyState>
       ) : (
         <div className="space-y-4">

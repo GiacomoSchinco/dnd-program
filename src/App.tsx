@@ -18,8 +18,8 @@ function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/combat" element={<CombatPage />} />
-        <Route path="/campaigns" element={<CampaignSelectPage />} />
-        <Route path="/campaign-management" element={<CampaignPage />} />
+        <Route path="/combat-hub" element={<CampaignSelectPage />} />
+        <Route path="/campaigns" element={<CampaignPage />} />
         <Route path="/campaign/:campaignId/battles" element={<BattleSelectPage />} />
         <Route path="/party" element={<PartyPage />} />
         <Route path="/monsters" element={<MonstersPage />} />

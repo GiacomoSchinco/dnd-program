@@ -35,7 +35,7 @@ export function CombatHeader({
         {currentCampaign && (
           <div className="breadcrumbs text-sm mb-1">
             <ul>
-              <li><a onClick={() => navigate('/campaigns')}>Campagne</a></li>
+              <li><a onClick={() => navigate('/combat-hub')}>Hub Combattimento</a></li>
               <li>
                 <a onClick={() => navigate(`/campaign/${currentCampaign.id}/battles`)}>
                   {currentCampaign.name}

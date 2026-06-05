@@ -3,6 +3,7 @@ import { Swords, Trophy } from 'lucide-react';
 import { useDB } from '../hooks/useDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { CombatTracker, InitiativePanel, CombatHeader } from '../components/combat';
+import { PageWrapper, EmptyState } from '../components/ui';
 import { toast } from 'sonner';
 
 export function CombatPage() {
@@ -34,17 +35,13 @@ export function CombatPage() {
 
   if (!activeCombat) {
     return (
-      <div className="hero min-h-[60vh]">
-        <div className="hero-content text-center">
-          <div className="max-w-md">
-            <h1 className="text-5xl font-bold flex items-center gap-3"><Swords size={40} /> Nessun Combattimento</h1>
-            <p className="py-6">Seleziona una campagna e una battaglia per iniziare</p>
-            <button className="btn btn-primary btn-lg" onClick={() => navigate('/campaigns')}>
-              Scegli Campagna
-            </button>
-          </div>
-        </div>
-      </div>
+      <PageWrapper>
+        <EmptyState message="Nessun combattimento attivo. Seleziona una campagna per iniziare!" variant="info">
+          <button className="btn btn-primary btn-lg gap-2 mt-2" onClick={() => navigate('/combat-hub')}>
+            <Swords size={20} /> Scegli Campagna
+          </button>
+        </EmptyState>
+      </PageWrapper>
     );
   }
 
@@ -73,7 +70,7 @@ export function CombatPage() {
             onClick={() =>
               currentCampaign
                 ? navigate(`/campaign/${currentCampaign.id}/battles`)
-                : navigate('/campaigns')
+                : navigate('/combat-hub')
             }
           >
             Torna alle battaglie

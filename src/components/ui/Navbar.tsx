@@ -10,9 +10,9 @@ interface NavLinkItem {
 
 const links: NavLinkItem[] = [
   { to: '/', icon: Home, label: 'Home' },
-  { to: '/campaigns', icon: Swords, label: 'Hub Combattimento' },
+  { to: '/combat-hub', icon: Swords, label: 'Hub Combattimento' },
   { to: '/party', icon: Users, label: 'Party' },
-  { to: '/campaign-management', icon: BookOpen, label: 'Campagne' },
+  { to: '/campaigns', icon: BookOpen, label: 'Campagne' },
   { to: '/monsters', icon: Skull, label: 'Mostri' },
   { to: '/npcs', icon: User, label: 'NPC' },
   { to: '/spells', icon: Sparkles, label: 'Magie' },

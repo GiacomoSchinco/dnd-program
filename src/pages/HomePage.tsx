@@ -22,12 +22,12 @@ export function HomePage() {
     if (activeCombat?.id) {
       navigate(`/combat/${activeCombat.id}`);
     } else {
-      navigate('/campaigns');
+      navigate('/combat-hub');
     }
   };
 
   const handleNewCombat = () => {
-    navigate('/campaigns');
+    navigate('/combat-hub');
   };
 
   // Keyboard shortcuts
@@ -35,12 +35,12 @@ export function HomePage() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'n') {
         e.preventDefault();
-        navigate('/campaigns');
+        navigate('/combat-hub');
       }
       if (e.ctrlKey && e.shiftKey && e.key === 'R') {
         e.preventDefault();
         if ((activeCombat?.participants?.length ?? 0) > 0) {
-          activeCombat?.id ? navigate(`/combat/${activeCombat.id}`) : navigate('/campaigns');
+          activeCombat?.id ? navigate(`/combat/${activeCombat.id}`) : navigate('/combat-hub');
         }
       }
     };
@@ -96,6 +96,13 @@ export function HomePage() {
               >
                 <BookOpen size={20} />
                 Gestisci Campagne
+              </button>
+              <button 
+                className="btn btn-outline btn-lg gap-2"
+                onClick={() => navigate('/combat-hub')}
+              >
+                <Swords size={20} />
+                Hub Combattimento
               </button>
             </div>
           </div>

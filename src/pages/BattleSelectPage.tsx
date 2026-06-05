@@ -2,10 +2,10 @@ import { useEffect, useState, FormEvent, MouseEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
-import { DataTable, ConfirmModal, FormModal, Field } from '../components/ui';
+import { DataTable, ConfirmModal, FormModal, Field, PageWrapper, EmptyState } from '../components/ui';
 import { useCampaignContext } from '../context/CampaignContext';
 import { toast } from 'sonner';
-import { Swords, Plus, Trash2 } from 'lucide-react';
+import { Swords, Plus, Trash2, BookOpen } from 'lucide-react';
 import { Campaign, Combat } from '../types';
 
 export function BattleSelectPage() {
@@ -59,77 +59,94 @@ export function BattleSelectPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header con breadcrumb */}
-      <div className="flex justify-between items-center">
-        <div>
-          <div className="breadcrumbs text-sm">
-            <ul>
-              <li><a onClick={() => navigate('/campaigns')}>Campagne</a></li>
-              <li className="font-bold">{campaign?.name || 'Campagna'}</li>
-              <li>Battaglie</li>
-            </ul>
-          </div>
-          <h1 className="text-3xl font-bold mt-2 flex items-center gap-2"><Swords size={28} /> Battaglie</h1>
-          <p className="text-base-content/60">Seleziona una battaglia o creane una nuova</p>
-        </div>
-        <button className="btn btn-primary gap-1" onClick={() => { setNewBattleName(''); setNewBattleModal(true); }}>
-          <Plus size={16} /> Nuova Battaglia
-        </button>
-      </div>
-
-      {/* Tabella Battaglie */}
-      <DataTable<Combat>
-        initialData={campaignCombats}
-        visibleColumns={['name', 'date', 'status', 'participants', 'round', 'actions']}
-        labels={{
-          name: 'Battaglia',
-          date: 'Data',
-          status: 'Stato',
-          participants: 'Partecipanti',
-          round: 'Round',
-          actions: 'Azioni',
-        }}
-        customRenderers={{
-          date: (value) => (
-            <span className="text-sm">
-              {value ? new Date(value).toLocaleString('it-IT') : '-'}
-            </span>
-          ),
-          status: (value) => (
-            <span className={`badge ${value === 'terminated' ? 'badge-error' : 'badge-success'}`}>
-              {value === 'terminated' ? 'Conclusa' : 'In corso'}
-            </span>
-          ),
-          participants: (value) => (
-            <span>{Array.isArray(value) ? value.length : 0}</span>
-          ),
-          round: (value) => <span>{value ?? 1}</span>,
-          actions: (_, row) => (
-            <div className="flex gap-2 justify-end">
-              <button
-                className="btn btn-xs btn-primary gap-1"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleLoadBattle(row.id!);
-                }}
-              >
-                <Swords size={12} /> Riprendi
-              </button>
-              <button
-                className="btn btn-xs btn-error gap-1"
-                onClick={(e) => handleDeleteBattle(row.id!, e)}
-              >
-                <Trash2 size={12} /> Elimina
-              </button>
+    <PageWrapper>
+      {!campaign ? (
+        <EmptyState
+          message="Nessuna campagna trovata. Creane una per iniziare!"
+          variant="info"
+        >
+          <button
+            className="btn btn-primary gap-2 mt-2"
+            onClick={() => navigate('/combat-hub')}
+          >
+            <BookOpen size={18} /> Vai alla gestione campagne
+          </button>
+        </EmptyState>
+      ) : (
+        <>
+          {/* Header con breadcrumb */}
+          <div className="flex justify-between items-center">
+            <div>
+              <div className="breadcrumbs text-sm">
+                <ul>
+                  <li><a onClick={() => navigate('/combat-hub')}>Hub Combattimento</a></li>
+                  <li className="font-bold">{campaign?.name || 'Campagna'}</li>
+                  <li>Battaglie</li>
+                </ul>
+              </div>
+              <h1 className="text-3xl font-bold mt-2 flex items-center gap-2"><Swords size={28} /> Battaglie</h1>
+              <p className="text-base-content/60">Seleziona una battaglia o creane una nuova</p>
             </div>
-          ),
-        }}
-        onRowClick={(id) => handleLoadBattle(id as number)}
-        emptyMessage="Nessuna battaglia in questa campagna. Creane una nuova."
-        pagination
-        itemsPerPage={10}
-      />
+            <button className="btn btn-primary gap-1" onClick={() => { setNewBattleName(''); setNewBattleModal(true); }}>
+              <Plus size={16} /> Nuova Battaglia
+            </button>
+          </div>
+
+          {/* Tabella Battaglie */}
+          <DataTable<Combat>
+            initialData={campaignCombats}
+            visibleColumns={['name', 'date', 'status', 'participants', 'round', 'actions']}
+            labels={{
+              name: 'Battaglia',
+              date: 'Data',
+              status: 'Stato',
+              participants: 'Partecipanti',
+              round: 'Round',
+              actions: 'Azioni',
+            }}
+            customRenderers={{
+              date: (value) => (
+                <span className="text-sm">
+                  {value ? new Date(value).toLocaleString('it-IT') : '-'}
+                </span>
+              ),
+              status: (value) => (
+                <span className={`badge ${value === 'terminated' ? 'badge-error' : 'badge-success'}`}>
+                  {value === 'terminated' ? 'Conclusa' : 'In corso'}
+                </span>
+              ),
+              participants: (value) => (
+                <span>{Array.isArray(value) ? value.length : 0}</span>
+              ),
+              round: (value) => <span>{value ?? 1}</span>,
+              actions: (_, row) => (
+                <div className="flex gap-2 justify-end">
+                  <button
+                    className="btn btn-xs btn-primary gap-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLoadBattle(row.id!);
+                    }}
+                  >
+                    <Swords size={12} /> Riprendi
+                  </button>
+                  <button
+                    className="btn btn-xs btn-error gap-1"
+                    onClick={(e) => handleDeleteBattle(row.id!, e)}
+                  >
+                    <Trash2 size={12} /> Elimina
+                  </button>
+                </div>
+              ),
+            }}
+            onRowClick={(id) => handleLoadBattle(id as number)}
+            emptyMessage="Nessuna battaglia in questa campagna. Creane una nuova."
+            pagination
+            itemsPerPage={10}
+          />
+        </>
+      )}
+
       <ConfirmModal
         isOpen={confirmState.isOpen}
         onClose={closeConfirm}
@@ -159,6 +176,6 @@ export function BattleSelectPage() {
           />
         </Field>
       </FormModal>
-    </div>
+    </PageWrapper>
   );
 }
