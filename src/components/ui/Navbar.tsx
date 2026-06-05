@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Swords, Users, BookOpen, Skull, User, Sparkles, Settings, Dices } from 'lucide-react';
+import { Home, Swords, Users, BookOpen, Skull, User, Sparkles, Settings } from 'lucide-react';
+import { DndIcon } from './DndIcon';
 
 interface NavLinkItem {
   to: string;
@@ -36,7 +37,7 @@ export function Navbar({ collapsed = false }: NavbarProps) {
           ${collapsed ? 'py-[0.55rem] px-0' : ''}
         `}
       >
-        <Dices size={24} className="text-primary" />
+        <DndIcon name="logo" size={36} className="text-primary" />
         {!collapsed && <span>Castle Keeper</span>}
       </div>
 

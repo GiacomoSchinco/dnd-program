@@ -2,6 +2,7 @@ import { useDB } from '../hooks/useDB';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Dices, Swords, Plus, BookOpen, Skull, Sparkles, Users, BarChart3, ScrollText } from 'lucide-react';
+import { DndIcon } from '../components/ui/DndIcon';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export function HomePage() {
       <div className="hero rounded-box bg-gradient-to-r from-primary/30 to-secondary/30 p-6">
         <div className="hero-content text-center p-4">
           <div className="max-w-lg">
-            <Dices size={48} className="mb-3" />
+            <DndIcon name="logo" size={56} className="text-primary mb-3" />
             <h1 className="text-4xl font-bold">Castle Keeper</h1>
             <p className="py-4 text-base-content/70">
               Your D&D Adventure Hub
