@@ -1,10 +1,9 @@
-import { useRef, ChangeEvent, ReactNode } from 'react'; // used by CsvRow
+import { useRef, useCallback, useState, ChangeEvent, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { useDB } from '../hooks/useDB';
-import { ConfirmModal } from '../components/ui';
-import { useState } from 'react';
+import { ConfirmModal, PageWrapper } from '../components/ui';
 import { db } from '../db/database';
 import { seedMonsters, seedSpells } from '../db/seedData';
 import {
@@ -151,7 +150,7 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <PageWrapper maxWidth="2xl">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2"><Settings2 size={28} /> Impostazioni</h1>
@@ -226,6 +225,6 @@ export function SettingsPage() {
         confirmText="Reset"
         confirmVariant="error"
       />
-    </div>
+    </PageWrapper>
   );
 }

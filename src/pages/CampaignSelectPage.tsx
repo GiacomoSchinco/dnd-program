@@ -8,6 +8,7 @@ import { CampaignPanel } from '../components/campaign';
 import { toast } from 'sonner';
 import { Swords, Plus, Trash2 } from 'lucide-react';
 import { Campaign, Combat } from '../types';
+import { PageWrapper, EmptyState } from '../components/ui';
 
 export function CampaignSelectPage() {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ export function CampaignSelectPage() {
 
 
   return (
-    <div className="space-y-6">
+    <PageWrapper>
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2"><Swords size={28} /> Hub Combattimento</h1>
@@ -69,15 +70,12 @@ export function CampaignSelectPage() {
       </div>
 
       {campaigns?.length === 0 ? (
-        <div className="hero min-h-[50vh] bg-base-200 rounded-box">
-          <div className="hero-content text-center">
-            <div>
-              <h2 className="text-2xl font-bold">Nessuna Campagna</h2>
-              <p className="py-4">Crea la tua prima campagna per iniziare</p>
-              <CampaignPanel title="" compact />
-            </div>
-          </div>
-        </div>
+        <EmptyState
+          message="Non hai ancora creato una campagna. Creane una per iniziare!"
+          variant="info"
+        >
+          <CampaignPanel title="" compact />
+        </EmptyState>
       ) : (
         <div className="space-y-4">
           <div className="card bg-base-100 shadow-xl">
@@ -189,6 +187,6 @@ export function CampaignSelectPage() {
           />
         </Field>
       </FormModal>
-    </div>
+    </PageWrapper>
   );
 }

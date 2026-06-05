@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
 
 /**
- * Determina se siamo in ambiente Electron o in produzione con file://
+ * Determina se siamo in ambiente Electron in produzione (file://)
  */
 function isElectron(): boolean {
   if (typeof window === 'undefined') return false;
-  if (navigator.userAgent.includes('Electron')) return true;
-  if (window.location.protocol === 'file:') return true;
-  return false;
+  return window.location.protocol === 'file:';
 }
 
 interface DndIconProps {
@@ -40,12 +38,13 @@ export function DndIcon({ name, size = 24, className = '', 'aria-label': ariaLab
     fetch(iconPath)
       .then((res) => res.text())
       .then((text) => {
-        // Sostituisci fill hardcoded con currentColor
-        const colored = text
+        // Sostituisci fill hardcoded con currentColor e rimuovi style/width/height dall'SVG
+        const cleaned = text
           .replace(/fill="#[0-9a-fA-F]+"/g, 'fill="currentColor"')
           .replace(/fill='#[0-9a-fA-F]+'/g, "fill='currentColor'")
-          .replace(/class="[^"]*"/g, '');
-        setSvgContent(colored);
+          .replace(/class="[^"]*"/g, '')
+          .replace(/\b(width|height|style)="[^"]*"/gi, '');
+        setSvgContent(cleaned);
       })
       .catch(() => setSvgContent(null));
   }, [electron, name]);
@@ -66,6 +65,7 @@ export function DndIcon({ name, size = 24, className = '', 'aria-label': ariaLab
           height: size,
           minWidth: size,
           minHeight: size,
+          overflow: 'hidden',
         }}
         dangerouslySetInnerHTML={{ __html: svgContent }}
       />
@@ -81,7 +81,9 @@ export function DndIcon({ name, size = 24, className = '', 'aria-label': ariaLab
         aria-hidden={!ariaLabel}
         className={className}
         style={{
-          display: 'inline-block',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           width: size,
           height: size,
           minWidth: size,
@@ -89,6 +91,7 @@ export function DndIcon({ name, size = 24, className = '', 'aria-label': ariaLab
           backgroundColor: 'currentColor',
           borderRadius: '4px',
           opacity: 0.3,
+          overflow: 'hidden',
         }}
       />
     );
@@ -102,7 +105,9 @@ export function DndIcon({ name, size = 24, className = '', 'aria-label': ariaLab
       aria-hidden={!ariaLabel}
       className={className}
       style={{
-        display: 'inline-block',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         width: size,
         height: size,
         minWidth: size,
@@ -116,6 +121,7 @@ export function DndIcon({ name, size = 24, className = '', 'aria-label': ariaLab
         WebkitMaskSize: 'contain',
         WebkitMaskRepeat: 'no-repeat',
         WebkitMaskPosition: 'center',
+        overflow: 'hidden',
       }}
     />
   );

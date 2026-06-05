@@ -2,8 +2,9 @@ import { useDB } from '../hooks/useDB';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useCampaignContext } from '../context/CampaignContext';
-import { Dices, Swords, Plus, BookOpen, Skull, Sparkles, Users, BarChart3, ScrollText } from 'lucide-react';
+import { Swords, Plus, BookOpen, Skull, Sparkles, Users, BarChart3, ScrollText } from 'lucide-react';
 import { DndIcon } from '../components/ui/DndIcon';
+import { PageWrapper } from '../components/ui';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ export function HomePage() {
   }, [activeCombat]);
 
   return (
-    <div className="space-y-6">
+    <PageWrapper>
       {/* Hero Section - Più compatta e orientata all'azione */}
       <div className="hero rounded-box bg-gradient-to-r from-primary/30 to-secondary/30 p-6">
         <div className="hero-content text-center p-4">
@@ -263,6 +264,6 @@ export function HomePage() {
           <Users size={14} /> Party
         </button>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

@@ -1,8 +1,9 @@
 import { CampaignPanel } from '../components/campaign';
+import { PageWrapper } from '../components/ui';
 
 export function CampaignPage() {
   return (
-    <div className="space-y-6">
+    <PageWrapper>
       <div>
         <h1 className="text-3xl font-bold">Gestione Campagne</h1>
         <p className="text-base-content/60">
@@ -11,6 +12,6 @@ export function CampaignPage() {
       </div>
 
       <CampaignPanel title="Campagne" />
-    </div>
+    </PageWrapper>
   );
 }

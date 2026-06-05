@@ -3,7 +3,7 @@ import { useDB } from '../hooks/useDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
-import { DeleteConfirmModal, EmptyState, PageHeader } from '../components/ui';
+import { DeleteConfirmModal, EmptyState, PageHeader, PageWrapper } from '../components/ui';
 import { CharacterCard, CharacterFormModal } from '../components/combat';
 import { CampaignFormModal } from '../components/campaign';
 import { Users, Plus } from 'lucide-react';
@@ -82,7 +82,7 @@ export function PartyPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <PageWrapper>
       {/* Header con selezione campagna */}
       <PageHeader
         icon={<Users size={28} />}
@@ -148,6 +148,6 @@ export function PartyPage() {
       />
 
       <DeleteConfirmModal confirmState={confirmState} onClose={closeConfirm} confirmText="Rimuovi" />
-    </div>
+    </PageWrapper>
   );
 }

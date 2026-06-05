@@ -3,7 +3,7 @@ import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { SpellSchools } from '../db/database';
 import { toast } from 'sonner';
-import { DeleteConfirmModal, CsvToolbar, PageHeader, SearchInput, EmptyState, FilterSelect } from '../components/ui';
+import { DeleteConfirmModal, CsvToolbar, PageHeader, SearchInput, EmptyState, FilterSelect, PageWrapper } from '../components/ui';
 import { SpellFormModal, SpellCard } from '../components/library';
 import { exportCSV, rowToSpell, SPELL_COLUMNS } from '../utils/csvIO';
 import { Sparkles, Plus } from 'lucide-react';
@@ -72,7 +72,7 @@ export function SpellsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <PageWrapper>
       <PageHeader
         icon={<Sparkles size={28} />}
         title="Grimorio degli Incantesimi"
@@ -122,6 +122,6 @@ export function SpellsPage() {
       />
 
       <DeleteConfirmModal confirmState={confirmState} onClose={closeConfirm} />
-    </div>
+    </PageWrapper>
   );
 }

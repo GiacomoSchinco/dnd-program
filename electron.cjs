@@ -12,6 +12,7 @@ function createWindow() {
     minHeight: 600,
     autoHideMenuBar: true,
     title: 'Castle Keeper',
+    icon: path.join(__dirname, 'public', 'logo.ico'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

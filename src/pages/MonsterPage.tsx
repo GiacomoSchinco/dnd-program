@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
-import { DeleteConfirmModal, EmptyState, FilterSelect, CsvToolbar, PageHeader, SearchInput } from '../components/ui';
+import { DeleteConfirmModal, EmptyState, FilterSelect, CsvToolbar, PageHeader, SearchInput, PageWrapper } from '../components/ui';
 import { MonsterCard, MonsterFormModal } from '../components/library';
 import { exportCSV, rowToMonster, MONSTER_COLUMNS } from '../utils/csvIO';
 import { Skull, Plus } from 'lucide-react';
@@ -67,7 +67,7 @@ export function MonstersPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <PageWrapper>
       <PageHeader
         icon={<Skull size={28} />}
         title="Libreria Mostri"
@@ -119,6 +119,6 @@ export function MonstersPage() {
       />
 
       <DeleteConfirmModal confirmState={confirmState} onClose={closeConfirm} />
-    </div>
+    </PageWrapper>
   );
 }

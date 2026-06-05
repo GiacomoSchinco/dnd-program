@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
-import { DeleteConfirmModal, EmptyState, CsvToolbar, PageHeader, SearchInput } from '../components/ui';
+import { DeleteConfirmModal, EmptyState, CsvToolbar, PageHeader, SearchInput, PageWrapper } from '../components/ui';
 import { exportCSV, rowToNpc, NPC_COLUMNS } from '../utils/csvIO';
 import { NpcFormModal, NpcCard } from '../components/library';
 import { User, Plus } from 'lucide-react';
@@ -36,9 +36,9 @@ export function NpcPage() {
   };
 
   const handleImport = async (rows: Record<string, string>[]) => {
-    const valid = rows.map(rowToNpc).filter((n) => n.name);
+    const valid = rows.map(rowToNpc).filter((n): n is Npc => n !== null && !!n.name);
     if (!valid.length) { toast.error('Nessuna riga valida trovata nel CSV'); return; }
-    await importNpcs(valid);
+    await importNpcs(valid as Omit<Npc, "id">[]);
     toast.success(`${valid.length} NPC importati!`);
   };
 
@@ -58,7 +58,7 @@ export function NpcPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <PageWrapper>
       <PageHeader
         icon={<User size={28} />}
         title="Libreria NPC"
@@ -104,6 +104,6 @@ export function NpcPage() {
       />
 
       <DeleteConfirmModal confirmState={confirmState} onClose={closeConfirm} />
-    </div>
+    </PageWrapper>
   );
 }
