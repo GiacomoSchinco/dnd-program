@@ -47,8 +47,8 @@ export function HomePage() {
   // Titolo finestra dinamico (Electron)
   useEffect(() => {
     document.title = activeCombat
-      ? `Combattimento - D&D Tracker`
-      : 'D&D Combat Tracker';
+      ? `Combattimento - Castle Keeper`
+      : 'Castle Keeper — Your D&D Adventure Hub';
   }, [activeCombat]);
 
   return (
@@ -58,9 +58,9 @@ export function HomePage() {
         <div className="hero-content text-center p-4">
           <div className="max-w-lg">
             <Dices size={48} className="mb-3" />
-            <h1 className="text-4xl font-bold">D&D Combat Tracker</h1>
+            <h1 className="text-4xl font-bold">Castle Keeper</h1>
             <p className="py-4 text-base-content/70">
-              Gestisci combattimenti, traccia HP e organizza le tue campagne
+              Your D&D Adventure Hub
             </p>
             
             {/* Azione principale ben visibile */}

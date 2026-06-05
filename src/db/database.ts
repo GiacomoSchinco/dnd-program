@@ -18,7 +18,7 @@ import {
 
 export { seedMonsters, seedSpells, CombatStatus, CharacterRaces, CharacterClasses, SpellSchools };
 
-export class DnDCombatDB extends Dexie {
+export class CastleKeeperDB extends Dexie {
   activeCombat!: Table<ActiveCombat, string>;
   combats!: Table<Combat, number>;
   campaigns!: Table<Campaign, number>;
@@ -84,4 +84,4 @@ export class DnDCombatDB extends Dexie {
   }
 }
 
-export const db = new DnDCombatDB();
+export const db = new CastleKeeperDB();

@@ -1,8 +1,9 @@
 {
-  "name": "dnd-program",
+  "name": "castle-keeper",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "description": "Castle Keeper — Your D&D Adventure Hub",
   "main": "electron.cjs",
   "scripts": {
     "dev": "vite",
@@ -14,8 +15,8 @@
     "electron:build:portable": "vite build && electron-builder --win portable"
   },
   "build": {
-    "appId": "com.dndprogram.app",
-    "productName": "D&D Combat Tracker",
+    "appId": "com.castlekeeper.app",
+    "productName": "Castle Keeper",
     "directories": {
       "output": "release"
     },

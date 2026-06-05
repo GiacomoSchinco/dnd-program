@@ -37,7 +37,7 @@ export function Navbar({ collapsed = false }: NavbarProps) {
         `}
       >
         <Dices size={24} className="text-primary" />
-        {!collapsed && <span>D&amp;D Tracker</span>}
+        {!collapsed && <span>Castle Keeper</span>}
       </div>
 
       {/* Links */}

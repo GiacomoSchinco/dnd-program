@@ -11,7 +11,7 @@ function createWindow() {
     minWidth: 800,
     minHeight: 600,
     autoHideMenuBar: true,
-    title: 'D&D Combat Tracker',
+    title: 'Castle Keeper',
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
