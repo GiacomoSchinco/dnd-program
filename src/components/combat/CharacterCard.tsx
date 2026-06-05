@@ -1,5 +1,7 @@
-import { Heart, Pencil, Trash2, Shield } from 'lucide-react';
+import { Pencil, Trash2, Shield } from 'lucide-react';
 import { DndIcon } from '../ui/DndIcon';
+import { HPBar } from '../ui/HPBar';
+import { QuickHealthActions } from '../ui/QuickHealthActions';
 import { getClassIcon, getClassColor, getClassName } from '../../utils/icons';
 
 interface CharacterCardProps {
@@ -35,11 +37,6 @@ export function CharacterCard({
   onDamage,
   variant = 'character', // 'character' | 'participant'
 }: CharacterCardProps) {
-  const hpPercent = currentHp != null && maxHp ? (currentHp / maxHp) * 100 : 100;
-  let hpColor = 'progress-success';
-  if (hpPercent < 25) hpColor = 'progress-error';
-  else if (hpPercent < 50) hpColor = 'progress-warning';
-
   const currentHpValue = currentHp ?? maxHp ?? 0;
   const maxHpValue = maxHp ?? currentHp ?? 100;
   const tempHpValue = tempHp ?? 0;
@@ -74,7 +71,7 @@ export function CharacterCard({
             )}
           </div>
           {currentHp !== undefined && (
-            <progress className={`progress ${hpColor} w-full h-1.5`} value={currentHpValue} max={maxHpValue} />
+            <HPBar current={currentHpValue} max={maxHpValue} size="xs" showLabel={false} />
           )}
         </div>
       </div>
@@ -104,39 +101,12 @@ export function CharacterCard({
 
         {/* HP bar */}
         {maxHp != null && (
-          <div>
-            <div className="flex justify-between text-xs text-base-content/60 mb-1">
-              <span className="flex items-center gap-1"><Heart size={12} /> HP</span>
-              <span className="font-semibold text-base-content">
-                {currentHpValue} / {maxHpValue}
-                {tempHpValue > 0 && <span className="text-info ml-1">+{tempHpValue}</span>}
-              </span>
-            </div>
-            <progress className={`progress ${hpColor} w-full h-2`} value={currentHpValue} max={maxHpValue} />
-          </div>
+          <HPBar current={currentHpValue} max={maxHpValue} temp={tempHpValue} size="sm" />
         )}
 
         {/* Pulsanti cura/danno */}
         {onHeal && onDamage && (
-          <div className="flex items-stretch gap-3 pt-1">
-            <div className="flex-1 flex flex-col items-center gap-1">
-              <span className="text-[10px] font-bold text-error/70 uppercase tracking-wider">Danno</span>
-              <div className="flex gap-1">
-                <button className="btn btn-xs btn-soft btn-error min-w-0 px-1.5" onClick={() => onDamage(10)} title="Danno 10">-10</button>
-                <button className="btn btn-xs btn-soft btn-error min-w-0 px-1.5" onClick={() => onDamage(5)} title="Danno 5">-5</button>
-                <button className="btn btn-xs btn-soft btn-error min-w-0 px-1.5" onClick={() => onDamage(1)} title="Danno 1">-1</button>
-              </div>
-            </div>
-            <div className="flex items-center justify-center w-px bg-base-300/50 self-stretch" />
-            <div className="flex-1 flex flex-col items-center gap-1">
-              <span className="text-[10px] font-bold text-success/70 uppercase tracking-wider">Cura</span>
-              <div className="flex gap-1">
-                <button className="btn btn-xs btn-soft btn-success min-w-0 px-1.5" onClick={() => onHeal(1)} title="Cura 1">+1</button>
-                <button className="btn btn-xs btn-soft btn-success min-w-0 px-1.5" onClick={() => onHeal(5)} title="Cura 5">+5</button>
-                <button className="btn btn-xs btn-soft btn-success min-w-0 px-1.5" onClick={() => onHeal(10)} title="Cura 10">+10</button>
-              </div>
-            </div>
-          </div>
+          <QuickHealthActions onDamage={onDamage} onHeal={onHeal} variant="card" />
         )}
 
         {/* CA */}

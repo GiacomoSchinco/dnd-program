@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ParticipantActions } from './ParticipantActions';
-import { Target, Pencil, Heart } from 'lucide-react';
+import { HPBar } from '../ui/HPBar';
+import { Target, Pencil } from 'lucide-react';
 import type { CombatParticipant } from '../../types';
 
 interface ParticipantListProps {
@@ -57,12 +58,7 @@ export function ParticipantList({
         : idx === currentTurnIndex;
         const currentHp = participant.currentHp ?? participant.hp ?? 0;
         const maxHp = participant.maxHp ?? participant.hp ?? 1;
-        const hpPercent = maxHp > 0 ? (currentHp / maxHp) * 100 : 0;
-        
-        let hpColor = 'progress-primary';
-        if (hpPercent < 25) hpColor = 'progress-error';
-        else if (hpPercent < 50) hpColor = 'progress-warning';
-        
+
         const isPC = participant.type === 'pc';
         const isNPC = participant.type === 'npc';
         const isMonster = participant.type === 'monster';
@@ -134,19 +130,7 @@ export function ParticipantList({
               </div>
 
               {/* HP e Barra */}
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="flex items-center gap-1"><Heart size={12} /> HP</span>
-                  <span className="font-bold">
-                    {currentHp} / {maxHp}
-                  </span>
-                </div>
-                <progress
-                  className={`progress ${hpColor} w-full h-3`}
-                  value={currentHp}
-                  max={maxHp}
-                />
-              </div>
+              <HPBar current={currentHp} max={maxHp} size="md" fullColor="primary" />
 
               {/* Bottoni Azioni */}
               {!isTerminated && (

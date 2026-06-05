@@ -1,7 +1,9 @@
 import { useState, ChangeEvent, KeyboardEvent } from 'react';
 import { ConfirmModal } from '../ui';
+import { QuickHealthActions } from '../ui/QuickHealthActions';
 import { Dices, Pencil, Trash2 } from 'lucide-react';
 import type { CombatParticipant } from '../../types';
+
 
 interface ConfirmState {
   isOpen: boolean;
@@ -17,20 +19,6 @@ interface ParticipantActionsProps {
   heal: (id: string, heal: number) => void;
   removeParticipant: (id: string) => void;
   showToast: (msg: string) => void;
-}
-
-function rollDamageFormula(formula: string) {
-  const match = formula.match(/(\d*)d(\d+)(?:([+-])(\d+))?/);
-  if (!match) return null;
-  const count = parseInt(match[1]) || 1;
-  const sides = parseInt(match[2]);
-  const sign = match[3] === '-' ? -1 : 1;
-  const bonus = sign * (parseInt(match[4]) || 0);
-  let total = bonus;
-  for (let i = 0; i < count; i++) {
-    total += Math.floor(Math.random() * sides) + 1;
-  }
-  return total;
 }
 
 export function ParticipantActions({ participant, applyDamage, heal, removeParticipant, showToast }: ParticipantActionsProps) {
@@ -58,13 +46,6 @@ export function ParticipantActions({ participant, applyDamage, heal, removeParti
     setShowCustom(false);
   };
 
-  const handleRollDamage = () => {
-    const total = rollDamageFormula(participant.damage ?? '');
-    if (total == null) return;
-    applyDamage(participant.id, total);
-    showToast(`${participant.name} subisce ${total} danni (${participant.damage})`);
-  };
-
   const handleRemove = () => {
     setConfirmState({
       isOpen: true,
@@ -81,18 +62,17 @@ export function ParticipantActions({ participant, applyDamage, heal, removeParti
   return (
     <div className="space-y-2 mt-2">
       {/* Azioni rapide */}
-      <div className="flex flex-wrap gap-2">
-        <button className="btn btn-error btn-sm" onClick={() => applyDamage(participant.id, 1)}>-1</button>
-        <button className="btn btn-error btn-sm" onClick={() => applyDamage(participant.id, 5)}>-5</button>
-        <button className="btn btn-error btn-sm" onClick={() => applyDamage(participant.id, 10)}>-10</button>
-        <button className="btn btn-success btn-sm" onClick={() => heal(participant.id, 1)}>+1</button>
-        <button className="btn btn-success btn-sm" onClick={() => heal(participant.id, 5)}>+5</button>
-        <button className="btn btn-success btn-sm" onClick={() => heal(participant.id, 10)}>+10</button>
+      <div className="flex flex-wrap gap-2 items-center">
+        <QuickHealthActions
+          onDamage={(n) => applyDamage(participant.id, n)}
+          onHeal={(n) => heal(participant.id, n)}
+          variant="row"
+        />
 
         {participant.damage && (
-          <button className="btn btn-warning btn-sm gap-1" onClick={handleRollDamage}>
-            <Dices size={14} /> {participant.damage}
-          </button>
+          <span className="badge badge-warning gap-1 text-xs font-mono" title="Formula danno">
+            <Dices size={11} /> {participant.damage}
+          </span>
         )}
 
         <button
