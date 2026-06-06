@@ -1,6 +1,8 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { SpellSchools } from '../../db/database';
-import { FormModal, Field, FieldRow } from '../ui/FormModal';
+import { FormModal, Field } from '../ui/FormModal';
+import { SpellBasicFields } from './spellForm/SpellBasicFields';
+import { SpellMechanicsFields } from './spellForm/SpellMechanicsFields';
+import { SpellCastingFields } from './spellForm/SpellCastingFields';
 import type { Spell } from '../../types';
 
 type SpellFormData = Omit<Spell, 'id'>;
@@ -58,154 +60,9 @@ export function SpellFormModal({ isOpen, editingSpell, onClose, onSubmit }: Spel
       onClose={onClose}
       onSubmit={handleSubmit}
     >
-      <Field label="Nome" required>
-        <input
-          type="text"
-          className="input input-bordered w-full"
-          value={formData.name}
-          onChange={set('name')}
-          required
-          autoFocus
-        />
-      </Field>
-
-      <FieldRow>
-        <Field label="Livello">
-          <select
-            className="select select-bordered w-full"
-            value={formData.level}
-            onChange={setNum('level')}
-          >
-            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((l) => (
-              <option key={l} value={l}>
-                {l === 0 ? 'Trucchetto' : `Livello ${l}`}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Scuola">
-          <select
-            className="select select-bordered w-full"
-            value={formData.school}
-            onChange={set('school')}
-          >
-            {Object.values(SpellSchools).map((school) => (
-              <option key={school} value={school}>
-                {school}
-              </option>
-            ))}
-          </select>
-        </Field>
-      </FieldRow>
-
-      <FieldRow>
-        <Field label="Danno" hint="es. 8d6">
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            value={formData.damage}
-            onChange={set('damage')}
-            placeholder="es. 8d6"
-          />
-        </Field>
-        <Field label="Cura" hint="es. 2d8+mod">
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            value={formData.healing}
-            onChange={set('healing')}
-            placeholder="es. 2d8+mod"
-          />
-        </Field>
-      </FieldRow>
-
-      <FieldRow>
-        <Field label="Gittata">
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            value={formData.range}
-            onChange={set('range')}
-            placeholder="es. 120 ft"
-          />
-        </Field>
-        <Field label="Durata">
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            value={formData.duration}
-            onChange={set('duration')}
-            placeholder="es. 1 ora"
-          />
-        </Field>
-      </FieldRow>
-
-      <FieldRow>
-        <Field label="Tempo di lancio">
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            value={formData.castingTime}
-            onChange={set('castingTime')}
-            placeholder="es. 1 azione, 1 azione bonus"
-          />
-        </Field>
-        <Field label="Tiro Salvezza">
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            value={formData.saveType}
-            onChange={set('saveType')}
-            placeholder="es. Destrezza, Costituzione"
-          />
-        </Field>
-      </FieldRow>
-
-      <FieldRow>
-        <Field label="Componenti">
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            value={formData.components}
-            onChange={set('components')}
-            placeholder="es. V, S, M"
-          />
-        </Field>
-        <Field label="Materiale">
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            value={formData.material}
-            onChange={set('material')}
-            placeholder="es. una piuma d'oca"
-          />
-        </Field>
-      </FieldRow>
-
-      <FieldRow>
-        <Field label="Concentrazione">
-          <div className="flex items-center h-10">
-            <input
-              type="checkbox"
-              className="checkbox checkbox-warning"
-              checked={!!formData.concentration}
-              onChange={setCheck('concentration')}
-            />
-            <span className="ml-2 text-sm">Richiede concentrazione</span>
-          </div>
-        </Field>
-        <Field label="Rituale">
-          <div className="flex items-center h-10">
-            <input
-              type="checkbox"
-              className="checkbox checkbox-info"
-              checked={!!formData.ritual}
-              onChange={setCheck('ritual')}
-            />
-            <span className="ml-2 text-sm">Può essere lanciato come rituale</span>
-          </div>
-        </Field>
-      </FieldRow>
+      <SpellBasicFields formData={formData} set={set} setNum={setNum} />
+      <SpellMechanicsFields formData={formData} set={set} />
+      <SpellCastingFields formData={formData} set={set} setCheck={setCheck} />
 
       <Field label="Descrizione">
         <textarea

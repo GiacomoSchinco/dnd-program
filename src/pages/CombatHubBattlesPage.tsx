@@ -2,11 +2,12 @@ import { useEffect, useState, FormEvent, MouseEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
-import { DataTable, ConfirmModal, FormModal, Field, PageWrapper, ContentSection, EmptyState } from '../components/ui';
+import { ConfirmModal, FormModal, Field, PageWrapper, ContentSection, EmptyState } from '../components/ui';
 import { useCampaignContext } from '../context/CampaignContext';
 import { toast } from 'sonner';
 import { Swords, Plus, Trash2, BookOpen } from 'lucide-react';
-import { Campaign, Combat } from '../types';
+import { BattleTable } from '../components/combat';
+import { Campaign } from '../types';
 
 export function CombatHubBattlesPage() {
   const { campaignId } = useParams();
@@ -93,57 +94,12 @@ export function CombatHubBattlesPage() {
 
           {/* Tabella Battaglie */}
           <ContentSection>
-            <DataTable<Combat>
-            initialData={campaignCombats}
-            visibleColumns={['name', 'date', 'status', 'participants', 'round', 'actions']}
-            labels={{
-              name: 'Battaglia',
-              date: 'Data',
-              status: 'Stato',
-              participants: 'Partecipanti',
-              round: 'Round',
-              actions: 'Azioni',
-            }}
-            customRenderers={{
-              date: (value) => (
-                <span className="text-sm">
-                  {value ? new Date(value).toLocaleString('it-IT') : '-'}
-                </span>
-              ),
-              status: (value) => (
-                <span className={`badge ${value === 'terminated' ? 'badge-error' : 'badge-success'}`}>
-                  {value === 'terminated' ? 'Conclusa' : 'In corso'}
-                </span>
-              ),
-              participants: (value) => (
-                <span>{Array.isArray(value) ? value.length : 0}</span>
-              ),
-              round: (value) => <span>{value ?? 1}</span>,
-              actions: (_, row) => (
-                <div className="flex gap-2 justify-end">
-                  <button
-                    className="btn btn-xs btn-primary gap-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLoadBattle(row.id!);
-                    }}
-                  >
-                    <Swords size={12} /> Riprendi
-                  </button>
-                  <button
-                    className="btn btn-xs btn-error gap-1"
-                    onClick={(e) => handleDeleteBattle(row.id!, e)}
-                  >
-                    <Trash2 size={12} /> Elimina
-                  </button>
-                </div>
-              ),
-            }}
-            onRowClick={(id) => handleLoadBattle(id as number)}
-            emptyMessage="Nessuna battaglia in questa campagna. Creane una nuova."
-            pagination
-            itemsPerPage={10}
-          />
+            <BattleTable
+              combats={campaignCombats}
+              onLoad={handleLoadBattle}
+              onDelete={handleDeleteBattle}
+              emptyMessage="Nessuna battaglia in questa campagna. Creane una nuova."
+            />
         </ContentSection>
         </>
       )}

@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useDB } from '../hooks/useDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { useConfirm } from '../hooks/useConfirm';
-import { DataTable, ConfirmModal, FormModal, Field } from '../components/ui';
+import { ConfirmModal, FormModal, Field } from '../components/ui';
 import { toast } from 'sonner';
-import { Swords, Plus, Trash2, BookOpen } from 'lucide-react';
+import { Swords, Plus, BookOpen } from 'lucide-react';
+import { BattleTable } from '../components/combat';
 import { Campaign, Combat } from '../types';
 import { PageWrapper, PageHeader, ContentSection, EmptyState } from '../components/ui';
 
@@ -107,55 +108,12 @@ export function CombatHubPage() {
 
           {activeCampaign && (
             <ContentSection>
-              <DataTable<Combat>
-              initialData={selectedCampaignCombats}
-              visibleColumns={['name', 'date', 'status', 'participants', 'round', 'actions']}
-              labels={{
-                name: 'Battaglia',
-                date: 'Data',
-                status: 'Stato',
-                participants: 'Partecipanti',
-                round: 'Round',
-                actions: 'Azioni',
-              }}
-              customRenderers={{
-                date: (value) => (
-                  <span className="text-sm">
-                    {value ? new Date(value).toLocaleString('it-IT') : '-'}
-                  </span>
-                ),
-                status: (value) => (
-                  <span className={`badge ${value === 'terminated' ? 'badge-error' : 'badge-success'}`}>
-                    {value === 'terminated' ? 'Conclusa' : 'In corso'}
-                  </span>
-                ),
-                participants: (value) => <span>{Array.isArray(value) ? value.length : 0}</span>,
-                round: (value) => <span>{value ?? 1}</span>,
-                actions: (_, row) => (
-                  <div className="flex gap-2 justify-end">
-                    <button
-                      className="btn btn-xs btn-primary gap-1"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLoadBattle(row.id!);
-                      }}
-                    >
-                      <Swords size={12} /> Riprendi
-                    </button>
-                    <button
-                      className="btn btn-xs btn-error gap-1"
-                      onClick={(e) => handleDeleteBattle(row.id!, e)}
-                    >
-                      <Trash2 size={12} /> Elimina
-                    </button>
-                  </div>
-                ),
-              }}
-              onRowClick={(id) => handleLoadBattle(id as number)}
-              emptyMessage="Nessuna battaglia per la campagna attiva. Creane una nuova."
-              pagination
-              itemsPerPage={10}
-            />
+              <BattleTable
+                combats={selectedCampaignCombats}
+                onLoad={handleLoadBattle}
+                onDelete={handleDeleteBattle}
+                emptyMessage="Nessuna battaglia per la campagna attiva. Creane una nuova."
+              />
             </ContentSection>
         )}
         </>

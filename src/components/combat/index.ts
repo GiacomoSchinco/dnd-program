@@ -1,3 +1,4 @@
+export { BattleTable } from './BattleTable'
 export { CharacterCard } from './CharacterCard'
 export { CharacterFormModal } from './CharacterFormModal'
 export { CombatHeader } from './CombatHeader'
