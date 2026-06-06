@@ -7,7 +7,7 @@ import { useCampaignContext } from '../context/CampaignContext';
 import { toast } from 'sonner';
 import { Swords, Plus, Trash2, BookOpen } from 'lucide-react';
 import { BattleTable } from '../components/combat';
-import { Campaign } from '../types';
+import { Campaign, Combat } from '../types';
 
 export function CombatHubBattlesPage() {
   const { campaignId } = useParams();
