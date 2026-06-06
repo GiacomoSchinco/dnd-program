@@ -20,7 +20,7 @@ export function HomePage() {
 
   const handleResumeCombat = () => {
     if (activeCombat?.id) {
-      navigate(`/combat/${activeCombat.id}`);
+      navigate('/combat');
     } else {
       navigate('/combat-hub');
     }
@@ -40,7 +40,7 @@ export function HomePage() {
       if (e.ctrlKey && e.shiftKey && e.key === 'R') {
         e.preventDefault();
         if ((activeCombat?.participants?.length ?? 0) > 0) {
-          activeCombat?.id ? navigate(`/combat/${activeCombat.id}`) : navigate('/combat-hub');
+          navigate('/combat');
         }
       }
     };
@@ -76,9 +76,6 @@ export function HomePage() {
                 >
                   <Swords size={20} />
                   Riprendi Combattimento
-                  <span className="badge badge-secondary badge-sm ml-2">
-                    {activeCombat.participants.length}
-                  </span>
                 </button>
               ) : (
                 <button 

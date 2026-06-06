@@ -168,7 +168,7 @@ export default function DataTable<T extends Record<string, any>>({
             <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100">
                 <table className="table table-zebra">
                     <thead>
-                        <tr className="border-b border-base-300 bg-base-200">
+                        <tr className="border-b border-base-300 bg-base-300">
                             {columns.map((col) => (
                                 <th key={col.id} className="px-4 py-3">
                                     <span className="font-semibold text-base-content text-sm uppercase tracking-wider">
