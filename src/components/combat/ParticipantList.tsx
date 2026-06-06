@@ -66,8 +66,8 @@ export function ParticipantList({
         return (
           <div
             key={participant.id}
-            className={`card bg-base-200 shadow-md transition-all ${
-              isCurrentTurn ? 'ring-2 ring-primary ring-offset-2 ring-offset-base-200' : ''
+            className={`card bg-base-100 shadow-md transition-all ${
+              isCurrentTurn ? 'ring-2 ring-primary ring-offset-2 ring-offset-base-100' : ''
             }`}
           >
             <div className="card-body p-3">
@@ -130,7 +130,7 @@ export function ParticipantList({
               </div>
 
               {/* HP e Barra */}
-              <HPBar current={currentHp} max={maxHp} size="md" fullColor="primary" />
+              <HPBar current={currentHp} max={maxHp} size="md" />
 
               {/* Bottoni Azioni */}
               {!isTerminated && (

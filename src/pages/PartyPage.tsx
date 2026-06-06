@@ -3,7 +3,7 @@ import { useDB } from '../hooks/useDB';
 import { useCampaignContext } from '../context/CampaignContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
-import { DeleteConfirmModal, EmptyState, PageHeader, PageWrapper } from '../components/ui';
+import { DeleteConfirmModal, EmptyState, PageHeader, PageWrapper, ContentSection } from '../components/ui';
 import { CharacterCard, CharacterFormModal } from '../components/combat';
 import { CampaignFormModal } from '../components/campaign';
 import { Users, Plus } from 'lucide-react';
@@ -104,35 +104,36 @@ export function PartyPage() {
       )}
 
       {/* Grid Personaggi */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredCharacters?.map((char) => (
-          <CharacterCard
-            key={char.id}
-            name={char.name}
-            race={char.race}
-            characterClass={char.class}
-            level={char.level}
-            ac={char.ac}
-            currentHp={char.currentHp ?? char.hp}
-            maxHp={char.maxHp ?? char.hp}
-            onEdit={() => openEdit(char)}
-            onDelete={() => handleDelete(char)}
-            onHeal={handleHeal(char)}
-            onDamage={handleDamage(char)}
-          />
-        ))}
-      </div>
+      <ContentSection>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredCharacters?.map((char) => (
+            <CharacterCard
+              key={char.id}
+              name={char.name}
+              race={char.race}
+              characterClass={char.class}
+              level={char.level}
+              ac={char.ac}
+              currentHp={char.currentHp ?? char.hp}
+              maxHp={char.maxHp ?? char.hp}
+              onEdit={() => openEdit(char)}
+              onDelete={() => handleDelete(char)}
+              onHeal={handleHeal(char)}
+              onDamage={handleDamage(char)}
+            />
+          ))}
+        </div>
 
-      {filteredCharacters?.length === 0 && (
-        <EmptyState
-          message={
-            activeCampaign
-              ? 'Nessun personaggio in questa campagna. Creane uno nuovo!'
-              : 'Nessuna campagna attiva. Crea una campagna per iniziare!'
-          }
-          variant="info"
-        />
-      )}
+        {filteredCharacters?.length === 0 && (
+          <EmptyState
+            message={
+              activeCampaign
+                ? 'Nessun personaggio in questa campagna. Creane uno nuovo!'
+                : 'Nessuna campagna attiva. Crea una campagna per iniziare!'
+            }
+          />
+        )}
+      </ContentSection>
 
       <CharacterFormModal
         isOpen={isModalOpen}

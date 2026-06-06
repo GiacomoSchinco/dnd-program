@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { DataTable } from '../../components/ui';
+import { DataTable, EmptyState } from '../../components/ui';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Campaign } from '../../types';
 
@@ -33,6 +33,12 @@ export function CampaignTable({
     },
     [onSelect],
   );
+
+  if (!sortedCampaigns.length) {
+    return (
+      <EmptyState message="Nessuna campagna disponibile. Creane una per iniziare!" />
+    );
+  }
 
   return (
     <DataTable

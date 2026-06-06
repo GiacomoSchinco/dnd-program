@@ -23,7 +23,7 @@ interface SectionProps {
 
 function Section({ icon, title, children }: SectionProps) {
   return (
-    <div className="card bg-base-200 shadow">
+    <div className="card bg-base-100 shadow">
       <div className="card-body gap-4">
         <h2 className="card-title text-lg">
           <span className="flex items-center">{icon}</span> {title}

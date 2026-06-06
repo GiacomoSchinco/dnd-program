@@ -7,9 +7,9 @@ import { DataTable, ConfirmModal, FormModal, Field } from '../components/ui';
 import { toast } from 'sonner';
 import { Swords, Plus, Trash2, BookOpen } from 'lucide-react';
 import { Campaign, Combat } from '../types';
-import { PageWrapper, EmptyState } from '../components/ui';
+import { PageWrapper, PageHeader, ContentSection, EmptyState } from '../components/ui';
 
-export function CampaignSelectPage() {
+export function CombatHubPage() {
   const navigate = useNavigate();
   const { confirmState, confirm, closeConfirm } = useConfirm();
   const { campaigns, combats, createCombatForCampaign, loadCombat, deleteFromHistory } = useDB();
@@ -61,55 +61,53 @@ export function CampaignSelectPage() {
 
   return (
     <PageWrapper>
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2"><Swords size={28} /> Hub Combattimento</h1>
-          <p className="text-base-content/60">La campagna attiva si seleziona dalla topbar globale</p>
-        </div>
-      </div>
-
+      <PageHeader
+        icon={<Swords size={28} />}
+        title="Hub Combattimento"
+        subtitle="La campagna attiva si seleziona dalla topbar globale"
+      />
       {campaigns?.length === 0 ? (
-        <EmptyState
-          message="Non hai ancora creato una campagna. Vai alla gestione campagne per iniziare!"
-          variant="info"
-        >
-          <button
-            className="btn btn-primary btn-sm gap-2 mt-2"
-            onClick={() => navigate('/campaigns')}
+        <ContentSection>
+          <EmptyState
+            message="Non hai ancora creato una campagna. Vai alla gestione campagne per iniziare!"
           >
-            <BookOpen size={16} /> Gestisci Campagne
-          </button>
-        </EmptyState>
+            <button
+              className="btn btn-primary btn-sm gap-2 mt-2"
+              onClick={() => navigate('/campaigns')}
+            >
+              <BookOpen size={16} /> Gestisci Campagne
+            </button>
+          </EmptyState>
+        </ContentSection>
       ) : (
-        <div className="space-y-4">
-          <div className="card bg-base-100 shadow-xl">
-            <div className="card-body">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 className="card-title">Campagna attiva</h2>
-                  {activeCampaign ? (
-                    <>
-                      <p className="text-lg font-semibold">{activeCampaign.name}</p>
-                      {activeCampaign.description && (
-                        <p className="text-sm text-base-content/70">{activeCampaign.description}</p>
-                      )}
-                    </>
-                  ) : (
-                    <p className="text-base-content/70">
-                      Seleziona una campagna dalla topbar per visualizzare le battaglie.
-                    </p>
+        <>
+        <ContentSection>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="card-title">Campagna attiva</h2>
+              {activeCampaign ? (
+                <>
+                  <p className="text-lg font-semibold">{activeCampaign.name}</p>
+                  {activeCampaign.description && (
+                    <p className="text-sm text-base-content/70">{activeCampaign.description}</p>
                   )}
-                </div>
-
-                <button className="btn btn-primary gap-1" onClick={() => { setNewBattleName(''); setNewBattleModal(true); }} disabled={!activeCampaign}>
-                  <Plus size={16} /> Nuova Battaglia
-                </button>
-              </div>
+                </>
+              ) : (
+                <p className="text-base-content/70">
+                  Seleziona una campagna dalla topbar per visualizzare le battaglie.
+                </p>
+              )}
             </div>
+
+            <button className="btn btn-primary gap-1" onClick={() => { setNewBattleName(''); setNewBattleModal(true); }} disabled={!activeCampaign}>
+              <Plus size={16} /> Nuova Battaglia
+            </button>
           </div>
+        </ContentSection>
 
           {activeCampaign && (
-            <DataTable<Combat>
+            <ContentSection>
+              <DataTable<Combat>
               initialData={selectedCampaignCombats}
               visibleColumns={['name', 'date', 'status', 'participants', 'round', 'actions']}
               labels={{
@@ -158,8 +156,9 @@ export function CampaignSelectPage() {
               pagination
               itemsPerPage={10}
             />
-          )}
-        </div>
+            </ContentSection>
+        )}
+        </>
       )}
 
       <ConfirmModal

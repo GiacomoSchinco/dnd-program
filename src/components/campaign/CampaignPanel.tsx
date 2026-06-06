@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useDB } from '../../hooks/useDB';
 import { useCampaignContext } from '../../context/CampaignContext';
 import { useConfirm } from '../../hooks/useConfirm';
-import { DeleteConfirmModal } from '../ui';
-import { CampaignHeader } from './CampaignHeader';
+import { DeleteConfirmModal , ContentSection } from '../ui';
 import { CampaignTable } from './CampaignTable';
 import { CampaignFormModal } from './CampaignFormModal';
 import type { CampaignFormData } from './CampaignFormModal';
@@ -13,9 +12,11 @@ import { Campaign } from '../../types';
 interface CampaignPanelProps {
   title?: string;
   compact?: boolean;
+  showCreate?: boolean;
+  onCloseCreate?: () => void;
 }
 
-export function CampaignPanel({ title = 'Campagne', compact = false }: CampaignPanelProps) {
+export function CampaignPanel({ title = 'Campagne', compact = false, showCreate = false, onCloseCreate }: CampaignPanelProps) {
   const { campaigns, addCampaign, updateCampaign, deleteCampaign } = useDB();
   const { selectedCampaignId, setSelectedCampaignId } = useCampaignContext();
   const { confirmState, confirm, closeConfirm } = useConfirm();
@@ -24,6 +25,10 @@ export function CampaignPanel({ title = 'Campagne', compact = false }: CampaignP
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (showCreate) setIsCreateOpen(true);
+  }, [showCreate]);
 
   const handleCreate = async (data: CampaignFormData) => {
     setIsSubmitting(true);
@@ -36,6 +41,7 @@ export function CampaignPanel({ title = 'Campagne', compact = false }: CampaignP
 
       setSelectedCampaignId(createdId);
       setIsCreateOpen(false);
+      onCloseCreate?.();
       toast.success('Campagna creata');
     } catch (err) {
       console.error('Errore creazione campagna:', err);
@@ -87,41 +93,32 @@ export function CampaignPanel({ title = 'Campagne', compact = false }: CampaignP
   };
 
   return (
-    <div className="card bg-base-100 shadow-xl">
-      <div className="card-body">
-        <CampaignHeader
-          title={title}
-            disabled={isSubmitting}
-          onCreate={() => setIsCreateOpen(true)}
-        />
-        <div className="mt-2">
-          <CampaignTable
-            campaigns={campaigns ?? []}
-            selectedCampaignId={selectedCampaignId}
-            compact={compact}
-                    disabled={isSubmitting}
-            onSelect={(id) => setSelectedCampaignId(id)}
-            onEdit={(campaign) => {
-              setEditingCampaign(campaign);
-              setIsEditOpen(true);
-            }}
-            onDelete={handleDelete}
-          />
-        </div>
+    <ContentSection>
+      <CampaignTable
+        campaigns={campaigns ?? []}
+        selectedCampaignId={selectedCampaignId}
+        compact={compact}
+        disabled={isSubmitting}
+        onSelect={(id) => setSelectedCampaignId(id)}
+        onEdit={(campaign) => {
+          setEditingCampaign(campaign);
+          setIsEditOpen(true);
+        }}
+        onDelete={handleDelete}
+      />
 
-        {!compact && (campaigns ?? []).length > 0 && (
-          <p className="text-xs text-base-content/60 mt-2">
-            Suggerimento: imposta la campagna attiva da qui o dalla topbar per aggiornare tutto il contesto.
-          </p>
-        )}
-      </div>
+      {!compact && (campaigns ?? []).length > 0 && (
+        <p className="text-xs text-base-content/60 mt-2">
+          Suggerimento: imposta la campagna attiva da qui o dalla topbar per aggiornare tutto il contesto.
+        </p>
+      )}
 
       <CampaignFormModal
         isOpen={isCreateOpen}
         title="Nuova Campagna"
         confirmText="Crea"
         loading={isSubmitting}
-        onClose={() => setIsCreateOpen(false)}
+        onClose={() => { setIsCreateOpen(false); onCloseCreate?.(); }}
         onSubmit={handleCreate}
       />
 
@@ -142,7 +139,7 @@ export function CampaignPanel({ title = 'Campagne', compact = false }: CampaignP
         onSubmit={handleEdit}
       />
       <DeleteConfirmModal confirmState={confirmState} onClose={closeConfirm} />
-    </div>
+    </ContentSection>
   );
 }
 

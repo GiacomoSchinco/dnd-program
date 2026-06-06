@@ -3,7 +3,7 @@ import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { SpellSchools } from '../db/database';
 import { toast } from 'sonner';
-import { DeleteConfirmModal, CsvToolbar, PageHeader, SearchInput, EmptyState, FilterSelect, PageWrapper } from '../components/ui';
+import { DeleteConfirmModal, CsvToolbar, PageHeader, EmptyState, FilterBar, FilterSelect, PageWrapper, ContentSection } from '../components/ui';
 import { SpellFormModal, SpellCard } from '../components/library';
 import { exportCSV, rowToSpell, SPELL_COLUMNS } from '../utils/csvIO';
 import { Sparkles, Plus } from 'lucide-react';
@@ -85,12 +85,7 @@ export function SpellsPage() {
         </>}
       />
 
-      {/* Filtri */}
-      <div className="flex flex-wrap gap-4 items-end">
-        <div className="form-control">
-          <label className="label text-sm">Cerca</label>
-          <SearchInput value={search} onChange={setSearch} placeholder="Nome incantesimo..." />
-        </div>
+      <FilterBar search={search} onSearchChange={setSearch} searchPlaceholder="Nome incantesimo...">
         <FilterSelect label="Livello" value={filterLevel} onChange={(e) => setFilterLevel(e.target.value === 'all' ? 'all' : Number(e.target.value) as FilterLevel)}>
           {LEVEL_OPTIONS.map((level) => (
             <option key={level} value={level}>{level === 'all' ? 'Tutti' : `Livello ${level}`}</option>
@@ -102,17 +97,19 @@ export function SpellsPage() {
             <option key={school} value={school}>{school}</option>
           ))}
         </FilterSelect>
-      </div>
+      </FilterBar>
 
       {/* Grid Incantesimi */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredSpells?.map((spell) => (
-          <SpellCard key={spell.id} spell={spell} onEdit={handleEdit} onDelete={handleDelete} />
-        ))}
-        {filteredSpells?.length === 0 && (
-          <EmptyState colSpan message="Nessun incantesimo trovato con questi filtri" variant="info" />
-        )}
-      </div>
+      <ContentSection>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredSpells?.map((spell) => (
+            <SpellCard key={spell.id} spell={spell} onEdit={handleEdit} onDelete={handleDelete} />
+          ))}
+          {filteredSpells?.length === 0 && (
+            <EmptyState colSpan message={spells?.length === 0 ? 'Nessun incantesimo in libreria. Creane uno!' : 'Nessun incantesimo trovato con questi filtri.'} />
+          )}
+        </div>
+      </ContentSection>
 
       <SpellFormModal
         isOpen={isModalOpen}

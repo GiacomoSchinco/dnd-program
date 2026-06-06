@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
-import { DeleteConfirmModal, EmptyState, FilterSelect, CsvToolbar, PageHeader, SearchInput, PageWrapper } from '../components/ui';
+import { DeleteConfirmModal, EmptyState, FilterBar, FilterSelect, CsvToolbar, PageHeader, PageWrapper, ContentSection } from '../components/ui';
 import { MonsterCard, MonsterFormModal } from '../components/library';
 import { exportCSV, rowToMonster, MONSTER_COLUMNS } from '../utils/csvIO';
 import { Skull, Plus } from 'lucide-react';
@@ -80,36 +80,33 @@ export function MonstersPage() {
         </>}
       />
 
-      {/* Filtri */}
-      <div className="flex flex-wrap gap-4 items-end">
-        <div className="form-control">
-          <label className="label text-sm">Cerca</label>
-          <SearchInput value={search} onChange={setSearch} placeholder="Nome mostro..." />
-        </div>
+      <FilterBar search={search} onSearchChange={setSearch} searchPlaceholder="Nome mostro...">
         <FilterSelect label="Tipo" value={filterType} onChange={(e) => setFilterType(e.target.value as FilterType)}>
           {TYPE_OPTIONS.map((t) => (
             <option key={t} value={t}>{t === 'all' ? 'Tutti' : getMonsterTypeMeta(t).label}</option>
           ))}
         </FilterSelect>
-      </div>
+      </FilterBar>
 
-      {/* Grid Mostri */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredMonsters.map((monster) => (
-          <MonsterCard
-            key={monster.id}
-            monster={monster}
-            onEdit={() => openEdit(monster)}
-            onDelete={() => handleDelete(monster)}
-          />
-        ))}
-        {monsterLibrary?.length === 0 && (
-          <EmptyState colSpan message="Nessun mostro in libreria. Creane uno!" />
-        )}
-        {monsterLibrary?.length > 0 && filteredMonsters.length === 0 && (
-          <EmptyState colSpan message="Nessun mostro trovato con questi filtri." variant="info" />
-        )}
-      </div>
+      <ContentSection>
+        {/* Grid Mostri */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredMonsters.map((monster) => (
+            <MonsterCard
+              key={monster.id}
+              monster={monster}
+              onEdit={() => openEdit(monster)}
+              onDelete={() => handleDelete(monster)}
+            />
+          ))}
+          {monsterLibrary?.length === 0 && (
+            <EmptyState colSpan message="Nessun mostro in libreria. Creane uno!" />
+          )}
+          {monsterLibrary?.length > 0 && filteredMonsters.length === 0 && (
+            <EmptyState colSpan message="Nessun mostro trovato con questi filtri." />
+          )}
+        </div>
+      </ContentSection>
 
       <MonsterFormModal
         isOpen={isModalOpen}

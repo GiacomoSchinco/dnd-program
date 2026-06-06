@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { toast } from 'sonner';
-import { DeleteConfirmModal, EmptyState, CsvToolbar, PageHeader, SearchInput, PageWrapper } from '../components/ui';
+import { DeleteConfirmModal, EmptyState, FilterBar, CsvToolbar, PageHeader, PageWrapper, ContentSection } from '../components/ui';
 import { exportCSV, rowToNpc, NPC_COLUMNS } from '../utils/csvIO';
 import { NpcFormModal, NpcCard } from '../components/library';
 import { User, Plus } from 'lucide-react';
 import type { Npc } from '../types';
 
-export function NpcPage() {
+export function NpcsPage() {
   const { npcLibrary, addNpc, updateNpc, deleteNpc, importNpcs } = useDB();
   const { confirmState, confirm, closeConfirm } = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,30 +71,27 @@ export function NpcPage() {
         </>}
       />
 
-      {/* Cerca */}
-      <SearchInput
-        value={search}
-        onChange={setSearch}
-        placeholder="Cerca NPC..."
-      />
+      <FilterBar search={search} onSearchChange={setSearch} searchPlaceholder="Cerca NPC..." />
 
-      {/* Lista */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map((npc) => (
-          <NpcCard
-            key={npc.id}
-            npc={npc}
-            onEdit={() => handleEdit(npc)}
-            onDelete={() => handleDelete(npc)}
-          />
-        ))}
-        {filtered.length === 0 && (
-          <EmptyState
-            colSpan
-            message={search ? 'Nessun NPC trovato.' : 'Nessun NPC in libreria. Creane uno!'}
-          />
-        )}
-      </div>
+      <ContentSection>
+        {/* Lista */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((npc) => (
+            <NpcCard
+              key={npc.id}
+              npc={npc}
+              onEdit={() => handleEdit(npc)}
+              onDelete={() => handleDelete(npc)}
+            />
+          ))}
+          {filtered.length === 0 && (
+            <EmptyState
+              colSpan
+              message={search ? 'Nessun NPC trovato.' : 'Nessun NPC in libreria. Creane uno!'}
+            />
+          )}
+        </div>
+      </ContentSection>
 
       <NpcFormModal
         isOpen={isModalOpen}

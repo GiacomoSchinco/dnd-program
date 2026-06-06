@@ -2,13 +2,13 @@ import { useEffect, useState, FormEvent, MouseEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
-import { DataTable, ConfirmModal, FormModal, Field, PageWrapper, EmptyState } from '../components/ui';
+import { DataTable, ConfirmModal, FormModal, Field, PageWrapper, ContentSection, EmptyState } from '../components/ui';
 import { useCampaignContext } from '../context/CampaignContext';
 import { toast } from 'sonner';
 import { Swords, Plus, Trash2, BookOpen } from 'lucide-react';
 import { Campaign, Combat } from '../types';
 
-export function BattleSelectPage() {
+export function CombatHubBattlesPage() {
   const { campaignId } = useParams();
   const { confirmState, confirm, closeConfirm } = useConfirm();
   const [newBattleModal, setNewBattleModal] = useState(false);
@@ -63,7 +63,6 @@ export function BattleSelectPage() {
       {!campaign ? (
         <EmptyState
           message="Nessuna campagna trovata. Creane una per iniziare!"
-          variant="info"
         >
           <button
             className="btn btn-primary gap-2 mt-2"
@@ -93,7 +92,8 @@ export function BattleSelectPage() {
           </div>
 
           {/* Tabella Battaglie */}
-          <DataTable<Combat>
+          <ContentSection>
+            <DataTable<Combat>
             initialData={campaignCombats}
             visibleColumns={['name', 'date', 'status', 'participants', 'round', 'actions']}
             labels={{
@@ -144,6 +144,7 @@ export function BattleSelectPage() {
             pagination
             itemsPerPage={10}
           />
+        </ContentSection>
         </>
       )}
 

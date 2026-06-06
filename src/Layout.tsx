@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Navbar } from './components/ui';
 import { CampaignTopbar } from './components/campaign';
 import { Toaster } from 'sonner';
@@ -18,14 +19,14 @@ export function Layout() {
         {/* Bottone toggle sidebar */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="btn btn-circle btn-sm absolute top-4 -right-3 z-50 shadow-lg bg-base-100 border border-base-300 hover:bg-base-200 transition-all duration-200"
+          className="absolute top-4 -right-3 z-50 flex items-center justify-center w-6 h-8 rounded-r-md bg-base-100 border border-l-0 border-base-300 text-base-content/50 hover:text-base-content hover:bg-base-200 transition-all duration-200 shadow-sm"
           aria-label={collapsed ? 'Espandi sidebar' : 'Comprimi sidebar'}
           title={collapsed ? 'Espandi sidebar' : 'Comprimi sidebar'}
         >
           {collapsed ? (
-            <span className="text-base">→</span>
+            <PanelLeftOpen size={14} />
           ) : (
-            <span className="text-base">←</span>
+            <PanelLeftClose size={14} />
           )}
         </button>
 

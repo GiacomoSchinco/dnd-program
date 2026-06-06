@@ -36,7 +36,7 @@ export function CombatPage() {
   if (!activeCombat) {
     return (
       <PageWrapper>
-        <EmptyState message="Nessun combattimento attivo. Seleziona una campagna per iniziare!" variant="info">
+        <EmptyState message="Nessun combattimento attivo. Seleziona una campagna per iniziare!">
           <button className="btn btn-primary btn-lg gap-2 mt-2" onClick={() => navigate('/combat-hub')}>
             <Swords size={20} /> Scegli Campagna
           </button>
