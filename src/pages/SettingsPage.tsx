@@ -11,7 +11,7 @@ import {
   rowToMonster, rowToSpell, rowToNpc,
   MONSTER_COLUMNS, SPELL_COLUMNS, NPC_COLUMNS,
 } from '../utils/csvIO';
-import { Settings2, Palette, FolderOpen, Database, Check, Skull, Sparkles, User, Download, Upload, Trash2 } from 'lucide-react';
+import { Settings2, Palette, FolderOpen, Database, Check, Skull, Sparkles, User, Download, Upload, Trash2, ScrollText } from 'lucide-react';
 
 // ── Section card ──────────────────────────────────────────────────────────
 
@@ -212,6 +212,16 @@ export function SettingsPage() {
         </p>
         <button className="btn btn-error w-full sm:w-auto gap-1" onClick={() => setResetOpen(true)}>
           <Trash2 size={16} /> Reset completo database
+        </button>
+      </Section>
+
+      {/* ── Crediti ── */}
+      <Section icon={<ScrollText size={18} />} title="Crediti">
+        <p className="text-sm text-base-content/60">
+          Riconoscimenti e licenze per le risorse utilizzate nell&apos;applicazione.
+        </p>
+        <button className="btn btn-outline w-full sm:w-auto gap-1" onClick={() => navigate('/credits')}>
+          <ScrollText size={16} /> Vai ai Crediti
         </button>
       </Section>
 

@@ -10,6 +10,7 @@ import { MonstersPage } from './pages/MonstersPage';
 import { SpellsPage } from './pages/SpellsPage';
 import { NpcsPage } from './pages/NpcsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { CreditsPage } from './pages/CreditsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
         <Route path="/npcs" element={<NpcsPage />} />
         <Route path="/spells" element={<SpellsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/credits" element={<CreditsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
