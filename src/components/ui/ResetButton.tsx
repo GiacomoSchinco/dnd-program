@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { db } from '../../db/database';
-import { seedMonsters, seedSpells } from '../../db/seedData';
+import { seedMonsters, loadSeedSpells } from '../../db/seedData';
 import { ConfirmModal } from './ConfirmModal';
 import { toast } from 'sonner';
 import { Trash2 } from 'lucide-react';
@@ -33,6 +33,7 @@ export function ResetButton({ collapsed = false }: ResetButtonProps) {
         await db.npcs.clear();
         // Re-seed subito dentro la stessa transazione per evitare duplicati
         await db.monsters.bulkAdd(seedMonsters);
+        const seedSpells = await loadSeedSpells();
         await db.spells.bulkAdd(seedSpells);
       });
       toast.success('Reset completato!');

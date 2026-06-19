@@ -5,7 +5,7 @@ import { useTheme } from '../hooks/useTheme';
 import { useDB } from '../hooks/useDB';
 import { ConfirmModal, PageWrapper } from '../components/ui';
 import { db } from '../db/database';
-import { seedMonsters, seedSpells } from '../db/seedData';
+import { seedMonsters, loadSeedSpells } from '../db/seedData';
 import {
   exportCSV, parseCSV,
   rowToMonster, rowToSpell, rowToNpc,
@@ -100,6 +100,7 @@ export function SettingsPage() {
         await db.spells.clear();
         await db.npcs.clear();
         await db.monsters.bulkAdd(seedMonsters);
+        const seedSpells = await loadSeedSpells();
         await db.spells.bulkAdd(seedSpells);
       });
       toast.success('Database resettato!');

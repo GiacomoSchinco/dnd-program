@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useEffect } from 'react';
-import { db, seedMonsters, seedSpells } from '../db/database';
+import { db, seedMonsters, loadSeedSpells } from '../db/database';
 import { toast } from 'sonner';
 import type { Monster, Npc, Spell } from '../types';
 
@@ -19,7 +19,10 @@ export function useLibrary() {
       try {
         await db.transaction('rw', [db.monsters, db.spells], async () => {
           if (await db.monsters.count() === 0) await db.monsters.bulkAdd(seedMonsters);
-          if (await db.spells.count() === 0) await db.spells.bulkAdd(seedSpells);
+          if (await db.spells.count() === 0) {
+            const seedSpells = await loadSeedSpells();
+            await db.spells.bulkAdd(seedSpells);
+          }
         });
       } catch {
         // Reset flag so next mount can retry

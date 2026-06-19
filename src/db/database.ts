@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie';
-import { seedMonsters, seedSpells } from './seedData';
+import { seedMonsters, loadSeedSpells } from './seedData';
 import type {
   Campaign,
   Character,
@@ -16,7 +16,7 @@ import {
   SpellSchools
 } from '../types';
 
-export { seedMonsters, seedSpells, CombatStatus, CharacterRaces, CharacterClasses, SpellSchools };
+export { seedMonsters, loadSeedSpells, CombatStatus, CharacterRaces, CharacterClasses, SpellSchools };
 
 export class CastleKeeperDB extends Dexie {
   activeCombat!: Table<ActiveCombat, string>;

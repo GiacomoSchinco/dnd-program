@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useDB } from '../hooks/useDB';
 import { useConfirm } from '../hooks/useConfirm';
 import { SpellSchools } from '../db/database';
@@ -6,12 +6,14 @@ import { toast } from 'sonner';
 import { DeleteConfirmModal, CsvToolbar, PageHeader, EmptyState, FilterBar, FilterSelect, PageWrapper, ContentSection } from '../components/ui';
 import { SpellFormModal, SpellCard } from '../components/library';
 import { exportCSV, rowToSpell, SPELL_COLUMNS } from '../utils/csvIO';
-import { Sparkles, Plus } from 'lucide-react';
+import { Sparkles, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Spell } from '../types';
 
 const LEVEL_OPTIONS = ['all', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 type FilterLevel = typeof LEVEL_OPTIONS[number];
 type FilterSchool = 'all' | (typeof SpellSchools)[keyof typeof SpellSchools];
+
+const ITEMS_PER_PAGE = 24;
 
 export function SpellsPage() {
   const { spells, addSpell, updateSpell, deleteSpell, importSpells } = useDB();
@@ -22,13 +24,28 @@ export function SpellsPage() {
   const [filterLevel, setFilterLevel] = useState<FilterLevel>('all');
   const [filterSchool, setFilterSchool] = useState<FilterSchool>('all');
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
-  const filteredSpells = spells?.filter((spell: Spell) => {
-    if (filterLevel !== 'all' && spell.level !== filterLevel) return false;
-    if (filterSchool !== 'all' && spell.school !== filterSchool) return false;
-    if (search && !spell.name.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
+  // Resetta la pagina a 1 quando cambiano i filtri
+  useEffect(() => {
+    setPage(1);
+  }, [filterLevel, filterSchool, search]);
+
+  const filteredSpells = useMemo(() => {
+    return spells?.filter((spell: Spell) => {
+      if (filterLevel !== 'all' && spell.level !== filterLevel) return false;
+      if (filterSchool !== 'all' && spell.school !== filterSchool) return false;
+      if (search && !spell.name.toLowerCase().includes(search.toLowerCase())) return false;
+      return true;
+    }) ?? [];
+  }, [spells, filterLevel, filterSchool, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredSpells.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(page, totalPages);
+  const paginatedSpells = filteredSpells.slice(
+    (safePage - 1) * ITEMS_PER_PAGE,
+    safePage * ITEMS_PER_PAGE,
+  );
 
   const handleExport = () => {
     if (!spells?.length) { toast.info('Nessun incantesimo da esportare'); return; }
@@ -99,13 +116,65 @@ export function SpellsPage() {
         </FilterSelect>
       </FilterBar>
 
+      {/* Paginazione — sopra la griglia */}
+      {totalPages > 1 && (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="flex items-center gap-2">
+            <button
+              className="btn btn-xs btn-outline"
+              disabled={safePage <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              <ChevronLeft size={14} />
+            </button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                let pageNum: number;
+                if (totalPages <= 7) {
+                  pageNum = i + 1;
+                } else if (safePage <= 4) {
+                  pageNum = i + 1;
+                } else if (safePage >= totalPages - 3) {
+                  pageNum = totalPages - 6 + i;
+                } else {
+                  pageNum = safePage - 3 + i;
+                }
+                return (
+                  <button
+                    key={pageNum}
+                    className={`btn btn-xs min-w-[2rem] ${
+                      pageNum === safePage ? 'btn-primary' : 'btn-outline'
+                    }`}
+                    onClick={() => setPage(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              className="btn btn-xs btn-outline"
+              disabled={safePage >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+          <span className="text-xs text-base-content/50 ml-1">
+            {filteredSpells.length} · Pag. {safePage}/{totalPages}
+          </span>
+        </div>
+      )}
+
       {/* Grid Incantesimi */}
       <ContentSection>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredSpells?.map((spell) => (
+          {paginatedSpells.map((spell) => (
             <SpellCard key={spell.id} spell={spell} onEdit={handleEdit} onDelete={handleDelete} />
           ))}
-          {filteredSpells?.length === 0 && (
+          {filteredSpells.length === 0 && (
             <EmptyState colSpan message={spells?.length === 0 ? 'Nessun incantesimo in libreria. Creane uno!' : 'Nessun incantesimo trovato con questi filtri.'} />
           )}
         </div>

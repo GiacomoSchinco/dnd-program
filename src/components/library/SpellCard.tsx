@@ -1,4 +1,5 @@
-import { MoreVertical, Pencil, Trash2, Dices, HeartHandshake, Ruler, Clock, BookOpen, Shield, FlaskConical } from 'lucide-react';
+import { useState } from 'react';
+import { MoreVertical, Pencil, Trash2, Dices, HeartHandshake, Clock, Shield, FlaskConical, BookOpen, ChevronDown, ChevronUp, Timer, Gauge } from 'lucide-react';
 import { DndIcon } from '../ui/DndIcon';
 import { getSchoolIcon, getSchoolColor } from '../../utils/icons';
 import type { Spell } from '../../types';
@@ -9,99 +10,115 @@ interface SpellCardProps {
   onDelete: (spell: Spell) => void;
 }
 
+// ── Stat chip ──────────────────────────────────────────────────────────────
+
+interface StatChipProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  mono?: boolean;
+}
+
+function StatChip({ icon, label, value, mono }: StatChipProps) {
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-base-200 text-xs font-medium" title={label}>
+      <span className="opacity-50 shrink-0">{icon}</span>
+      <span className={mono ? 'font-mono' : ''}>{value}</span>
+    </span>
+  );
+}
+
+// ── SpellCard ──────────────────────────────────────────────────────────────
+
 export function SpellCard({ spell, onEdit, onDelete }: SpellCardProps) {
+  const [expanded, setExpanded] = useState(false);
   const schoolColor = getSchoolColor(spell.school);
   const componentsText = spell.components
     ? `${spell.components}${spell.material ? ` (${spell.material})` : ''}`
     : null;
 
+  const isLongDesc = spell.effect && spell.effect.length > 150;
+
+  const levelLabel = spell.level === 0 ? 'Trucchetto' : `Liv. ${spell.level}`;
+
   return (
     <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-      <div className="card-body p-4">
-        {/* Header */}
+      <div className="card-body p-4 gap-3">
+        {/* ── Riga 1: icona + nome + menu ── */}
         <div className="flex justify-between items-start">
-          <div className="flex items-start gap-2 flex-1">
-            <DndIcon name={getSchoolIcon(spell.school)} size={28} className={schoolColor} />
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="card-title text-lg">{spell.name}</h3>
-                <span className="badge badge-primary badge-sm">Livello {spell.level}</span>
-                <span className={`badge badge-sm ${schoolColor} border border-current/30`}>
-                  {spell.school}
-                </span>
-              </div>
-            </div>
+          <div className="flex items-center gap-2 min-w-0">
+            <DndIcon name={getSchoolIcon(spell.school)} size={26} className={`${schoolColor} shrink-0`} />
+            <h3 className="card-title text-base sm:text-lg truncate">{spell.name}</h3>
           </div>
-          <div className="dropdown dropdown-end">
-            <button className="btn btn-ghost btn-xs"><MoreVertical size={14} /></button>
-            <ul className="dropdown-menu dropdown-content z-50 menu p-2 shadow bg-base-200 rounded-box w-32">
+          <div className="dropdown dropdown-end shrink-0">
+            <button className="btn btn-ghost btn-xs" tabIndex={0}><MoreVertical size={14} /></button>
+            <ul className="dropdown-menu dropdown-content z-50 menu p-2 shadow bg-base-200 rounded-box w-32" tabIndex={0}>
               <li><button className="gap-1" onClick={() => onEdit(spell)}><Pencil size={12} /> Modifica</button></li>
               <li><button className="gap-1" onClick={() => onDelete(spell)}><Trash2 size={12} /> Elimina</button></li>
             </ul>
           </div>
         </div>
 
-        {/* Tags */}
-        {(spell.concentration || spell.ritual) && (
-          <div className="flex gap-1 mt-1 flex-wrap">
-            {spell.concentration && <span className="badge badge-warning badge-sm">Concentrazione</span>}
-            {spell.ritual && <span className="badge badge-info badge-sm">Rituale</span>}
-          </div>
-        )}
+        {/* ── Riga 2: badge livello + scuola + tag ── */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="badge badge-primary badge-sm">{levelLabel}</span>
+          <span className={`badge badge-sm ${schoolColor} border border-current/30`}>{spell.school}</span>
+          {spell.concentration && <span className="badge badge-warning badge-sm">Concentrazione</span>}
+          {spell.ritual && <span className="badge badge-info badge-sm">Rituale</span>}
+        </div>
 
-        {/* Stats */}
-        <div className="space-y-1 mt-2 text-sm">
+        {/* ── Riga 3: chip parametri ── */}
+        <div className="flex flex-wrap gap-1.5">
           {spell.castingTime && (
-            <div className="flex justify-between">
-              <span className="opacity-70 flex items-center gap-1"><Clock size={12} /> Lancio:</span>
-              <span>{spell.castingTime}</span>
-            </div>
-          )}
-          {componentsText && (
-            <div className="flex justify-between">
-              <span className="opacity-70 flex items-center gap-1"><FlaskConical size={12} /> Componenti:</span>
-              <span>{componentsText}</span>
-            </div>
-          )}
-          {spell.saveType && (
-            <div className="flex justify-between">
-              <span className="opacity-70 flex items-center gap-1"><Shield size={12} /> TS:</span>
-              <span>{spell.saveType}</span>
-            </div>
-          )}
-          {spell.damage && (
-            <div className="flex justify-between">
-              <span className="opacity-70 flex items-center gap-1"><Dices size={12} /> Danno:</span>
-              <span className="font-mono">{spell.damage}</span>
-            </div>
-          )}
-          {spell.healing && (
-            <div className="flex justify-between">
-              <span className="opacity-70 flex items-center gap-1"><HeartHandshake size={12} /> Cura:</span>
-              <span className="font-mono">{spell.healing}</span>
-            </div>
+            <StatChip icon={<Timer size={11} />} label="Tempo di lancio" value={spell.castingTime} />
           )}
           {spell.range && (
-            <div className="flex justify-between">
-              <span className="opacity-70 flex items-center gap-1"><Ruler size={12} /> Gittata:</span>
-              <span>{spell.range}</span>
-            </div>
+            <StatChip icon={<Gauge size={11} />} label="Gittata" value={spell.range} />
           )}
           {spell.duration && (
-            <div className="flex justify-between">
-              <span className="opacity-70 flex items-center gap-1"><Clock size={12} /> Durata:</span>
-              <span>{spell.duration}</span>
-            </div>
+            <StatChip icon={<Clock size={11} />} label="Durata" value={spell.duration} />
           )}
-          {spell.effect && (
-            <div className="mt-2 pt-2 border-t border-base-300">
-              <p className="text-xs font-medium flex items-center gap-1 opacity-60 mb-1">
-                <BookOpen size={11} /> Descrizione
-              </p>
-              <p className="text-xs leading-relaxed">{spell.effect}</p>
-            </div>
+          {spell.damage && (
+            <StatChip icon={<Dices size={11} />} label="Danno" value={spell.damage} mono />
+          )}
+          {spell.healing && (
+            <StatChip icon={<HeartHandshake size={11} />} label="Cura" value={spell.healing} mono />
+          )}
+          {spell.saveType && (
+            <StatChip icon={<Shield size={11} />} label="Tiro Salvezza" value={spell.saveType} />
           )}
         </div>
+
+        {/* ── Riga 4: descrizione + componenti ── */}
+        {spell.effect && (
+          <div className="border-t border-base-300 pt-2">
+            <div className="flex items-center gap-1 mb-1">
+              <BookOpen size={11} className="opacity-50" />
+              <span className="text-xs font-medium opacity-60">Descrizione</span>
+            </div>
+            {componentsText && (
+              <div className="mb-1.5 px-2.5 py-1 rounded-md bg-base-200/60 border border-base-300 text-xs inline-flex items-center gap-1.5">
+                <FlaskConical size={11} className="opacity-50 shrink-0" />
+                <span className="font-medium">{componentsText}</span>
+              </div>
+            )}
+            <div className={`text-xs leading-relaxed text-base-content/80 ${!expanded && isLongDesc ? 'line-clamp-3' : ''}`}>
+              {spell.effect}
+            </div>
+            {isLongDesc && (
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className="flex items-center gap-1 text-xs text-primary font-medium mt-1 hover:underline"
+              >
+                {expanded ? (
+                  <>Mostra meno <ChevronUp size={12} /></>
+                ) : (
+                  <>Leggi tutto <ChevronDown size={12} /></>
+                )}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
