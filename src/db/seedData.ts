@@ -1,8 +1,8 @@
 import type { Monster } from '../types';
-import { loadSeedSpells } from '../utils/spellMapper';
+import { loadSeedSpells, clearSpellsCache } from '../utils/spellMapper';
 
 // Re-export per comodità
-export { loadSeedSpells };
+export { loadSeedSpells, clearSpellsCache };
 
 // Mostri iniziali (seed)
 export const seedMonsters: Omit<Monster, 'id'>[] = [

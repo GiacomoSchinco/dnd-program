@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback, ChangeEvent, MouseEvent } from "react";
-import { Pencil, Trash2, ScrollText } from 'lucide-react';
+import { Eye, Pencil, Trash2, ScrollText } from 'lucide-react';
 
 function toLabel(key: string) {
     return key
@@ -21,6 +21,7 @@ interface DataTableProps<T> {
     hiddenColumns?: string[];
     labels?: Record<string, string>;
     visibleColumns?: string[];
+    onView?: (id: any, row: T) => void;
     onEdit?: (id: any, row: T) => void;
     onDelete?: (id: any, row: T) => void;
     onRowClick?: (id: any, row: T) => void;
@@ -38,6 +39,7 @@ export default function DataTable<T extends Record<string, any>>({
     hiddenColumns = [],
     labels: labelsRaw = {},
     visibleColumns: visibleColumnsRaw,
+    onView,
     onEdit,
     onDelete,
     onRowClick,
@@ -126,32 +128,46 @@ export default function DataTable<T extends Record<string, any>>({
             };
         });
 
-        if (onEdit || onDelete) {
+        if (onView || onEdit || onDelete) {
             baseCols.push({
                 id: "actions",
                 header: "Azioni",
                 cell: (row: T) => (
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
+                        {onView && (
+                            <button
+                                className="btn btn-xs btn-info btn-square"
+                                onClick={(e: MouseEvent<HTMLButtonElement>) => { 
+                                    e.stopPropagation(); 
+                                    onView(row[idKey], row); 
+                                }}
+                                title="Dettagli"
+                            >
+                                <Eye size={14} />
+                            </button>
+                        )}
                         {onEdit && (
                             <button
-                                className="btn btn-xs btn-primary gap-1"
+                                className="btn btn-xs btn-primary btn-square"
                                 onClick={(e: MouseEvent<HTMLButtonElement>) => { 
                                     e.stopPropagation(); 
                                     onEdit(row[idKey], row); 
                                 }}
+                                title="Modifica"
                             >
-                                <Pencil size={12} /> Modifica
+                                <Pencil size={14} />
                             </button>
                         )}
                         {onDelete && (
                             <button
-                                className="btn btn-xs btn-error gap-1"
+                                className="btn btn-xs btn-error btn-square"
                                 onClick={(e: MouseEvent<HTMLButtonElement>) => { 
                                     e.stopPropagation(); 
                                     onDelete(row[idKey], row); 
                                 }}
+                                title="Elimina"
                             >
-                                <Trash2 size={12} /> Elimina
+                                <Trash2 size={14} />
                             </button>
                         )}
                     </div>

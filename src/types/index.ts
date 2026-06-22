@@ -71,19 +71,18 @@ export interface Spell {
   name: string;
   level: number;
   school: string;
-  castingTime?: string;
+  classes?: string;
+  casting?: string;
   range?: string;
   components?: string;
   duration?: string;
   description?: string;
-  higherLevels?: string;
+  upgrade?: string;
   material?: string;
   concentration?: boolean;
   ritual?: boolean;
   damage?: string;
-  healing?: string;
-  saveType?: string;
-  effect?: string;
+  save?: string;
 }
 
 export interface CombatParticipant {
@@ -205,12 +204,12 @@ export const CharacterClasses = {
 } as const;
 
 export const SpellSchools = {
-  ABITURAZIONE: 'Abiurazione',
-  AMMALIAMENTO: 'Ammaestramento',
-  DIVINAZIONE: 'Divinazione',
-  EVOCAZIONE: 'Evocazione',
-  ILLUSIONE: 'Illusione',
-  INVOCAZIONE: 'Invocazione',
-  NECROMANZIA: 'Necromanzia',
-  TRASMUTAZIONE: 'Trasmutazione'
+  ABJURATION: 'Abjuration',
+  CONJURATION: 'Conjuration',
+  DIVINATION: 'Divination',
+  ENCHANTMENT: 'Enchantment',
+  EVOCATION: 'Evocation',
+  ILLUSION: 'Illusion',
+  NECROMANCY: 'Necromancy',
+  TRANSMUTATION: 'Transmutation'
 } as const;

@@ -10,14 +10,14 @@
 // ─── Scuole di magia ────────────────────────────────────────────────────────
 
 const SCHOOL_MAP: Record<string, { icon: string; color: string }> = {
-  'Abiurazione':     { icon: 'abjuration',    color: 'text-info' },
-  'Ammaestramento':  { icon: 'enchantment',   color: 'text-secondary' },
-  'Divinazione':     { icon: 'divination',    color: 'text-warning' },
-  'Evocazione':      { icon: 'evocation',     color: 'text-error' },
-  'Illusione':       { icon: 'illusion',      color: 'text-accent' },
-  'Invocazione':     { icon: 'conjuration',   color: 'text-success' },
-  'Necromanzia':     { icon: 'necromancy',    color: 'text-base-content' },
-  'Trasmutazione':   { icon: 'transmutation', color: 'text-primary' },
+  'Abjuration':     { icon: 'abjuration',    color: 'text-info' },
+  'Conjuration':    { icon: 'conjuration',   color: 'text-success' },
+  'Divination':     { icon: 'divination',    color: 'text-warning' },
+  'Enchantment':    { icon: 'enchantment',   color: 'text-secondary' },
+  'Evocation':      { icon: 'evocation',     color: 'text-error' },
+  'Illusion':       { icon: 'illusion',      color: 'text-accent' },
+  'Necromancy':     { icon: 'necromancy',    color: 'text-base-content' },
+  'Transmutation':  { icon: 'transmutation', color: 'text-primary' },
 } as const;
 
 /** Nome file SVG per la scuola di magia */
@@ -28,6 +28,22 @@ export function getSchoolIcon(school: string): string {
 /** Classe Tailwind per il colore della scuola di magia */
 export function getSchoolColor(school: string): string {
   return SCHOOL_MAP[school]?.color ?? 'text-base-content/60';
+}
+
+/** Nome italiano della scuola di magia */
+export const SCHOOL_LABELS: Record<string, string> = {
+  'Abjuration':     'Abiurazione',
+  'Conjuration':    'Invocazione',
+  'Divination':     'Divinazione',
+  'Enchantment':    'Ammaliamento',
+  'Evocation':      'Evocazione',
+  'Illusion':       'Illusione',
+  'Necromancy':     'Necromanzia',
+  'Transmutation':  'Trasmutazione',
+};
+
+export function getSchoolName(school: string): string {
+  return SCHOOL_LABELS[school] ?? school;
 }
 
 // ─── Classi dei personaggi ───────────────────────────────────────────────────

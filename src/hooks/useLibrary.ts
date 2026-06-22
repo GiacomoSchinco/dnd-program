@@ -17,10 +17,11 @@ export function useLibrary() {
     _seedInitialized = true;
     const initializeDB = async () => {
       try {
+        // Carica gli incantesimi FUORI dalla transazione per evitare PrematureCommitError
+        const seedSpells = await loadSeedSpells();
         await db.transaction('rw', [db.monsters, db.spells], async () => {
           if (await db.monsters.count() === 0) await db.monsters.bulkAdd(seedMonsters);
           if (await db.spells.count() === 0) {
-            const seedSpells = await loadSeedSpells();
             await db.spells.bulkAdd(seedSpells);
           }
         });

@@ -1,18 +1,17 @@
-import { ChangeEvent } from 'react';
+import { UseFormRegister } from 'react-hook-form';
 import { Field, FieldRow } from '../../ui/FormModal';
 import type { Spell } from '../../../types';
 
 type SpellFormData = Omit<Spell, 'id'>;
 
 interface SpellMechanicsFieldsProps {
-  formData: SpellFormData;
-  set: (field: keyof SpellFormData) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+  register: UseFormRegister<SpellFormData>;
 }
 
 /**
- * SpellMechanicsFields — danno, cura, gittata, durata, tempo di lancio, tiro salvezza.
+ * SpellMechanicsFields — danno, tiro salvezza, gittata, durata, tempo di lancio, potenziamento.
  */
-export function SpellMechanicsFields({ formData, set }: SpellMechanicsFieldsProps) {
+export function SpellMechanicsFields({ register }: SpellMechanicsFieldsProps) {
   return (
     <>
       <FieldRow>
@@ -20,18 +19,16 @@ export function SpellMechanicsFields({ formData, set }: SpellMechanicsFieldsProp
           <input
             type="text"
             className="input input-bordered w-full"
-            value={formData.damage}
-            onChange={set('damage')}
-            placeholder="es. 8d6"
+            {...register('damage')}
+            placeholder="es. 8d6 fuoco"
           />
         </Field>
-        <Field label="Cura" hint="es. 2d8+mod">
+        <Field label="Tiro Salvezza">
           <input
             type="text"
             className="input input-bordered w-full"
-            value={formData.healing}
-            onChange={set('healing')}
-            placeholder="es. 2d8+mod"
+            {...register('save')}
+            placeholder="es. Destrezza, Costituzione"
           />
         </Field>
       </FieldRow>
@@ -41,17 +38,15 @@ export function SpellMechanicsFields({ formData, set }: SpellMechanicsFieldsProp
           <input
             type="text"
             className="input input-bordered w-full"
-            value={formData.range}
-            onChange={set('range')}
-            placeholder="es. 120 ft"
+            {...register('range')}
+            placeholder="es. 45 metri"
           />
         </Field>
         <Field label="Durata">
           <input
             type="text"
             className="input input-bordered w-full"
-            value={formData.duration}
-            onChange={set('duration')}
+            {...register('duration')}
             placeholder="es. 1 ora"
           />
         </Field>
@@ -62,18 +57,16 @@ export function SpellMechanicsFields({ formData, set }: SpellMechanicsFieldsProp
           <input
             type="text"
             className="input input-bordered w-full"
-            value={formData.castingTime}
-            onChange={set('castingTime')}
-            placeholder="es. 1 azione, 1 azione bonus"
+            {...register('casting')}
+            placeholder="es. 1 azione"
           />
         </Field>
-        <Field label="Tiro Salvezza">
+        <Field label="Potenziamento">
           <input
             type="text"
             className="input input-bordered w-full"
-            value={formData.saveType}
-            onChange={set('saveType')}
-            placeholder="es. Destrezza, Costituzione"
+            {...register('upgrade')}
+            placeholder="es. +1d6 per slot"
           />
         </Field>
       </FieldRow>

@@ -1,16 +1,16 @@
 import type { Spell } from '../types';
 
-// ── Mapping scuole (inglese → italiano) ───────────────────────────────────
+// ── Mapping scuole (lowercase inglese → capitalized inglese) ─────────────
 
 const SCHOOL_MAP: Record<string, string> = {
-  abjuration:    'Abiurazione',
-  conjuration:   'Invocazione',
-  divination:    'Divinazione',
-  enchantment:   'Ammaestramento',
-  evocation:     'Evocazione',
-  illusion:      'Illusione',
-  necromancy:    'Necromanzia',
-  transmutation: 'Trasmutazione',
+  abjuration:    'Abjuration',
+  conjuration:   'Conjuration',
+  divination:    'Divination',
+  enchantment:   'Enchantment',
+  evocation:     'Evocation',
+  illusion:      'Illusion',
+  necromancy:    'Necromancy',
+  transmutation: 'Transmutation',
 };
 
 // ── Mapping tempi di lancio ───────────────────────────────────────────────
@@ -26,79 +26,49 @@ const CASTING_TIME_MAP: Record<string, string> = {
   '24hours':    '24 ore',
 };
 
-// ── Interfaccia del JSON ───────────────────────────────────────────────────
+// ── Interfaccia del nuovo JSON ────────────────────────────────────────────
 
 interface RawSpell {
-  slug: string;
   name: string;
-  name_it: string;
   level: number;
   school: string;
   classes: string[];
-  action_type: string | null;
+  casting: string;
+  components: string[];
+  material?: string;
+  duration: string;
   concentration: boolean;
   ritual: boolean;
   range: string;
-  components: string[] | null;
-  material: string | null;
-  duration: string;
-  description: string | null;
-  description_it: string | null;
-  cantrip_upgrade: string | null;
-  higher_level_slot: string | null;
-  saving_throw: string | null;
-  attack_roll: boolean;
-  damage: string | null;
-  area_of_effect: string | null;
-}
-
-// ── Helper: estrae il danno base (prima della virgola) ────────────────────
-
-function extractBaseDamage(raw: string | null): string {
-  if (!raw) return '';
-  // Il formato può essere "1d10 da, 1d10 da" (base, upgraded)
-  // Prendiamo solo la parte prima della virgola
-  const base = raw.split(',')[0].trim();
-  // Rimuovi eventuale testo dopo il dado
-  return base;
-}
-
-// ── Helper: combina potenziamenti ─────────────────────────────────────────
-
-function buildHigherLevels(
-  cantripUpgrade: string | null,
-  higherSlot: string | null,
-): string {
-  const parts: string[] = [];
-  if (cantripUpgrade) parts.push(cantripUpgrade);
-  if (higherSlot) parts.push(higherSlot);
-  return parts.join('\n\n');
+  damage?: string;
+  save?: string;
+  upgrade?: string;
+  description: string;
 }
 
 // ── Mapper principale ─────────────────────────────────────────────────────
 
 /**
- * Converte un array di magie dal formato JSON (pubblico / copyright-free)
+ * Converte un array di magie dal nuovo formato JSON
  * nel formato `Omit<Spell, 'id'>` usato dall'applicazione.
  */
 export function mapSpellsJson(raw: RawSpell[]): Omit<Spell, 'id'>[] {
   return raw.map((s) => ({
-    name:          s.name_it || s.name,
+    name:          s.name,
     level:         s.level,
     school:        SCHOOL_MAP[s.school] || s.school,
-    castingTime:   CASTING_TIME_MAP[s.action_type ?? ''] || s.action_type || '',
+    classes:       s.classes?.map((c) => c.charAt(0).toUpperCase() + c.slice(1)).join(', ') || '',
+    casting:       CASTING_TIME_MAP[s.casting] || s.casting || '',
     range:         s.range || '',
     components:    s.components?.join(', ') || '',
     material:      s.material || '',
     duration:      s.duration || '',
     concentration: !!s.concentration,
     ritual:        !!s.ritual,
-    damage:        extractBaseDamage(s.damage),
-    healing:       '',
-    saveType:      s.saving_throw || '',
-    effect:        s.description_it || s.description || '',
-    higherLevels:  buildHigherLevels(s.cantrip_upgrade, s.higher_level_slot),
-    description:   s.description_it || s.description || '',
+    damage:        s.damage || '',
+    save:          s.save || '',
+    upgrade:       s.upgrade || '',
+    description:   s.description || '',
   }));
 }
 

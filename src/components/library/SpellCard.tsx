@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { MoreVertical, Pencil, Trash2, Dices, HeartHandshake, Clock, Shield, FlaskConical, BookOpen, ChevronDown, ChevronUp, Timer, Gauge } from 'lucide-react';
+import { MoreVertical, Pencil, Trash2, Dices, Clock, Shield, FlaskConical, BookOpen, ChevronDown, ChevronUp, Timer, Gauge, Users } from 'lucide-react';
 import { DndIcon } from '../ui/DndIcon';
-import { getSchoolIcon, getSchoolColor } from '../../utils/icons';
+import { getSchoolIcon, getSchoolColor, getSchoolName, getClassName } from '../../utils/icons';
 import type { Spell } from '../../types';
 
 interface SpellCardProps {
@@ -37,7 +37,8 @@ export function SpellCard({ spell, onEdit, onDelete }: SpellCardProps) {
     ? `${spell.components}${spell.material ? ` (${spell.material})` : ''}`
     : null;
 
-  const isLongDesc = spell.effect && spell.effect.length > 150;
+  const hasDesc = !!spell.description;
+  const isLongDesc = hasDesc && spell.description!.length > 150;
 
   const levelLabel = spell.level === 0 ? 'Trucchetto' : `Liv. ${spell.level}`;
 
@@ -59,18 +60,24 @@ export function SpellCard({ spell, onEdit, onDelete }: SpellCardProps) {
           </div>
         </div>
 
-        {/* ── Riga 2: badge livello + scuola + tag ── */}
+        {/* ── Riga 2: badge livello + scuola + classi + tag ── */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="badge badge-primary badge-sm">{levelLabel}</span>
-          <span className={`badge badge-sm ${schoolColor} border border-current/30`}>{spell.school}</span>
+          <span className={`badge badge-sm ${schoolColor} border border-current/30`}>{getSchoolName(spell.school)}</span>
+          {spell.classes && (
+            <span className="badge badge-ghost badge-sm gap-1">
+              <Users size={11} />
+              {spell.classes.split(',').map((c) => c.trim()).map(getClassName).join(', ')}
+            </span>
+          )}
           {spell.concentration && <span className="badge badge-warning badge-sm">Concentrazione</span>}
           {spell.ritual && <span className="badge badge-info badge-sm">Rituale</span>}
         </div>
 
         {/* ── Riga 3: chip parametri ── */}
         <div className="flex flex-wrap gap-1.5">
-          {spell.castingTime && (
-            <StatChip icon={<Timer size={11} />} label="Tempo di lancio" value={spell.castingTime} />
+          {spell.casting && (
+            <StatChip icon={<Timer size={11} />} label="Tempo di lancio" value={spell.casting} />
           )}
           {spell.range && (
             <StatChip icon={<Gauge size={11} />} label="Gittata" value={spell.range} />
@@ -81,30 +88,30 @@ export function SpellCard({ spell, onEdit, onDelete }: SpellCardProps) {
           {spell.damage && (
             <StatChip icon={<Dices size={11} />} label="Danno" value={spell.damage} mono />
           )}
-          {spell.healing && (
-            <StatChip icon={<HeartHandshake size={11} />} label="Cura" value={spell.healing} mono />
-          )}
-          {spell.saveType && (
-            <StatChip icon={<Shield size={11} />} label="Tiro Salvezza" value={spell.saveType} />
+          {spell.save && (
+            <StatChip icon={<Shield size={11} />} label="Tiro Salvezza" value={spell.save} />
           )}
         </div>
 
-        {/* ── Riga 4: descrizione + componenti ── */}
-        {spell.effect && (
+        {/* ── Riga 4: descrizione ── */}
+        {hasDesc && (
           <div className="border-t border-base-300 pt-2">
-            <div className="flex items-center gap-1 mb-1">
-              <BookOpen size={11} className="opacity-50" />
-              <span className="text-xs font-medium opacity-60">Descrizione</span>
-            </div>
             {componentsText && (
               <div className="mb-1.5 px-2.5 py-1 rounded-md bg-base-200/60 border border-base-300 text-xs inline-flex items-center gap-1.5">
                 <FlaskConical size={11} className="opacity-50 shrink-0" />
                 <span className="font-medium">{componentsText}</span>
               </div>
             )}
-            <div className={`text-xs leading-relaxed text-base-content/80 ${!expanded && isLongDesc ? 'line-clamp-3' : ''}`}>
-              {spell.effect}
+
+            <div className="flex items-center gap-1 mb-1">
+              <BookOpen size={11} className="opacity-50" />
+              <span className="text-xs font-medium opacity-60">Descrizione</span>
             </div>
+            <div className={`text-xs leading-relaxed text-base-content/80 ${!expanded && isLongDesc ? 'line-clamp-3' : ''}`}>
+              {spell.description}
+            </div>
+
+            {/* Pulsante Leggi tutto / Mostra meno */}
             {isLongDesc && (
               <button
                 onClick={() => setExpanded(!expanded)}

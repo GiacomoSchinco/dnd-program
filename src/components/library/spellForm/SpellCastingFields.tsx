@@ -1,19 +1,17 @@
-import { ChangeEvent } from 'react';
+import { UseFormRegister } from 'react-hook-form';
 import { Field, FieldRow } from '../../ui/FormModal';
 import type { Spell } from '../../../types';
 
 type SpellFormData = Omit<Spell, 'id'>;
 
 interface SpellCastingFieldsProps {
-  formData: SpellFormData;
-  set: (field: keyof SpellFormData) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
-  setCheck: (field: keyof SpellFormData) => (e: ChangeEvent<HTMLInputElement>) => void;
+  register: UseFormRegister<SpellFormData>;
 }
 
 /**
  * SpellCastingFields — componenti, materiale, concentrazione e rituale.
  */
-export function SpellCastingFields({ formData, set, setCheck }: SpellCastingFieldsProps) {
+export function SpellCastingFields({ register }: SpellCastingFieldsProps) {
   return (
     <>
       <FieldRow>
@@ -21,8 +19,7 @@ export function SpellCastingFields({ formData, set, setCheck }: SpellCastingFiel
           <input
             type="text"
             className="input input-bordered w-full"
-            value={formData.components}
-            onChange={set('components')}
+            {...register('components')}
             placeholder="es. V, S, M"
           />
         </Field>
@@ -30,8 +27,7 @@ export function SpellCastingFields({ formData, set, setCheck }: SpellCastingFiel
           <input
             type="text"
             className="input input-bordered w-full"
-            value={formData.material}
-            onChange={set('material')}
+            {...register('material')}
             placeholder="es. una piuma d'oca"
           />
         </Field>
@@ -43,8 +39,7 @@ export function SpellCastingFields({ formData, set, setCheck }: SpellCastingFiel
             <input
               type="checkbox"
               className="checkbox checkbox-warning"
-              checked={!!formData.concentration}
-              onChange={setCheck('concentration')}
+              {...register('concentration')}
             />
             <span className="ml-2 text-sm">Richiede concentrazione</span>
           </div>
@@ -54,8 +49,7 @@ export function SpellCastingFields({ formData, set, setCheck }: SpellCastingFiel
             <input
               type="checkbox"
               className="checkbox checkbox-info"
-              checked={!!formData.ritual}
-              onChange={setCheck('ritual')}
+              {...register('ritual')}
             />
             <span className="ml-2 text-sm">Può essere lanciato come rituale</span>
           </div>

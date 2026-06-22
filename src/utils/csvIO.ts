@@ -91,7 +91,7 @@ export function parseCSV(text: string): Record<string, string>[] {
 // ── Per-entity column definitions ──────────────────────────────────────────
 
 export const MONSTER_COLUMNS = ['name', 'hp', 'ac', 'damage', 'cr', 'type'];
-export const SPELL_COLUMNS   = ['name', 'level', 'school', 'damage', 'healing', 'range', 'duration', 'effect'];
+export const SPELL_COLUMNS   = ['name', 'level', 'school', 'classes', 'casting', 'damage', 'save', 'range', 'duration', 'components', 'material', 'concentration', 'ritual', 'upgrade', 'description'];
 export const NPC_COLUMNS     = ['name', 'hp', 'ac', 'description'];
 
 // ── Per-entity row mappers (CSV row → DB object) ───────────────────────────
@@ -115,15 +115,23 @@ export function rowToSpell(row: Record<string, string>): Omit<Spell, 'id'> | nul
   const name = (row.name || '').trim();
   if (!name) return null;
   const level = Math.max(0, Math.min(9, parseInt(row.level, 10) || 0));
+  const toBool = (v: string) => v.trim().toLowerCase() === 'true' || v.trim() === '1';
   return {
     name,
     level,
-    school:   (row.school   || 'Evocazione').trim(),
-    damage:   (row.damage   || '').trim(),
-    healing:  (row.healing  || '').trim(),
-    range:    (row.range    || '').trim(),
-    duration: (row.duration || '').trim(),
-    effect:   (row.effect   || '').trim(),
+    school:        (row.school       || 'Evocation').trim(),
+    classes:       (row.classes      || '').trim(),
+    casting:       (row.casting      || '').trim(),
+    damage:        (row.damage       || '').trim(),
+    save:          (row.save         || '').trim(),
+    range:         (row.range        || '').trim(),
+    duration:      (row.duration     || '').trim(),
+    components:    (row.components   || '').trim(),
+    material:      (row.material     || '').trim(),
+    concentration: toBool(row.concentration || ''),
+    ritual:        toBool(row.ritual || ''),
+    upgrade:       (row.upgrade      || '').trim(),
+    description:   (row.description  || '').trim(),
   };
 }
 
